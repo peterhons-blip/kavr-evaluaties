@@ -9,26 +9,37 @@ use Illuminate\View\View;
 class SchoolSelectionController extends Controller
 {
     /**
-     * Toon de scholen waarvoor de gebruiker bevoegd is.
+     * Toon de beschikbare omgevingen.
      */
     public function index(Request $request): View|RedirectResponse
     {
-        $schools = $request->user()
-            ->schools()
+        $user = $request->user();
+
+        // Actieve scholen van deze gebruiker ophalen.
+        $schools = $user->schools()
             ->where('schools.is_active', true)
             ->wherePivot('is_active', true)
             ->orderBy('schools.name')
             ->get();
 
-        // Geen toegang tot een school
-        if ($schools->isEmpty()) {
-            $request->session()->forget('active_school_id');
+        // Heeft deze gebruiker platformbeheerrechten?
+        $isPlatformAdmin = $user->isPlatformAdmin();
 
-            abort(403, 'U bent niet gekoppeld aan een actieve school.');
+        // Niet-actieve gebruiker mag niet verder.
+        if (!$user->is_active) {
+            abort(403, 'Uw gebruikersaccount is niet actief.');
         }
 
-        // Slechts één school: automatisch selecteren
-        if ($schools->count() === 1) {
+        // Geen scholen en geen platformbeheerrechten.
+        if ($schools->isEmpty() && !$isPlatformAdmin) {
+            $request->session()->forget('active_school_id');
+
+            abort(403, 'U heeft geen toegang tot een actieve school.');
+        }
+
+        // Gewone gebruiker met slechts één school:
+        // automatisch naar het schooldashboard.
+        if (!$isPlatformAdmin && $schools->count() === 1) {
             $request->session()->put(
                 'active_school_id',
                 $schools->first()->id
@@ -37,18 +48,28 @@ class SchoolSelectionController extends Controller
             return redirect()->route('dashboard');
         }
 
-        return view('schools.select', compact('schools'));
+        // Platformadmins krijgen altijd de omgevingskeuze.
+        // Gebruikers met meerdere scholen ook.
+        return view('schools.select', compact(
+            'schools',
+            'isPlatformAdmin'
+        ));
     }
 
     /**
-     * Kies de actieve school.
+     * Een school kiezen of ernaartoe wisselen.
      */
     public function select(Request $request): RedirectResponse
     {
+        if (!$request->user()->is_active) {
+            abort(403, 'Uw gebruikersaccount is niet actief.');
+        }
+
         $validated = $request->validate([
             'school_id' => ['required', 'integer'],
         ]);
 
+        // Controleer de school binnen de toegestane scholen.
         $school = $request->user()
             ->schools()
             ->where('schools.id', $validated['school_id'])
@@ -56,7 +77,11 @@ class SchoolSelectionController extends Controller
             ->wherePivot('is_active', true)
             ->firstOrFail();
 
-        $request->session()->put('active_school_id', $school->id);
+        // Vorige schoolselectie vervangen.
+        $request->session()->put(
+            'active_school_id',
+            $school->id
+        );
 
         return redirect()->route('dashboard');
     }

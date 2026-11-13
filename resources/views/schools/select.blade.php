@@ -3,12 +3,21 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
 
-    <title>School kiezen | Evaluatieplatform</title>
+    <title>Omgeving kiezen | Evaluatieplatform</title>
 
     <style>
-        * { box-sizing: border-box; }
+        :root {
+            --navy: #142b45;
+            --teal: #59aaa5;
+            --muted: #718096;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
@@ -16,105 +25,222 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f2f5f7;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            color: #142b45;
             padding: 24px;
+            background: #f2f5f7;
+            color: var(--navy);
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
 
         .container {
             width: 100%;
-            max-width: 560px;
+            max-width: 620px;
+            padding: 42px;
             background: white;
-            padding: 45px;
             border-radius: 18px;
             box-shadow: 0 20px 60px rgba(20,43,69,.10);
         }
 
+        .eyebrow {
+            color: #408984;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
+
         h1 {
-            font-size: 28px;
             margin: 0 0 10px;
+            font-size: 30px;
+            letter-spacing: -.6px;
         }
 
         .description {
-            color: #718096;
-            margin-bottom: 30px;
+            color: var(--muted);
             line-height: 1.6;
+            margin-bottom: 30px;
         }
 
-        .school-button {
-            display: block;
+        .section-label {
+            margin: 25px 0 12px;
+            color: #718096;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 15px;
             width: 100%;
-            padding: 20px;
-            margin-bottom: 12px;
-            text-align: left;
-            background: #f8fafb;
+            padding: 18px;
             border: 1px solid #dce4ea;
-            border-radius: 10px;
+            border-radius: 11px;
+            background: #f8fafb;
+            color: var(--navy);
+            text-align: left;
+            text-decoration: none;
             cursor: pointer;
-            color: #142b45;
-            font-size: 16px;
-            font-weight: 600;
+            margin-bottom: 12px;
+            font: inherit;
+            transition: .2s;
         }
 
-        .school-button:hover {
-            border-color: #59aaa5;
+        .option:hover {
+            border-color: var(--teal);
             background: #eff8f7;
         }
 
-        .school-code {
+        .option-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            border-radius: 10px;
+            background: #e7eff2;
+            font-size: 24px;
+        }
+
+        .option-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .option-title {
+            display: block;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .option-description {
             display: block;
             margin-top: 5px;
-            color: #718096;
+            color: var(--muted);
             font-size: 13px;
-            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .arrow {
+            font-size: 23px;
+            color: #9aa6b2;
         }
 
         .logout {
-            margin-top: 25px;
+            margin-top: 30px;
             text-align: center;
         }
 
         .logout button {
-            border: 0;
+            border: none;
             background: transparent;
-            color: #718096;
-            cursor: pointer;
+            color: var(--muted);
             text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
         }
     </style>
 </head>
+
 <body>
 
 <div class="container">
 
-    <h1>Kies je school</h1>
+    <div class="eyebrow">EVALUATIEPLATFORM</div>
+
+    <h1>
+        Welkom, {{ auth()->user()->first_name }}!
+    </h1>
 
     <p class="description">
-        Welkom, {{ auth()->user()->first_name }}.
-        Selecteer de school waarvoor je wilt werken.
+        Kies de omgeving waarin je wilt werken.
     </p>
 
-    @foreach ($schools as $school)
-        <form method="POST" action="{{ route('schools.select.store') }}">
-            @csrf
+    @if ($isPlatformAdmin)
 
-            <input type="hidden"
-                   name="school_id"
-                   value="{{ $school->id }}">
+        <div class="section-label">Platform</div>
 
-            <button type="submit" class="school-button">
-                {{ $school->name }}
+        <a href="{{ route('platform.dashboard') }}"
+           class="option">
 
-                <span class="school-code">
-                    {{ $school->code }}
+            <span class="option-icon">⚙️</span>
+
+            <span class="option-text">
+                <span class="option-title">
+                    Platformbeheer
                 </span>
-            </button>
-        </form>
-    @endforeach
 
-    <form method="POST" action="{{ route('logout') }}" class="logout">
+                <span class="option-description">
+                    Scholen, gebruikers en
+                    platforminstellingen beheren
+                </span>
+            </span>
+
+            <span class="arrow">&rsaquo;</span>
+        </a>
+
+    @endif
+
+    @if ($schools->isNotEmpty())
+
+        <div class="section-label">Mijn scholen</div>
+
+        @foreach ($schools as $school)
+
+            <form method="POST"
+                  action="{{ route('schools.select.store') }}">
+                @csrf
+
+                <input type="hidden"
+                       name="school_id"
+                       value="{{ $school->id }}">
+
+                <button type="submit" class="option">
+
+                    <span class="option-icon">🏫</span>
+
+                    <span class="option-text">
+
+                        <span class="option-title">
+                            {{ $school->name }}
+                        </span>
+
+                        <span class="option-description">
+                            {{ ucfirst(str_replace(
+                                '_',
+                                ' ',
+                                $school->pivot->role
+                            )) }}
+                        </span>
+
+                    </span>
+
+                    <span class="arrow">&rsaquo;</span>
+
+                </button>
+            </form>
+
+        @endforeach
+
+    @endif
+
+    <form method="POST"
+          action="{{ route('logout') }}"
+          class="logout">
         @csrf
+
         <button type="submit">Afmelden</button>
     </form>
 

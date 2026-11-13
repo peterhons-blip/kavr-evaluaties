@@ -76,14 +76,25 @@
 </head>
 <body>
 
+
 <header>
     <div class="logo">Evaluatieplatform</div>
 
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit">Afmelden</button>
-    </form>
+    <div style="display:flex; gap:15px; align-items:center;">
+
+        <a href="{{ route('schools.select') }}"
+           style="color:white; text-decoration:none;">
+            Wissel omgeving
+        </a>
+
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit">Afmelden</button>
+        </form>
+
+    </div>
 </header>
+
 
 <main>
     <div class="card">

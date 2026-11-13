@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class School extends Model
 {
@@ -47,5 +48,13 @@ class School extends Model
     public function settings(): HasOne
     {
         return $this->hasOne(SchoolSetting::class);
+    }
+
+    /**
+     * Vestigingsplaatsen die bij deze school horen.
+     */
+    public function locations(): HasMany
+    {
+        return $this->hasMany(SchoolLocation::class);
     }
 }

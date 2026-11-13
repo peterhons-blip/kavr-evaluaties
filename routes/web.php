@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\SchoolSelectionController;
+use App\Http\Controllers\Platform\SchoolController;
 
 // Startpagina
 Route::get('/', function () {
@@ -57,5 +58,8 @@ Route::middleware(['auth', 'platform.admin'])
         Route::get('/', function () {
             return view('platform.dashboard');
         })->name('dashboard');
+
+        Route::get('/schools', [SchoolController::class, 'index'])
+            ->name('schools.index');
 
     });
