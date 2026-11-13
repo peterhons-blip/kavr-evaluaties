@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\School;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -10,32 +11,49 @@ use Illuminate\View\View;
 
 class LoginController extends Controller
 {
-    // Toon de loginpagina
+    /**
+     * Algemene loginpagina.
+     * Voorlopig standaard Kunstacademie Voeren-Riemst.
+     */
     public function showLogin(): View
     {
-        return view('auth.login');
+        $school = School::with('settings')
+            ->where('code', 'KAVR')
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        return view('auth.login', compact('school'));
     }
 
-    // Verwerk een aanmeldpoging
+    /**
+     * Loginpagina van een specifieke school.
+     */
+    public function showSchoolLogin(string $slug): View
+    {
+        $school = School::with('settings')
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        return view('auth.login', compact('school'));
+    }
+
+    /**
+     * Aanmelden.
+     */
     public function login(Request $request): RedirectResponse
     {
-        // Controleer de ingevulde gegevens
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
 
-        // Probeer de gebruiker aan te melden
         if (Auth::attempt($credentials)) {
-
-            // Vernieuw de sessie voor de veiligheid
             $request->session()->regenerate();
 
-            // Ga naar het dashboard
-            return redirect()->intended('/dashboard');
+            return redirect()->route('schools.select');
         }
 
-        // Verkeerd e-mailadres of wachtwoord
         return back()
             ->withErrors([
                 'email' => 'Ongeldig e-mailadres of wachtwoord.',
@@ -43,7 +61,9 @@ class LoginController extends Controller
             ->onlyInput('email');
     }
 
-    // Meld de gebruiker af
+    /**
+     * Afmelden.
+     */
     public function logout(Request $request): RedirectResponse
     {
         Auth::logout();
@@ -51,6 +71,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect()->route('login');
     }
 }

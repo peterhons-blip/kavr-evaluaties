@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -46,6 +47,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_active' => 'boolean',
             'must_change_password' => 'boolean',
+            'is_platform_admin' => 'boolean',
         ];
     }
 
@@ -78,5 +80,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function mustChangePassword(): bool
     {
         return (bool) $this->must_change_password;
+    }
+
+    /**
+     * Scholen waaraan deze gebruiker gekoppeld is.
+     */
+    public function schools(): BelongsToMany
+    {
+        return $this->belongsToMany(School::class, 'school_user')
+            ->withPivot(['role', 'is_active'])
+            ->withTimestamps();
+    }
+    
+    public function isPlatformAdmin(): bool
+    {
+        return (bool) $this->is_platform_admin;
     }
 }

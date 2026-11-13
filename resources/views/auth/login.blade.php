@@ -11,9 +11,9 @@
 
     <style>
         :root {
-            --navy: #142b45;
-            --teal: #59aaa5;
-            --gold: #e5a65b;
+            --navy: {{ $school->settings?->primary_color ?? '#142b45' }};
+            --teal: {{ $school->settings?->secondary_color ?? '#59aaa5' }};
+            --gold: {{ $school->settings?->accent_color ?? '#e5a65b' }};
             --pink: #c97f9a;
             --muted: #718096;
             --background: #f2f5f7;
@@ -80,7 +80,7 @@
             font-weight: 400;
             letter-spacing: 0.1px;
             line-height: 1.6;
-            color: #9cd5d1;
+            color: var(--teal);
         }
 
 
@@ -288,21 +288,21 @@
             </div>
 
             <div class="academy-subtitle">
-                Kunstacademie Voeren-Riemst
+                {{ $school->name }}
             </div>
         </div>
 
         <!-- Slogan -->
         <div>
-            <h1>Ruimte voor talent.</h1>
+            <h1>{{ $school->settings?->slogan ?? 'Ruimte voor talent.' }}</h1>
 
             <p class="disciplines">
-                Beeld. Muziek. Theater.
+                {{ $school->settings?->subtitle ?? '' }}
             </p>
 
             <p>
-                Eén plek voor alle evaluaties,
-                leerdoelen en leerlingengroei.
+                {{ $school->settings?->login_description
+                    ?? 'Welkom bij het evaluatieplatform.' }}
             </p>
         </div>
 
