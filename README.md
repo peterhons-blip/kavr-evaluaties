@@ -1,58 +1,160 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Evaluatieplatform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+### Kunstacademie Voeren-Riemst
 
-## About Laravel
+Een modern, webgebaseerd evaluatieplatform voor kunstacademies en andere onderwijsinstellingen.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+De applicatie vervangt de bestaande Excel-evaluatiefiches door één centrale omgeving voor het beheren van leerlingen, lesgroepen, leerdoelen, evaluaties en rapporten.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Het platform wordt ontwikkeld voor **Kunstacademie Voeren-Riemst**, maar is vanaf het begin ontworpen om meerdere scholen te ondersteunen.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Functionaliteiten
 
-## Learning Laravel
+Het evaluatieplatform wordt ontwikkeld met ondersteuning voor:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- Individuele evaluaties (ICJ)
+- Klassikale evaluaties (KCJ)
+- Competentiegericht evalueren
+- Verschillende evaluatiemethoden per vak
+- Meerdere evaluatiemomenten per periode
+- Individuele en klassikale feedback
+- Historiek over meerdere schooljaren
+- Leerlingen, leerkrachten, vakken en lesgroepen
+- Gebruikersrollen en toegangsrechten
+- PDF-export voor administratieve verwerking in DKO3
+- Multischoolondersteuning
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Status:** Het project is in actieve ontwikkeling. Een groot deel van deze functionaliteiten is nog gepland en niet beschikbaar.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Technologie
 
-## Agentic Development
+| Onderdeel | Technologie |
+|---|---|
+| Backend | Laravel 13 |
+| Programmeertaal | PHP 8.4+ |
+| Databank | MySQL / MariaDB |
+| Frontend | Blade, HTML, CSS, JavaScript |
+| Ontwikkelomgeving | Windows / XAMPP |
+| Editor | Visual Studio Code |
+| Versiebeheer | Git / GitHub |
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Lokale installatie
+
+### 1. Repository clonen
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/peterhons-blip/kavr-evaluaties.git
+cd kavr-evaluaties
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. PHP-afhankelijkheden installeren
 
-## Contributing
+Gebruik PHP 8.4 of hoger.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+composer install
+```
 
-## Code of Conduct
+### 3. Omgevingsbestand aanmaken
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Kopieer `.env.example` naar `.env`.
 
-## Security Vulnerabilities
+Configureer de databank:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```dotenv
+APP_NAME="KA-VR Evaluaties"
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8001
 
-## License
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=kavr_evaluaties_dev
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+De databasegebruiker en het wachtwoord zijn voorbeelden voor een lokale XAMPP-installatie.
+
+### 4. Applicatiesleutel aanmaken
+
+```bash
+php artisan key:generate
+```
+
+### 5. Databank voorbereiden
+
+Maak de databank `kavr_evaluaties_dev` aan in MySQL/MariaDB.
+
+Voer daarna uit:
+
+```bash
+php artisan migrate
+```
+
+### 6. Applicatie starten
+
+```bash
+php artisan serve --port=8001
+```
+
+Open de applicatie via:
+
+http://localhost:8001/login
+
+Op Windows kan het nodig zijn om het volledige pad naar PHP op te geven, bijvoorbeeld `C:\php84\php.exe`, afhankelijk van de lokale installatie.
+
+Gebruikersaccounts worden voorlopig handmatig aangemaakt. Publieke registratie is niet beschikbaar.
+
+## Projectstructuur
+
+```text
+app/              Laravel-modellen en controllers
+database/         Migraties en toekomstige seeders
+resources/views/  Blade-templates en interface
+routes/           Webroutes
+public/           Publiek toegankelijke bestanden
+tests/            Automatische tests
+```
+
+## Multischoolarchitectuur
+
+Het platform wordt ontworpen volgens een multi-tenant architectuur.
+
+Iedere school krijgt eigen leerlingen, lesgroepen, vakken, evaluaties, instellingen en gebruikersrechten.
+
+Eenzelfde gebruiker kan aan meerdere scholen verbonden zijn.
+
+De beveiliging moet ervoor zorgen dat gegevens van verschillende scholen strikt gescheiden blijven.
+
+Deze architectuur is momenteel in voorbereiding.
+
+## Projectdocumentatie
+
+Voor meer informatie:
+
+- [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) – Projectdoelstellingen, architectuur, databank en ontwikkelplanning.
+- [AGENTS.md](AGENTS.md) – Programmeerafspraken en instructies voor AI-assistenten.
+
+## Beveiliging en privacy
+
+De applicatie zal persoonsgegevens van leerlingen verwerken.
+
+Daarom zijn authenticatie, autorisatie, privacybescherming en veilige gegevensopslag belangrijke uitgangspunten.
+
+Het project is momenteel niet klaar voor gebruik met echte leerlinggegevens in een publieke productieomgeving.
+
+## Ontwikkeling
+
+**Versiebeheer:** GitHub
+
+**Repository:** https://github.com/peterhons-blip/kavr-evaluaties
+
+**Huidige ontwikkelfase:** basisarchitectuur, gebruikersbeheer en multischoolondersteuning.
+
+## Licentie
+
+De software wordt ontwikkeld als maatwerkproject. Er is momenteel geen publieke open-sourcelicentie toegekend.
+
+Alle rechten voorbehouden, behoudens afzonderlijke contractuele afspraken.
