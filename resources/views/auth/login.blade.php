@@ -284,7 +284,7 @@
         <!-- Naam platform -->
         <div class="brand-name">
             <div class="platform-title">
-                Evaluatieplatform
+                Evaluatieplatform BLA
             </div>
 
             <div class="academy-subtitle">
