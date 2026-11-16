@@ -6,12 +6,25 @@
 
 @section('content')
 
+
+@include('platform.schools.partials.breadcrumbs', [
+    'school' => $school,
+    'section' => 'Algemene gegevens'
+])
+
+
 <div class="page-header">
     <h1>{{ $school->name }}</h1>
     <p>
-        Wijzig de algemene gegevens van deze school.
+        Beheer de gegevens en instellingen van deze school.
     </p>
 </div>
+
+@include('platform.schools.partials.tabs', [
+    'school' => $school
+])
+
+
 
 @if ($errors->any())
     <div class="card" role="alert"
@@ -223,6 +236,7 @@
         padding-top: 25px;
         border-top: 1px solid #e1e8ee;
     }
+
 
     @media (max-width: 650px) {
         .form-grid {

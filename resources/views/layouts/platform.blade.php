@@ -3,9 +3,23 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
 
-    <title>@yield('title', 'Platformbeheer') | Evaluatieplatform</title>
+    <title>@yield('title', 'Platformbeheer') | EvolvIT</title>
+
+    <link rel="icon"
+          type="image/png"
+          href="{{ asset('favicon.ico') }}">
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
 
     <style>
         :root {
@@ -13,7 +27,9 @@
             --navy-light: #223e5b;
             --teal: #59aaa5;
             --gold: #e5a65b;
-            --background: #f2f5f7;
+            --pink: #c97f9a;
+
+            --background: #f0f4f7;
             --text: #142b45;
             --muted: #718096;
             --border: #e1e8ee;
@@ -23,123 +39,201 @@
             box-sizing: border-box;
         }
 
-        body {
-            margin: 0;
-            background: var(--background);
-            color: var(--text);
-            font-family: 'Segoe UI', Arial, sans-serif;
+        html {
+            min-height: 100%;
         }
 
-        /* Linkernavigatie */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--background);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ========================================
+           LINKERNAVIGATIE
+        ======================================== */
+
         .sidebar {
             position: fixed;
             top: 0;
             left: 0;
             bottom: 0;
-            width: 260px;
-            background: var(--navy);
-            color: white;
+            width: 250px;
             display: flex;
             flex-direction: column;
+            background: var(--navy);
+            border-right: 1px solid var(--navy-light);
             z-index: 100;
         }
 
+        /* Wit gedeelte met EvolvIT-logo */
+
         .sidebar-brand {
-            padding: 30px 24px;
-            border-bottom: 1px solid rgba(255,255,255,.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 128px;
+            padding: 25px 24px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
         }
 
-        .sidebar-brand h2 {
-            margin: 0;
-            font-size: 23px;
-            font-weight: 700;
-            letter-spacing: -.5px;
+        .sidebar-brand a {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            max-width: 100%;
+            text-decoration: none;
         }
 
-        .sidebar-brand p {
-            margin: 8px 0 0;
-            color: #9cd5d1;
-            font-size: 13px;
+        .brand-logo {
+            display: block;
+            width: 175px;
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
         }
+
+        .brand-subtitle {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .3px;
+        }
+
+        /* Menu */
 
         .sidebar-menu {
-            padding: 25px 12px;
             flex: 1;
+            padding: 25px 12px;
+            overflow-y: auto;
         }
 
         .menu-label {
-            margin: 10px 14px 14px;
-            color: #809bb4;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1.3px;
+            margin: 15px 14px 12px;
+            color: #839eb5;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             gap: 13px;
+            width: 100%;
             padding: 13px 15px;
             margin-bottom: 5px;
             color: #d5e1ec;
             text-decoration: none;
             border-radius: 9px;
-            font-size: 14px;
-            transition: background .2s, color .2s;
+            font-size: 13px;
+            font-weight: 600;
+            transition:
+                background .2s ease,
+                color .2s ease;
         }
 
         .nav-item:hover {
             background: var(--navy-light);
-            color: white;
+            color: #ffffff;
         }
 
         .nav-item.active {
-            background: rgba(89,170,165,.18);
+            background: rgba(89, 170, 165, .22);
             color: #a5ebe3;
-            font-weight: 600;
+        }
+
+        .nav-item.active .nav-icon {
+            color: #a5ebe3;
+        }
+
+        .nav-item.disabled {
+            color: #718ca4;
+            cursor: default;
+            opacity: .7;
+        }
+
+        .nav-item.disabled:hover {
+            background: transparent;
+            color: #718ca4;
         }
 
         .nav-icon {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
             width: 22px;
-            text-align: center;
+            flex-shrink: 0;
             font-size: 18px;
         }
 
+        .nav-text {
+            min-width: 0;
+        }
+
+        /* Footer linkernavigatie */
+
         .sidebar-footer {
-            padding: 22px;
-            border-top: 1px solid rgba(255,255,255,.1);
+            padding: 20px 25px;
+            border-top: 1px solid rgba(255, 255, 255, .1);
+            color: #839eb5;
+            font-size: 11px;
         }
 
-        .sidebar-footer small {
-            color: #809bb4;
-        }
+        /* ========================================
+           HOOFDGEDEELTE
+        ======================================== */
 
-        /* Hoofdinhoud */
         .main-wrapper {
-            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
+            margin-left: 250px;
         }
+
+        /* ========================================
+           BOVENBALK
+        ======================================== */
 
         .topbar {
-            height: 76px;
-            padding: 0 35px;
-            background: white;
-            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 15px;
+            gap: 20px;
+            min-height: 76px;
+            padding: 15px 35px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-heading {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
 
         .topbar-title {
-            font-size: 18px;
-            font-weight: 700;
+            color: var(--navy);
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: -.4px;
+        }
+
+        .topbar-subtitle {
+            color: var(--muted);
+            font-size: 11px;
         }
 
         .topbar-right {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
         }
 
         .user-info {
@@ -147,41 +241,40 @@
         }
 
         .user-name {
-            font-size: 14px;
+            color: var(--navy);
+            font-size: 13px;
             font-weight: 700;
         }
 
         .user-role {
+            margin-top: 4px;
             color: var(--muted);
-            font-size: 12px;
-            margin-top: 3px;
+            font-size: 11px;
         }
 
         .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #e5f3f1;
-            color: #286e69;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: #e5f3f1;
+            color: #286e69;
+            font-weight: 800;
         }
+
+        /* ========================================
+           PAGINA-INHOUD
+        ======================================== */
 
         .content {
-            padding: 35px;
-            max-width: 1600px;
+            width: 100%;
+            max-width: 1500px;
             margin: 0 auto;
-        }
-
-        /* Herbruikbare kaarten */
-        .card {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 13px;
-            padding: 28px;
-            box-shadow: 0 5px 20px rgba(20,43,69,.03);
+            padding: 35px;
+            flex: 1;
         }
 
         .page-header {
@@ -189,33 +282,73 @@
         }
 
         .page-header h1 {
+            margin: 0 0 9px;
+            color: var(--navy);
             font-size: 27px;
-            margin: 0 0 8px;
+            font-weight: 800;
+            letter-spacing: -.8px;
         }
 
         .page-header p {
-            color: var(--muted);
             margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.8;
         }
 
-        /* Knoppen */
+        /* ========================================
+           KAARTEN
+        ======================================== */
+
+        .card {
+            padding: 28px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            box-shadow: 0 5px 20px rgba(20, 43, 69, .035);
+        }
+
+        .card h2 {
+            color: var(--navy);
+        }
+
+        /* ========================================
+           KNOPPEN
+        ======================================== */
+
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 8px;
             padding: 11px 17px;
+            background: var(--navy);
             border: none;
             border-radius: 8px;
-            background: var(--navy);
-            color: white;
+            color: #ffffff;
             text-decoration: none;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            transition:
+                background .2s ease,
+                transform .15s ease;
         }
 
         .btn:hover {
             background: var(--navy-light);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn:focus-visible,
+        .nav-item:focus-visible {
+            outline: 3px solid var(--teal);
+            outline-offset: 3px;
         }
 
         .btn-secondary {
@@ -227,22 +360,39 @@
             background: #d7ebe8;
         }
 
-        /* Responsive */
-        @media (max-width: 900px) {
+        /* ========================================
+           FOOTER HOOFDGEDEELTE
+        ======================================== */
+
+        .main-footer {
+            padding: 20px 35px;
+            border-top: 1px solid var(--border);
+            color: #98a6b7;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* ========================================
+           TABLET
+        ======================================== */
+
+        @media (max-width: 1000px) {
+
             .sidebar {
-                width: 75px;
+                width: 78px;
             }
 
             .sidebar-brand {
-                padding: 25px 12px;
-                text-align: center;
+                min-height: 100px;
+                align-items: center;
+                padding: 20px 10px;
             }
 
-            .sidebar-brand h2 {
-                font-size: 14px;
+            .brand-logo {
+                width: 58px;
             }
 
-            .sidebar-brand p,
+            .brand-subtitle,
             .menu-label,
             .nav-text,
             .sidebar-footer {
@@ -259,111 +409,262 @@
             }
 
             .main-wrapper {
-                margin-left: 75px;
+                margin-left: 78px;
             }
 
             .topbar {
-                padding: 0 20px;
+                padding: 15px 20px;
             }
 
             .content {
+                padding: 25px;
+            }
+        }
+
+        /* ========================================
+           SMARTPHONE
+        ======================================== */
+
+        @media (max-width: 650px) {
+
+            .sidebar {
+                position: static;
+                width: 100%;
+                flex-direction: row;
+                align-items: center;
+                border-right: none;
+                border-bottom: 1px solid var(--navy-light);
+            }
+
+            .sidebar-brand {
+                min-height: 0;
+                padding: 12px 15px;
+                border-bottom: none;
+                flex-shrink: 0;
+            }
+
+            .brand-logo {
+                width: 105px;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                justify-content: flex-end;
+                gap: 2px;
+                padding: 8px;
+                min-width: 0;
+            }
+
+            .nav-item {
+                width: auto;
+                margin: 0;
+                padding: 10px;
+            }
+
+            .nav-icon {
+                font-size: 17px;
+            }
+
+            .main-wrapper {
+                min-height: calc(100vh - 70px);
+                margin-left: 0;
+            }
+
+            .topbar {
+                flex-wrap: wrap;
+                align-items: flex-start;
+                padding: 17px 20px;
+            }
+
+            .topbar-right {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .user-info,
+            .avatar {
+                display: none;
+            }
+
+            .content {
+                padding: 22px 15px;
+            }
+
+            .page-header h1 {
+                font-size: 23px;
+            }
+
+            .card {
                 padding: 20px;
+            }
+
+            .main-footer {
+                padding: 18px;
             }
         }
     </style>
+
+    @stack('styles')
 </head>
 
 <body>
 
-<!-- LINKERNAVIGATIE -->
+<!-- ======================================
+     LINKERNAVIGATIE
+====================================== -->
+
 <aside class="sidebar">
 
+    <!-- WIT LOGOGEDEELTE -->
     <div class="sidebar-brand">
-        <h2>Evaluatieplatform</h2>
-        <p>Platformbeheer</p>
+
+        <a href="{{ route('platform.dashboard') }}"
+           aria-label="EvolvIT – Platformbeheer">
+
+            <img
+                src="{{ asset('images/evolvit-logo.webp') }}"
+                alt="EvolvIT"
+                class="brand-logo">
+
+        </a>
+
     </div>
 
-    <nav class="sidebar-menu" aria-label="Platformnavigatie">
+    <!-- DONKERBLAUW MENU -->
+    <nav class="sidebar-menu"
+         aria-label="Platformnavigatie">
 
         <div class="menu-label">ALGEMEEN</div>
 
+        <!-- Dashboard -->
         <a href="{{ route('platform.dashboard') }}"
-           class="nav-item {{ request()->routeIs('platform.dashboard') ? 'active' : '' }}">
+           class="nav-item {{ request()->routeIs('platform.dashboard') ? 'active' : '' }}"
+           @if (request()->routeIs('platform.dashboard'))
+               aria-current="page"
+           @endif>
+
             <span class="nav-icon">▦</span>
             <span class="nav-text">Dashboard</span>
+
         </a>
 
+        <!-- Scholen -->
         <a href="{{ route('platform.schools.index') }}"
-        class="nav-item {{ request()->routeIs('platform.schools.*') ? 'active' : '' }}">
+           class="nav-item {{ request()->routeIs('platform.schools.*') ? 'active' : '' }}"
+           @if (request()->routeIs('platform.schools.*'))
+               aria-current="page"
+           @endif>
+
             <span class="nav-icon">🏫</span>
             <span class="nav-text">Scholen</span>
+
         </a>
 
-        <a href="{{ route('platform.dashboard') }}"
-           class="nav-item">
+        <!-- Gebruikers: nog niet beschikbaar -->
+        <span class="nav-item disabled"
+              title="Binnenkort beschikbaar">
+
             <span class="nav-icon">♙</span>
             <span class="nav-text">Gebruikers</span>
-        </a>
+
+        </span>
 
         <div class="menu-label">BEHEER</div>
 
-        <a href="{{ route('platform.dashboard') }}"
-           class="nav-item">
+        <!-- Platforminstellingen: later -->
+        <span class="nav-item disabled"
+              title="Binnenkort beschikbaar">
+
             <span class="nav-icon">⚙</span>
             <span class="nav-text">Platforminstellingen</span>
-        </a>
+
+        </span>
 
     </nav>
 
+    <!-- SIDEBAR FOOTER -->
     <div class="sidebar-footer">
-        <small>Evaluatieplatform &copy; {{ date('Y') }}</small>
+        EvolvIT &copy; {{ date('Y') }}
     </div>
 
 </aside>
 
-<!-- HOOFDINHOUD -->
+<!-- ======================================
+     HOOFDGEDEELTE
+====================================== -->
+
 <div class="main-wrapper">
 
+    <!-- BOVENBALK -->
     <header class="topbar">
 
-        <div class="topbar-title">
-            @yield('page-title', 'Platformbeheer')
+        <div class="topbar-heading">
+
+            <div class="topbar-title">
+                @yield('page-title', 'Platformbeheer')
+            </div>
+
+            <div class="topbar-subtitle">
+                EvolvIT / Platformbeheer
+            </div>
+
         </div>
 
         <div class="topbar-right">
 
+            <!-- OMGEVING WISSELEN -->
             <a href="{{ route('schools.select') }}"
                class="btn btn-secondary">
                 Wissel omgeving
             </a>
 
+            <!-- GEBRUIKER -->
             <div class="user-info">
+
                 <div class="user-name">
                     {{ auth()->user()->full_name }}
                 </div>
+
                 <div class="user-role">
                     Platformadministrator
                 </div>
+
             </div>
 
+            <!-- AVATAR -->
             <div class="avatar">
-                {{ strtoupper(substr(auth()->user()->first_name ?? 'U', 0, 1)) }}
+                {{ strtoupper(mb_substr(
+                    auth()->user()->first_name ?? 'U',
+                    0,
+                    1
+                )) }}
             </div>
 
-            <form method="POST" action="{{ route('logout') }}">
+            <!-- AFMELDEN -->
+            <form method="POST"
+                  action="{{ route('logout') }}">
+
                 @csrf
+
                 <button type="submit" class="btn">
                     Afmelden
                 </button>
+
             </form>
 
         </div>
 
     </header>
 
+    <!-- PAGINA-INHOUD -->
     <main class="content">
         @yield('content')
     </main>
+
+    <!-- FOOTER -->
+    <footer class="main-footer">
+        EvolvIT · Elk talent in ontwikkeling.
+    </footer>
 
 </div>
 

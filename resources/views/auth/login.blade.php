@@ -5,22 +5,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Evaluatieplatform | Kunstacademie Voeren-Riemst</title>
+    <title>EvolvIT | Aanmelden</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon"
+          type="image/png"
+          href="{{ asset('favicon.ico') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
 
     <style>
         :root {
-            --navy: {{ $school->settings?->primary_color ?? '#142b45' }};
-            --teal: {{ $school->settings?->secondary_color ?? '#59aaa5' }};
-            --gold: {{ $school->settings?->accent_color ?? '#e5a65b' }};
-            --pink: #c97f9a;
+            --primary: {{ $school->settings?->primary_color ?? '#142b45' }};
+            --secondary: {{ $school->settings?->secondary_color ?? '#59aaa5' }};
+            --accent: {{ $school->settings?->accent_color ?? '#e5a65b' }};
+
+            --text: #142b45;
             --muted: #718096;
-            --background: #f2f5f7;
+            --background: #f1f5f8;
+            --border: #d5e0e9;
         }
 
         * {
             box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100%;
         }
 
         body {
@@ -29,246 +45,395 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 28px 20px;
             background: var(--background);
-            font-family: 'Segoe UI', Arial, sans-serif;
-            color: var(--navy);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Hoofdcontainer */
+        /* ================================
+           HOOFDCONTAINER
+        ================================= */
+
         .login-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             width: 100%;
-            max-width: 960px;
-            min-height: 530px;
-            background: white;
-            border-radius: 20px;
+            max-width: 1000px;
+            min-height: 550px;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(20, 43, 69, .10);
+            background: #ffffff;
+            border-radius: 22px;
+            box-shadow: 0 22px 65px rgba(20, 43, 69, .11);
         }
 
-        /* Linkerkant */
-        .branding {
-            background: var(--navy);
-            color: white;
-            padding: 55px;
+        /* ================================
+           LINKERPANEEL - EVOLVIT
+        ================================= */
+
+        .login-panel {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            gap: 35px;
+            padding: 45px 55px 45px;
+            background: #ffffff;
         }
 
-        .brand-name {
-            letter-spacing: normal;
-        }
-
-        .platform-title {
-            font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
-            font-size: 36px;
-            font-weight: 700;
-            letter-spacing: -1.2px;
-            line-height: 1.3;
-            color: #ffffff;
-        }
-
-
-        .academy-subtitle {
-            margin-top: 8px;
-            font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
-            font-size: 15px;
-            font-weight: 400;
-            letter-spacing: 0.1px;
-            line-height: 1.6;
-            color: var(--teal);
-        }
-
-
-        .branding h1 {
-            font-size: 32px;
-            line-height: 1.25;
-            margin: 0 0 20px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-        }
-
-
-        .branding p {
-            color: #c9d7e5;
-            line-height: 1.7;
-            font-size: 16px;
-        }
-
-        .branding .disciplines {
-            font-size: 17px;
+        .platform-brand {
+            display: flex;
+            align-items: center;
+            height: 70px;
             margin-bottom: 25px;
         }
 
+        .platform-brand img {
+            display: block;
+            width: 185px;
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .login-content {
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .login-content h1 {
+            margin: 0 0 12px;
+            color: var(--text);
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.25;
+        }
+
+        .login-description {
+            margin: 0 0 33px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        /* ================================
+           FORMULIER
+        ================================= */
+
+        .form-group {
+            margin-bottom: 23px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 9px;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .form-control {
+            width: 100%;
+            height: 49px;
+            padding: 0 15px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: #f8fafc;
+            color: var(--text);
+            font: inherit;
+            font-size: 13px;
+            transition:
+                border-color .2s,
+                box-shadow .2s,
+                background .2s;
+        }
+
+        .form-control::placeholder {
+            color: #93a4b8;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(89, 170, 165, .13);
+        }
+
+        .form-control.is-invalid {
+            border-color: #d96c78;
+        }
+
+        .field-error {
+            margin-top: 7px;
+            color: #b84252;
+            font-size: 12px;
+        }
+
+        .login-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 49px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 9px;
+            background: var(--primary);
+            color: #ffffff;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition:
+                opacity .2s,
+                transform .15s,
+                box-shadow .2s;
+        }
+
+        .login-button:hover {
+            opacity: .94;
+            box-shadow: 0 7px 18px rgba(20, 43, 69, .15);
+        }
+
+        .login-button:active {
+            transform: translateY(1px);
+        }
+
+        .login-button:focus-visible {
+            outline: 3px solid var(--secondary);
+            outline-offset: 3px;
+        }
+
+        /* ================================
+           MELDINGEN
+        ================================= */
+
+        .alert {
+            margin-bottom: 23px;
+            padding: 14px 16px;
+            border-radius: 9px;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .alert-error {
+            border: 1px solid #f2c7cc;
+            background: #fff3f4;
+            color: #a73d4b;
+        }
+
+        .alert-success {
+            border: 1px solid #b7dfcd;
+            background: #effaf4;
+            color: #28704f;
+        }
+
+        .alert ul {
+            margin: 7px 0 0;
+            padding-left: 18px;
+        }
+
+        /* ================================
+           RECHTERPANEEL - SCHOOL
+        ================================= */
+
+        .branding-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-width: 0;
+            padding: 52px 52px 46px;
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        /* SCHOOLNAAM */
+
+        .school-header {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 9px;
+        }
+
+        .school-label {
+            color: var(--secondary);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            line-height: 1.6;
+        }
+
+        .school-name {
+            margin: 2px 0 0;
+            color: #ffffff;
+            font-size: 27px;
+            font-weight: 700;
+            letter-spacing: -.7px;
+            line-height: 1.3;
+            overflow-wrap: anywhere;
+        }
+
+        .school-decoration {
+            width: 45px;
+            height: 3px;
+            margin-top: 8px;
+            background: var(--secondary);
+            border-radius: 3px;
+        }
+
+        /* SLOGAN EN BESCHRIJVING */
+
+        .school-content {
+            margin: 36px 0 42px;
+        }
+
+        .school-content h2 {
+            margin: 0 0 20px;
+            color: #ffffff;
+            font-size: 35px;
+            font-weight: 800;
+            letter-spacing: -1.2px;
+            line-height: 1.25;
+        }
+
+        .school-disciplines {
+            margin: 0 0 28px;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.7;
+        }
+
+        .school-description {
+            max-width: 350px;
+            margin: 0;
+            color: #dce7f1;
+            font-size: 14px;
+            line-height: 1.9;
+        }
+
+        /* ACCENTBALKEN */
+
         .color-bars {
             display: flex;
-            gap: 8px;
+            gap: 9px;
+            width: 100%;
+            max-width: 370px;
         }
 
         .color-bars span {
-            height: 7px;
             flex: 1;
+            height: 6px;
             border-radius: 10px;
         }
 
         .color-bars span:nth-child(1) {
-            background: var(--gold);
+            background: var(--accent);
         }
 
         .color-bars span:nth-child(2) {
-            background: var(--teal);
+            background: var(--secondary);
         }
 
         .color-bars span:nth-child(3) {
-            background: var(--pink);
+            background: #c97f9a;
         }
 
-        /* Rechterkant */
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 65px 55px;
-        }
+        /* ================================
+           TABLET
+        ================================= */
 
-        .login-form h2 {
-            margin: 0 0 12px;
-            font-size: 32px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .description {
-            color: var(--muted);
-            margin-bottom: 35px;
-            line-height: 1.6;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px 15px;
-            border: 1px solid #d7dfe7;
-            border-radius: 9px;
-            font-size: 15px;
-            margin-bottom: 22px;
-            outline: none;
-            background: #f9fafb;
-            color: var(--navy);
-            transition: border-color .2s, box-shadow .2s;
-        }
-
-        input:focus {
-            border-color: var(--teal);
-            box-shadow: 0 0 0 3px rgba(89, 170, 165, .12);
-        }
-
-        input::placeholder {
-            color: #8a98a7;
-        }
-
-        button {
-            width: 100%;
-            background: var(--navy);
-            color: white;
-            border: none;
-            border-radius: 9px;
-            padding: 15px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 600;
-            transition: background .2s, transform .2s;
-        }
-
-        button:hover {
-            background: #254668;
-        }
-
-        button:active {
-            transform: scale(.99);
-        }
-
-        button:focus-visible {
-            outline: 3px solid var(--teal);
-            outline-offset: 3px;
-        }
-
-        /* Foutmeldingen */
-        .error {
-            padding: 12px 15px;
-            color: #9c2e35;
-            background: #fff1f2;
-            border: 1px solid #f5c2c7;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .footer {
-            text-align: center;
-            color: #9aa6b2;
-            font-size: 12px;
-            margin-top: 35px;
-        }
-
-        /* Tablets */
         @media (max-width: 850px) {
-            .branding {
-                padding: 35px;
+            .login-panel {
+                padding: 42px 35px;
             }
 
-            .login-form {
-                padding: 45px 35px;
+            .branding-panel {
+                padding: 45px 35px 40px;
             }
 
-            .branding h1 {
-                font-size: 36px;
+            .school-name {
+                font-size: 24px;
+            }
+
+            .school-content h2 {
+                font-size: 29px;
             }
         }
 
-        /* Smartphones */
-        @media (max-width: 700px) {
+        /* ================================
+           SMARTPHONE
+        ================================= */
+
+        @media (max-width: 650px) {
             body {
-                padding: 14px;
+                align-items: flex-start;
+                padding: 18px 12px;
             }
 
             .login-container {
                 grid-template-columns: 1fr;
+                min-height: 0;
+                border-radius: 17px;
             }
 
-            .branding {
-                padding: 30px;
-                gap: 25px;
+            .login-panel {
+                padding: 28px 27px 38px;
             }
 
-            .platform-title {
-                font-size: 29px;
+            .platform-brand {
+                height: auto;
+                margin-bottom: 28px;
             }
 
-            .branding h1 {
+            .platform-brand img {
+                width: 175px;
+            }
+
+            .login-content {
+                max-width: none;
+            }
+
+            .login-content h1 {
                 font-size: 26px;
             }
 
-            .academy-subtitle {
-                font-size: 14px;
+            .login-description {
+                margin-bottom: 27px;
             }
 
-            .login-form {
-                padding: 35px 30px;
+            .branding-panel {
+                padding: 33px 27px;
             }
 
-            .login-form h2 {
-                font-size: 28px;
+            .school-label {
+                font-size: 10px;
+            }
+
+            .school-name {
+                font-size: 23px;
+            }
+
+            .school-content {
+                margin: 30px 0;
+            }
+
+            .school-content h2 {
+                font-size: 27px;
+                margin-bottom: 15px;
+            }
+
+            .school-disciplines {
+                margin-bottom: 18px;
+            }
+
+            .school-description {
+                font-size: 13px;
+            }
+
+            .color-bars span {
+                height: 5px;
             }
         }
     </style>
@@ -278,95 +443,149 @@
 
 <div class="login-container">
 
-    <!-- LINKERKANT: HUISSTIJL -->
-    <section class="branding">
+    <!-- =====================================
+         LINKERKANT: EVOLVIT + LOGIN
+    ====================================== -->
 
-        <!-- Naam platform -->
-        <div class="brand-name">
-            <div class="platform-title">
-                Evaluatieplatform
-            </div>
+    <section class="login-panel">
 
-            <div class="academy-subtitle">
-                {{ $school->name }}
-            </div>
+        <!-- Officieel EvolvIT-logo -->
+        <div class="platform-brand">
+            <img
+                src="{{ asset('images/evolvit-logo.webp') }}"
+                alt="EvolvIT – Elk talent in ontwikkeling"
+                width="185">
         </div>
 
-        <!-- Slogan -->
-        <div>
-            <h1>{{ $school->settings?->slogan ?? 'Ruimte voor talent.' }}</h1>
+        <!-- Aanmeldformulier -->
+        <div class="login-content">
 
-            <p class="disciplines">
-                {{ $school->settings?->subtitle ?? '' }}
+            <h1>Welkom terug</h1>
+
+            <p class="login-description">
+                Meld je aan om verder te gaan.
             </p>
 
-            <p>
-                {{ $school->settings?->login_description
-                    ?? 'Welkom bij het evaluatieplatform.' }}
-            </p>
-        </div>
+            <!-- Succesmelding -->
+            @if (session('status'))
+                <div class="alert alert-success" role="status">
+                    {{ session('status') }}
+                </div>
+            @endif
 
-        <!-- Accentkleuren -->
-        <div class="color-bars" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
+            <!-- Foutmeldingen -->
+            @if ($errors->any())
+                <div class="alert alert-error" role="alert">
+                    <strong>Aanmelden is niet gelukt.</strong>
+
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <!-- Formulier -->
+            <form method="POST"
+                  action="{{ route('login.submit') }}">
+
+                @csrf
+
+                <div class="form-group">
+
+                    <label for="email">
+                        E-mailadres
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-control @error('email') is-invalid @enderror"
+                        value="{{ old('email') }}"
+                        placeholder="Vul uw e-mailadres in"
+                        autocomplete="username"
+                        maxlength="255"
+                        required
+                        autofocus>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label for="password">
+                        Wachtwoord
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-control @error('password') is-invalid @enderror"
+                        placeholder="Uw wachtwoord"
+                        autocomplete="current-password"
+                        required>
+
+                </div>
+
+                <button type="submit" class="login-button">
+                    Aanmelden
+                </button>
+
+            </form>
+
         </div>
 
     </section>
 
-    <!-- RECHTERKANT: AANMELDEN -->
-    <section class="login-form">
+    <!-- =====================================
+         RECHTERKANT: SCHOOL
+    ====================================== -->
 
-        <h2>Welkom terug</h2>
+    <section class="branding-panel">
 
-        <p class="description">
-            Meld je aan om verder te gaan.
-        </p>
+        <!-- Schoolidentiteit -->
+        <div class="school-header">
 
-        <!-- Foutmelding -->
-        @if ($errors->any())
-            <div class="error" role="alert">
-                {{ $errors->first() }}
+            <div class="school-label">
+                Aangesloten school
             </div>
-        @endif
 
-        <!-- Loginformulier -->
-        <form method="POST" action="{{ route('login.submit') }}">
-            @csrf
+            <h2 class="school-name">
+                {{ $school->name }}
+            </h2>
 
-            <label for="email">E-mailadres</label>
+            <div class="school-decoration"></div>
 
-            <input
-                type="email"
-                id="email"
-                name="email"
-                value="{{ old('email') }}"
-                placeholder="Vul uw e-mailadres in"
-                autocomplete="username"
-                required
-                autofocus
-            >
+        </div>
 
-            <label for="password">Wachtwoord</label>
+        <!-- Slogan -->
+        <div class="school-content">
 
-            <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="Uw wachtwoord"
-                autocomplete="current-password"
-                required
-            >
+            <h2>
+                {{ $school->settings?->slogan
+                    ?? 'Ruimte voor talent.' }}
+            </h2>
 
-            <button type="submit">
-                Aanmelden
-            </button>
-        </form>
+            @if ($school->settings?->subtitle)
+                <p class="school-disciplines">
+                    {{ $school->settings->subtitle }}
+                </p>
+            @endif
 
-        <div class="footer">
-            Kunstacademie Voeren-Riemst
-            &copy; {{ date('Y') }}
+            <p class="school-description">
+                {{ $school->settings?->login_description
+                    ?? 'Welkom bij EvolvIT.' }}
+            </p>
+
+        </div>
+
+        <!-- Schoolspecificieke accentkleuren -->
+        <div class="color-bars" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
 
     </section>

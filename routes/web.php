@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\SchoolSelectionController;
 use App\Http\Controllers\Platform\SchoolController;
+use App\Http\Controllers\Platform\SchoolLocationController;
 
 // Startpagina
 Route::get('/', function () {
@@ -56,7 +57,36 @@ Route::middleware(['auth', 'platform.admin'])
     ->group(function () {
 
         Route::get('/', function () {
-            return view('platform.dashboard');
+
+            // Algemene platformstatistieken.
+            $stats = [
+                'schools_total' => \App\Models\School::count(),
+
+                'schools_active' => \App\Models\School::where(
+                    'is_active', true
+                )->count(),
+
+                'users_total' => \App\Models\User::count(),
+
+                'users_active' => \App\Models\User::where(
+                    'is_active', true
+                )->count(),
+
+                'locations_total' => \App\Models\SchoolLocation::count(),
+            ];
+
+            // De vijf meest recent toegevoegde scholen.
+            $recentSchools = \App\Models\School::query()
+                ->orderByDesc('created_at')
+                ->orderByDesc('id')
+                ->limit(5)
+                ->get();
+
+            return view('platform.dashboard', compact(
+                'stats',
+                'recentSchools'
+            ));
+
         })->name('dashboard');
 
         Route::get('/schools', [SchoolController::class, 'index'])
@@ -73,4 +103,30 @@ Route::middleware(['auth', 'platform.admin'])
 
         Route::put('/schools/{school}', [SchoolController::class, 'update'])
             ->name('schools.update');
+
+        Route::get(
+            '/schools/{school}/locations',
+            [SchoolLocationController::class, 'index']
+        )->name('schools.locations.index');
+
+        Route::get(
+            '/schools/{school}/locations/create',
+            [SchoolLocationController::class, 'create']
+        )->name('schools.locations.create');
+
+        Route::post(
+            '/schools/{school}/locations',
+            [SchoolLocationController::class, 'store']
+        )->name('schools.locations.store');
+
+        Route::get(
+            '/schools/{school}/locations/{location}/edit',
+            [SchoolLocationController::class, 'edit']
+        )->name('schools.locations.edit');
+
+        Route::put(
+            '/schools/{school}/locations/{location}',
+            [SchoolLocationController::class, 'update']
+        )->name('schools.locations.update');
+
     });
