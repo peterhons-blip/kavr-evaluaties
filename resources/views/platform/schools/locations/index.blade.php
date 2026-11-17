@@ -36,6 +36,16 @@
         </div>
     @endif
 
+
+    @if ($errors->any())
+        <div class="locations-delete-error" role="alert">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    @endif
+
+
     {{-- Vestigingenoverzicht --}}
     <div class="card">
 
@@ -143,14 +153,64 @@
                                 @endif
                             </td>
 
-                            <td>
-                                <a href="{{ route(
-                                    'platform.schools.locations.edit',
-                                    [$school, $location]
-                                ) }}" class="btn btn-secondary">
-                                    Bewerken
-                                </a>
+                            <td class="location-actions-cell">
+
+                                <div class="location-actions">
+
+                                    <a href="{{ route(
+                                        'platform.schools.locations.edit',
+                                        [$school, $location]
+                                    ) }}" class="btn btn-secondary location-edit-btn">
+                                        Bewerken
+                                    </a>
+
+                                    @if ($locations->count() > 1)
+
+                                        <form method="POST"
+                                            action="{{ route(
+                                                'platform.schools.locations.destroy',
+                                                [$school, $location]
+                                            ) }}"
+                                            onsubmit="return confirm('Weet je zeker dat je deze vestigingsplaats wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.');">
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="location-delete-btn"
+                                                title="Vestigingsplaats verwijderen"
+                                                aria-label="Verwijder {{ $location->name }}">
+
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    width="17"
+                                                    height="17"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="1.8"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    aria-hidden="true">
+
+                                                    <path d="M3 6h18"/>
+                                                    <path d="M8 6V4h8v2"/>
+                                                    <path d="M19 6l-1 14H6L5 6"/>
+                                                    <path d="M10 10v6"/>
+                                                    <path d="M14 10v6"/>
+
+                                                </svg>
+
+                                            </button>
+
+                                        </form>
+
+                                    @endif
+
+                                </div>
+
                             </td>
+
 
                         </tr>
                     @empty
@@ -375,6 +435,84 @@
         color: #718096;
         font-size: 12px;
     }
+
+
+    
+    /* Acties vestigingsplaatsen */
+
+    .location-actions-cell {
+        white-space: nowrap;
+        width: 1%;
+    }
+
+    .location-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 9px;
+    }
+
+    .location-actions form {
+        display: flex;
+        margin: 0;
+    }
+
+    .location-edit-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 8px 13px;
+        white-space: nowrap;
+    }
+
+    .location-delete-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 36px;
+        height: 36px;
+        padding: 0;
+
+        background: #ffffff;
+        color: #b94747;
+
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+
+        cursor: pointer;
+        transition: background .2s, border-color .2s;
+    }
+
+    .location-delete-btn:hover {
+        background: #fff1f2;
+        border-color: #fecdd3;
+    }
+
+    .location-delete-btn:focus-visible {
+        outline: 2px solid #b94747;
+        outline-offset: 2px;
+    }
+
+    .location-delete-btn svg {
+        display: block;
+        flex-shrink: 0;
+    }
+
+
+
+    .locations-delete-error {
+        margin-bottom: 24px;
+        padding: 15px 18px;
+        border: 1px solid #f2c7cc;
+        border-radius: 10px;
+        background: #fff3f4;
+        color: #b84252;
+        font-size: 13px;
+    }
+
+
 
     @media (max-width: 650px) {
         .locations-card-header .btn {

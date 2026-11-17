@@ -154,6 +154,46 @@
             </div>
         </div>
 
+
+        {{-- SCHOOLSTATUS --}}
+        <h2>Schoolstatus</h2>
+
+        <div class="school-status-box">
+
+            <div class="school-status-info">
+                <div class="school-status-title">
+                    School actief
+                </div>
+
+                <p>
+                    Een actieve school is toegankelijk voor
+                    gekoppelde gebruikers. Bij deactivering
+                    blijven alle gegevens bewaard, maar krijgen
+                    gebruikers geen toegang meer tot deze school.
+                </p>
+            </div>
+
+            <div class="school-status-control">
+
+                <input type="hidden"
+                    name="is_active"
+                    value="0">
+
+                <label class="school-switch">
+                    <input
+                        type="checkbox"
+                        name="is_active"
+                        value="1"
+                        @checked(old('is_active', $school->is_active))>
+
+                    <span class="school-switch-slider"></span>
+                </label>
+
+            </div>
+
+        </div>
+
+
         <div class="form-actions">
             <a href="{{ route('platform.schools.index') }}"
                class="btn btn-secondary">
@@ -247,6 +287,99 @@
             grid-column: auto;
         }
     }
+
+
+    /* Schoolstatus */
+
+    .school-status-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 30px;
+        padding: 20px 22px;
+        background: #f8fafc;
+        border: 1px solid #e1e8ee;
+        border-radius: 10px;
+    }
+
+    .school-status-info {
+        flex: 1;
+    }
+
+    .school-status-title {
+        margin-bottom: 7px;
+        color: #142b45;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .school-status-info p {
+        max-width: 650px;
+        margin: 0;
+        color: #718096;
+        font-size: 12px;
+        line-height: 1.8;
+    }
+
+    .school-status-control {
+        flex-shrink: 0;
+    }
+
+    .school-switch {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 27px;
+        cursor: pointer;
+    }
+
+    .school-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .school-switch-slider {
+        position: absolute;
+        inset: 0;
+        background: #cbd5e1;
+        border-radius: 30px;
+        transition: background .2s;
+    }
+
+    .school-switch-slider::before {
+        position: absolute;
+        content: "";
+        width: 19px;
+        height: 19px;
+        left: 4px;
+        bottom: 4px;
+        border-radius: 50%;
+        background: #ffffff;
+        transition: transform .2s;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+    }
+
+    .school-switch input:checked + .school-switch-slider {
+        background: #3a9d89;
+    }
+
+    .school-switch input:checked + .school-switch-slider::before {
+        transform: translateX(21px);
+    }
+
+    .school-switch input:focus-visible + .school-switch-slider {
+        outline: 3px solid #59aaa5;
+        outline-offset: 3px;
+    }
+
+    @media (max-width: 650px) {
+        .school-status-box {
+            align-items: flex-start;
+            gap: 15px;
+        }
+    }
+
 </style>
 
 @endsection

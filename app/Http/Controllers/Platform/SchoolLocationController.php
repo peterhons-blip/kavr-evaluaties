@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\QueryException;
+
 
 class SchoolLocationController extends Controller
 {
@@ -66,15 +69,37 @@ class SchoolLocationController extends Controller
             'is_active' => ['required', 'boolean'],
         ]);
 
-
-
+        
         DB::transaction(function () use ($school, $validated) {
 
-            // Vergrendel de school tijdens deze wijziging.
             School::whereKey($school->id)
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            $hasActiveLocation = $school->locations()
+                ->where('is_active', true)
+                ->exists();
+
+            // Er moet minstens één actieve vestiging zijn.
+            if (! $hasActiveLocation && ! $validated['is_active']) {
+                throw ValidationException::withMessages([
+                    'is_active' =>
+                        'De eerste vestigingsplaats moet actief zijn.',
+                ]);
+            }
+
+            // Een hoofdvestiging moet zelf actief zijn.
+            if (
+                $validated['is_main_location'] &&
+                ! $validated['is_active']
+            ) {
+                throw ValidationException::withMessages([
+                    'is_active' =>
+                        'Een hoofdvestiging moet actief zijn.',
+                ]);
+            }
+
+            // Maximaal één hoofdvestiging, maar nul mag ook.
             if ($validated['is_main_location']) {
                 $school->locations()->update([
                     'is_main_location' => false,
@@ -82,7 +107,6 @@ class SchoolLocationController extends Controller
             }
 
             $school->locations()->create($validated);
-
         });
 
 
@@ -90,6 +114,7 @@ class SchoolLocationController extends Controller
             ->route('platform.schools.locations.index', $school)
             ->with('success', 'Vestigingsplaats toegevoegd.');
     }
+
 
     /**
      * Formulier: vestigingsplaats bewerken.
@@ -137,30 +162,137 @@ class SchoolLocationController extends Controller
             'is_active' => ['required', 'boolean'],
         ]);
 
+        
         DB::transaction(function () use (
             $school,
             $location,
             $validated
         ) {
-
             School::whereKey($school->id)
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if ($validated['is_main_location']) {
-                $school->locations()
-                    ->whereKeyNot($location->id)
-                    ->update(['is_main_location' => false]);
+            $location = $school->locations()
+                ->whereKey($location->id)
+                ->firstOrFail();
+
+            $wantsToBeMain = (bool) $validated['is_main_location'];
+            $wantsToBeActive = (bool) $validated['is_active'];
+
+            // Een hoofdvestiging moet actief zijn.
+            if ($wantsToBeMain && ! $wantsToBeActive) {
+                throw ValidationException::withMessages([
+                    'is_active' =>
+                        'Een hoofdvestiging moet actief zijn.',
+                ]);
             }
 
-            $location->update($validated);
+            // De laatste actieve vestiging mag niet
+            // gedeactiveerd worden.
+            if ($location->is_active && ! $wantsToBeActive) {
+                $otherActiveLocations = $school->locations()
+                    ->whereKeyNot($location->id)
+                    ->where('is_active', true)
+                    ->exists();
 
+                if (! $otherActiveLocations) {
+                    throw ValidationException::withMessages([
+                        'is_active' =>
+                            'Een school moet minstens één actieve '
+                            . 'vestigingsplaats behouden.',
+                    ]);
+                }
+            }
+
+            // Alleen bij het kiezen van een hoofdvestiging
+            // wordt de hoofdstatus van andere vestigingen verwijderd.
+            if ($wantsToBeMain) {
+                $school->locations()
+                    ->whereKeyNot($location->id)
+                    ->update([
+                        'is_main_location' => false,
+                    ]);
+            }
+
+            // Hoofdstatus uitvinken is toegestaan.
+            // Hierdoor kunnen alle vestigingen gelijkwaardig zijn.
+            $location->update($validated);
         });
+
 
         return redirect()
             ->route('platform.schools.locations.index', $school)
             ->with('success', 'Vestigingsplaats bijgewerkt.');
     }
+
+    /**
+     * Een ongebruikte vestigingsplaats verwijderen.
+     */
+    public function destroy(
+        School $school,
+        SchoolLocation $location
+    ): RedirectResponse {
+        $this->ensureBelongsToSchool($school, $location);
+
+        try {
+            DB::transaction(function () use ($school, $location) {
+
+                School::whereKey($school->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $location = $school->locations()
+                    ->whereKey($location->id)
+                    ->firstOrFail();
+
+                // De laatste vestigingsplaats mag nooit weg.
+                if ($school->locations()->count() <= 1) {
+                    throw ValidationException::withMessages([
+                        'location' =>
+                            'De laatste vestigingsplaats '
+                            . 'van een school kan niet verwijderd worden.',
+                    ]);
+                }
+
+                // Er moet na verwijdering minimaal
+                // één actieve vestigingsplaats overblijven.
+                $otherActiveLocations = $school->locations()
+                    ->whereKeyNot($location->id)
+                    ->where('is_active', true)
+                    ->exists();
+
+                if (! $otherActiveLocations) {
+                    throw ValidationException::withMessages([
+                        'location' =>
+                            'Een school moet minstens één actieve '
+                            . 'vestigingsplaats behouden.',
+                    ]);
+                }
+
+                // Ook een hoofdvestiging mag worden verwijderd,
+                // zolang de andere voorwaarden voldaan zijn.
+                $location->delete();
+            });
+
+        } catch (QueryException $e) {
+            if (in_array((string) $e->getCode(), ['23000', '23503'], true)) {
+                return back()->withErrors([
+                    'location' =>
+                        'Deze vestigingsplaats heeft gekoppelde '
+                        . 'gegevens en kan niet verwijderd worden. '
+                        . 'Deactiveer de vestiging indien nodig.',
+                ]);
+            }
+
+            throw $e;
+        }
+
+        return redirect()
+            ->route('platform.schools.locations.index', $school)
+            ->with('success', 'Vestigingsplaats verwijderd.');
+    }
+
+
 
     /**
      * Controleer dat de locatie bij de juiste school hoort.

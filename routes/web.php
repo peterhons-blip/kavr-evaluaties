@@ -79,10 +79,12 @@ Route::middleware(['auth', 'platform.admin'])
 
             // De vijf meest recent toegevoegde scholen.
             $recentSchools = \App\Models\School::query()
+                ->orderByDesc('is_active')
                 ->orderByDesc('created_at')
                 ->orderByDesc('id')
                 ->limit(5)
                 ->get();
+
 
             return view('platform.dashboard', compact(
                 'stats',
@@ -105,6 +107,12 @@ Route::middleware(['auth', 'platform.admin'])
 
         Route::put('/schools/{school}', [SchoolController::class, 'update'])
             ->name('schools.update');
+
+        Route::delete(
+            '/schools/{school}',
+            [SchoolController::class, 'destroy']
+        )->name('schools.destroy');
+
 
         Route::get(
             '/schools/{school}/locations',
@@ -130,6 +138,11 @@ Route::middleware(['auth', 'platform.admin'])
             '/schools/{school}/locations/{location}',
             [SchoolLocationController::class, 'update']
         )->name('schools.locations.update');
+
+        Route::delete(
+            '/schools/{school}/locations/{location}',
+            [SchoolLocationController::class, 'destroy']
+        )->name('schools.locations.destroy');
 
         Route::get(
             '/schools/{school}/settings',

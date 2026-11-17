@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
+
 
 class SchoolController extends Controller
 {
@@ -19,6 +24,7 @@ class SchoolController extends Controller
     {
         $schools = School::query()
             ->withCount('locations')
+            ->orderByDesc('is_active')
             ->orderBy('name')
             ->paginate(15);
 
@@ -91,6 +97,7 @@ class SchoolController extends Controller
         DB::transaction(function () use ($validated) {
             $school = School::create($validated);
 
+            // Standaardinstellingen van de school.
             $school->settings()->create([
                 'slogan' => 'Ruimte voor talent.',
                 'subtitle' => null,
@@ -102,7 +109,22 @@ class SchoolController extends Controller
                 'language' => 'nl',
                 'timezone' => 'Europe/Brussels',
             ]);
+
+            // Elke nieuwe school krijgt automatisch
+            // een actieve hoofdvestiging.
+            $school->locations()->create([
+                'name' => $school->name,
+                'location_number' => null,
+                'street' => $school->street,
+                'postal_code' => $school->postal_code,
+                'city' => $school->city,
+                'email' => $school->email,
+                'phone' => $school->phone,
+                'is_main_location' => false,
+                'is_active' => true,
+            ]);
         });
+
 
         return redirect()
             ->route('platform.schools.index')
@@ -169,6 +191,7 @@ class SchoolController extends Controller
             'city' => ['nullable', 'string', 'max:255'],
             'country_code' => ['required', 'string', 'size:2'],
             'director_name' => ['nullable', 'string', 'max:255'],
+            'is_active' => ['required', 'boolean'],
         ]);
 
         $school->update($validated);
@@ -177,4 +200,98 @@ class SchoolController extends Controller
             ->route('platform.schools.index')
             ->with('success', 'De schoolgegevens zijn bijgewerkt.');
     }
+
+
+        /**
+         * Een ongebruikte school definitief verwijderen.
+         */
+        public function destroy(School $school): RedirectResponse
+        {
+            $logoPath = null;
+
+            try {
+                DB::transaction(function () use ($school, &$logoPath) {
+
+                    // Vergrendel de school.
+                    $school = School::whereKey($school->id)
+                        ->lockForUpdate()
+                        ->firstOrFail();
+
+                    // Scholen met gekoppelde gebruikers bewaren.
+                    if ($school->users()->exists()) {
+                        throw ValidationException::withMessages([
+                            'school' =>
+                                'Deze school heeft gekoppelde gebruikers. '
+                                . 'Deactiveer de school in plaats van '
+                                . 'ze te verwijderen.',
+                        ]);
+                    }
+
+                    // Scholen met schooljaren of evaluatieperiodes
+                    // mogen niet verwijderd worden.
+                    foreach ([
+                        'school_years',
+                        'evaluation_periods',
+                    ] as $table) {
+
+                        if (
+                            Schema::hasTable($table) &&
+                            Schema::hasColumn($table, 'school_id') &&
+                            DB::table($table)
+                                ->where('school_id', $school->id)
+                                ->exists()
+                        ) {
+                            throw ValidationException::withMessages([
+                                'school' =>
+                                    'Deze school bevat reeds '
+                                    . 'schoolgegevens of evaluatieperiodes. '
+                                    . 'Verwijderen is niet toegestaan.',
+                            ]);
+                        }
+                    }
+
+                    $logoPath = $school->settings?->logo_path;
+
+                    // Alleen de eigen vestigingen en instellingen
+                    // van deze ongebruikte school verwijderen.
+                    $school->locations()->delete();
+                    $school->settings()->delete();
+
+                    $school->delete();
+                });
+
+            } catch (QueryException $e) {
+
+                if (in_array(
+                    (string) $e->getCode(),
+                    ['23000', '23503'],
+                    true
+                )) {
+                    return back()->withErrors([
+                        'school' =>
+                            'Deze school heeft gekoppelde gegevens '
+                            . 'en kan niet verwijderd worden. '
+                            . 'Deactiveer ze indien nodig.',
+                    ]);
+                }
+
+                throw $e;
+            }
+
+            // Eigen geupload logo pas na geslaagde verwijdering opruimen.
+            if (
+                $logoPath &&
+                str_starts_with(
+                    $logoPath,
+                    'school-logos/' . $school->id . '/'
+                )
+            ) {
+                Storage::disk('public')->delete($logoPath);
+            }
+
+            return redirect()
+                ->route('platform.schools.index')
+                ->with('success', 'De school is verwijderd.');
+        }
+
 }
