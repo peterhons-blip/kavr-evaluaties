@@ -17,11 +17,13 @@
         Vestigingsplaatsen
     </a>
 
-    <span class="school-tab disabled"
-          title="Binnenkort beschikbaar"
-          aria-disabled="true">
-        Huisstijl
-    </span>
+    <a href="{{ route('platform.schools.settings.edit', $school) }}"
+        class="school-tab {{ request()->routeIs('platform.schools.settings.*') ? 'active' : '' }}"
+        @if (request()->routeIs('platform.schools.settings.*'))
+            aria-current="page"
+        @endif>
+            Huisstijl
+    </a>
 
 </nav>
 

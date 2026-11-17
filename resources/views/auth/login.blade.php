@@ -1,6 +1,7 @@
 
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,11 +9,12 @@
     <title>EvolvIT | Aanmelden</title>
 
     <link rel="icon"
-          type="image/png"
+          type="image/x-icon"
           href="{{ asset('favicon.ico') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com"
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
           crossorigin>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
@@ -75,7 +77,7 @@
         .login-panel {
             display: flex;
             flex-direction: column;
-            padding: 45px 55px 45px;
+            padding: 45px 55px;
             background: #ffffff;
         }
 
@@ -246,14 +248,45 @@
             color: #ffffff;
         }
 
-        /* SCHOOLNAAM */
-
         .school-header {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
             gap: 9px;
+            min-width: 0;
         }
+
+        /* ================================
+           SCHOOLLOGO - DEFINITIEVE CSS
+        ================================= */
+
+        .evolvit-school-logo {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+
+            width: fit-content;
+            max-width: 100%;
+            margin-bottom: 20px;
+            padding: 8px 12px;
+
+            background: #ffffff;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .evolvit-school-logo > img {
+            display: block;
+            width: auto;
+            height: auto;
+            max-width: 180px;
+            max-height: 65px;
+            object-fit: contain;
+        }
+
+        /* ================================
+           SCHOOLNAAM
+        ================================= */
 
         .school-label {
             color: var(--secondary);
@@ -282,7 +315,9 @@
             border-radius: 3px;
         }
 
-        /* SLOGAN EN BESCHRIJVING */
+        /* ================================
+           SLOGAN EN BESCHRIJVING
+        ================================= */
 
         .school-content {
             margin: 36px 0 42px;
@@ -313,7 +348,9 @@
             line-height: 1.9;
         }
 
-        /* ACCENTBALKEN */
+        /* ================================
+           ACCENTBALKEN
+        ================================= */
 
         .color-bars {
             display: flex;
@@ -435,6 +472,11 @@
             .color-bars span {
                 height: 5px;
             }
+
+            .evolvit-school-logo > img {
+                max-width: 160px;
+                max-height: 60px;
+            }
         }
     </style>
 </head>
@@ -453,7 +495,7 @@
         <div class="platform-brand">
             <img
                 src="{{ asset('images/evolvit-logo.webp') }}"
-                alt="EvolvIT – Elk talent in ontwikkeling"
+                alt="EvolvIT - Elk talent in ontwikkeling"
                 width="185">
         </div>
 
@@ -476,6 +518,7 @@
             <!-- Foutmeldingen -->
             @if ($errors->any())
                 <div class="alert alert-error" role="alert">
+
                     <strong>Aanmelden is niet gelukt.</strong>
 
                     <ul>
@@ -483,6 +526,7 @@
                             <li>{{ $error }}</li>
                         @endforeach
                     </ul>
+
                 </div>
             @endif
 
@@ -548,6 +592,14 @@
         <!-- Schoolidentiteit -->
         <div class="school-header">
 
+            @if ($school->settings?->logo_path)
+                <div class="evolvit-school-logo">
+                    <img
+                        src="{{ asset('storage/' . $school->settings->logo_path) }}"
+                        alt="Logo van {{ $school->name }}">
+                </div>
+            @endif
+
             <div class="school-label">
                 Aangesloten school
             </div>
@@ -560,7 +612,7 @@
 
         </div>
 
-        <!-- Slogan -->
+        <!-- Slogan en beschrijving -->
         <div class="school-content">
 
             <h2>

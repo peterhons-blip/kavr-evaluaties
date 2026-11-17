@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\SchoolSelectionController;
 use App\Http\Controllers\Platform\SchoolController;
 use App\Http\Controllers\Platform\SchoolLocationController;
+use App\Http\Controllers\Platform\SchoolSettingsController;
+
 
 // Startpagina
 Route::get('/', function () {
@@ -128,5 +130,27 @@ Route::middleware(['auth', 'platform.admin'])
             '/schools/{school}/locations/{location}',
             [SchoolLocationController::class, 'update']
         )->name('schools.locations.update');
+
+        Route::get(
+            '/schools/{school}/settings',
+            [SchoolSettingsController::class, 'edit']
+        )->name('schools.settings.edit');
+
+        Route::put(
+            '/schools/{school}/settings',
+            [SchoolSettingsController::class, 'update']
+        )->name('schools.settings.update');
+
+        Route::get('/schools/{school}/login-preview', function (
+            \App\Models\School $school
+        ) {
+            $school->load('settings');
+
+            return response()
+                ->view('auth.login', [
+                    'school' => $school,
+                ])
+                ->header('Cache-Control', 'no-store');
+        })->name('schools.login-preview');
 
     });
