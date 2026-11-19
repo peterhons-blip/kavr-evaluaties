@@ -6,10 +6,10 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1">
 
-    <title>@yield('title', 'Platformbeheer') | EvolvIT</title>
+    <title>@yield('title', 'Platformbeheer') | Artelynx</title>
 
     <link rel="icon"
-          type="image/png"
+          type="image/x-icon"
           href="{{ asset('favicon.ico') }}">
 
     <link rel="preconnect"
@@ -70,7 +70,7 @@
             z-index: 100;
         }
 
-        /* Wit gedeelte met EvolvIT-logo */
+        /* Wit gedeelte met Artelynx-logo */
 
         .sidebar-brand {
             display: flex;
@@ -92,7 +92,7 @@
 
         .brand-logo {
             display: block;
-            width: 175px;
+            width: 190px;
             max-width: 100%;
             height: auto;
             object-fit: contain;
@@ -519,11 +519,11 @@
     <div class="sidebar-brand">
 
         <a href="{{ route('platform.dashboard') }}"
-           aria-label="EvolvIT – Platformbeheer">
+           aria-label="Artelynx – Platformbeheer">
 
             <img
-                src="{{ asset('images/evolvit-logo.webp') }}"
-                alt="EvolvIT"
+                src="{{ asset('images/artelynx-logo.webp') }}"
+                alt="Artelynx"
                 class="brand-logo">
 
         </a>
@@ -584,7 +584,7 @@
 
     <!-- SIDEBAR FOOTER -->
     <div class="sidebar-footer">
-        EvolvIT &copy; {{ date('Y') }}
+        Artelynx &copy; {{ date('Y') }}
     </div>
 
 </aside>
@@ -605,7 +605,7 @@
             </div>
 
             <div class="topbar-subtitle">
-                EvolvIT / Platformbeheer
+                Artelynx / Platformbeheer
             </div>
 
         </div>
@@ -663,7 +663,7 @@
 
     <!-- FOOTER -->
     <footer class="main-footer">
-        EvolvIT · Elk talent in ontwikkeling.
+        Artelynx · Elk talent in ontwikkeling.
     </footer>
 
 </div>
