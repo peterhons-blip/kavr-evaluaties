@@ -110,6 +110,23 @@
             evaluatieplatform van Kunstacademie Voeren-Riemst.
         </p>
 
+        @php
+            $activeSchoolId = session('active_school_id');
+            $mayViewUsers = $activeSchoolId && auth()->user()->hasSchoolPermission($activeSchoolId, 'users.view');
+            $mayManageRoles = $activeSchoolId && auth()->user()->hasSchoolPermission($activeSchoolId, 'roles.manage');
+        @endphp
+
+        @if ($mayViewUsers || $mayManageRoles)
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin:22px 0;">
+                @if ($mayViewUsers)
+                    <a href="{{ route('school.members.index') }}" style="display:inline-block;padding:12px 16px;color:#fff;background:#142b45;border-radius:8px;text-decoration:none;font-weight:600;">Gebruikers beheren</a>
+                @endif
+                @if ($mayManageRoles)
+                    <a href="{{ route('school.roles.index') }}" style="display:inline-block;padding:12px 16px;color:#142b45;background:#e5f3f1;border-radius:8px;text-decoration:none;font-weight:600;">Rollen en rechten</a>
+                @endif
+            </div>
+        @endif
+
         <p>
             Binnenkort vind je hier jouw leerlingen,
             lesgroepen en evaluaties.
