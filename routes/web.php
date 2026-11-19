@@ -12,6 +12,7 @@ use App\Http\Controllers\Platform\UserController;
 use App\Http\Controllers\Platform\SchoolRoleController;
 use App\Http\Controllers\Platform\SchoolMemberController;
 use App\Http\Controllers\School\MemberController;
+use App\Http\Controllers\School\DashboardController;
 use App\Http\Controllers\School\RoleController as SchoolRoleManagementController;
 
 
@@ -42,9 +43,7 @@ Route::middleware('guest')->group(function () {
 
 // Dashboard: alleen toegankelijk na aanmelden
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })
+    Route::get('/dashboard', DashboardController::class)
     ->middleware('active.school')
     ->name('dashboard');
 
