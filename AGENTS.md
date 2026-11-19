@@ -1,6 +1,8 @@
-# AGENTS.md – Evaluatieplatform
+# AGENTS.md – Artelynx Evaluatieplatform
 
 ## 1. Projectcontext
+
+De officiële merknaam van de applicatie is **Artelynx** (voorheen EvolvIT). Gebruik Artelynx in alle zichtbare productteksten, branding en paginatitels. Bestaande technische namen, databanktabelnamen en repositorypaden hoeven niet hernoemd te worden.
 
 Dit project is een webgebaseerd evaluatieplatform voor Kunstacademie Voeren-Riemst, ontworpen om later meerdere scholen te ondersteunen.
 
