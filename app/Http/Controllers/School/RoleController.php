@@ -48,7 +48,11 @@ class RoleController extends Controller
     {
         $school = $this->school($request);
         $data = $this->validated($request, $school);
-        $school->roles()->create($data + ['is_system' => false]);
+        $createdRole = $school->roles()->create($data + ['is_system' => false]);
+        \App\Support\AccessAudit::record('school.role.created', $school, null, [
+            'slug' => $createdRole->slug,
+            'permissions' => $createdRole->permissions,
+        ]);
         return redirect()->route('school.roles.index')->with('success','Rol aangemaakt.');
     }
 
@@ -70,6 +74,10 @@ class RoleController extends Controller
             throw ValidationException::withMessages(['permissions'=>'Je kunt je eigen rollenbeheer niet uitschakelen.']);
         }
         $role->update($data);
+        \App\Support\AccessAudit::record('school.role.updated', $school, null, [
+            'slug' => $role->slug,
+            'permissions' => $role->permissions,
+        ]);
         return redirect()->route('school.roles.index')->with('success','Rol bijgewerkt.');
     }
 
@@ -81,6 +89,9 @@ class RoleController extends Controller
             throw ValidationException::withMessages(['role'=>'Standaardrollen en toegewezen rollen mogen niet verwijderd worden.']);
         }
         $role->delete();
+        \App\Support\AccessAudit::record('school.role.deleted', $school, null, [
+            'slug' => $role->slug,
+        ]);
         return redirect()->route('school.roles.index')->with('success','Rol verwijderd.');
     }
 
