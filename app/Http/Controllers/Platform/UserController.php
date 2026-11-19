@@ -19,20 +19,60 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = trim((string) $request->query('q', ''));
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:120'],
+            'school_id' => ['nullable', 'integer', 'exists:schools,id'],
+            'role' => ['nullable', 'string', 'max:30'],
+            'status' => ['nullable', Rule::in(['active', 'inactive'])],
+        ]);
+
+        $search = trim($filters['q'] ?? '');
+        $schoolId = isset($filters['school_id']) ? (int) $filters['school_id'] : null;
+        $roleFilter = $filters['role'] ?? '';
+        $statusFilter = $filters['status'] ?? '';
+
+        // Combineer school en rol op DEZELFDE koppeling, zodat rollen van
+        // een tweede school geen foutieve matches opleveren.
         $users = User::query()
             ->with(['schools:id,name'])
-            ->when($search !== '', fn ($q) => $q->where(function ($query) use ($search) {
-                $query->where('first_name', 'like', "%{$search}%")
-                    ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
-            }))
+            ->when($search !== '', function ($query) use ($search) {
+                $term = '%' . addcslashes($search, '%_\\\\') . '%';
+                $query->where(function ($q) use ($term) {
+                    $q->where('first_name', 'like', $term)
+                        ->orWhere('last_name', 'like', $term)
+                        ->orWhere('name', 'like', $term)
+                        ->orWhere('email', 'like', $term);
+                });
+            })
+            ->when($schoolId !== null || $roleFilter !== '', function ($query) use ($schoolId, $roleFilter) {
+                $query->whereHas('schools', function ($membership) use ($schoolId, $roleFilter) {
+                    if ($schoolId !== null) {
+                        $membership->where('schools.id', $schoolId);
+                    }
+                    if ($roleFilter !== '') {
+                        $membership->wherePivot('role', $roleFilter);
+                    }
+                });
+            })
+            ->when($statusFilter !== '', fn ($query) => $query->where('is_active', $statusFilter === 'active'))
             ->orderBy('last_name')
             ->orderBy('first_name')
+            ->orderBy('id')
             ->paginate(20)
             ->withQueryString();
 
-        return view('platform.users.index', compact('users', 'search'));
+        $schools = School::orderBy('name')->get(['id', 'name']);
+        $roles = DB::table('school_roles')
+            ->orderBy('name')
+            ->get(['school_id', 'slug', 'name']);
+
+        if ($request->ajax()) {
+            return view('platform.users.partials.results', compact('users', 'roleFilter', 'roles'));
+        }
+
+        return view('platform.users.index', compact(
+            'users', 'search', 'schoolId', 'roleFilter', 'statusFilter', 'schools', 'roles'
+        ));
     }
 
     public function create(): View
