@@ -83,7 +83,7 @@ class SchoolRoleController extends Controller
         $request->merge(['slug' => \Illuminate\Support\Str::slug((string) $request->input('slug'), '_')]);
         $data = $request->validate([
             'slug' => [
-                'required','alpha_dash','max:50',
+                'required','alpha_dash','max:30',
                 Rule::unique('school_roles', 'slug')->where('school_id', $school->id)->ignore($role?->id),
             ],
             'name' => ['required','string','max:100'],
