@@ -18,12 +18,12 @@
             <label>Voornaam *<input name="first_name" required maxlength="100" value="{{ old('first_name',$user->first_name) }}"></label>
             <label>Achternaam *<input name="last_name" required maxlength="100" value="{{ old('last_name',$user->last_name) }}"></label>
             <label class="uf-full">E-mailadres *<input type="email" name="email" required maxlength="255" autocomplete="off" value="{{ old('email',$user->email) }}"></label>
-            <label>Wachtwoord {{ $user->exists ? '(leeg laten om te behouden)' : '*' }}
-                <input type="password" name="password" minlength="12" autocomplete="new-password" {{ $user->exists ? '' : 'required' }}>
+            <label>Wachtwoord (optioneel)
+                <input type="password" name="password" minlength="12" autocomplete="new-password">
             </label>
-            <label>Wachtwoord bevestigen<input type="password" name="password_confirmation" autocomplete="new-password" {{ $user->exists ? '' : 'required' }}></label>
+            <label>Wachtwoord bevestigen<input type="password" name="password_confirmation" autocomplete="new-password"></label>
         </div>
-        <p class="uf-help">Minstens 12 tekens. Deel een nieuw wachtwoord via een veilig kanaal. Automatische accountuitnodigingen en verplicht wijzigen bij eerste login bouwen we in een aparte beveiligingsstap.</p>
+        <p class="uf-help">Laat het wachtwoord leeg om een willekeurig beginwachtwoord te gebruiken. Activeer het account en stuur via het overzicht een beveiligde instellink. Een handmatig gekozen wachtwoord moet minstens 12 tekens bevatten.</p>
         <div class="uf-checks">
             <label><input type="hidden" name="is_active" value="0"><input type="checkbox" name="is_active" value="1" @checked(old('is_active',$user->exists ? $user->is_active : false))> Account actief</label>
             <label><input type="hidden" name="is_platform_admin" value="0"><input type="checkbox" name="is_platform_admin" value="1" @checked(old('is_platform_admin',$user->is_platform_admin))> Platformadministrator</label>
