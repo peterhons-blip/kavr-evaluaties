@@ -75,6 +75,7 @@ class MemberController extends Controller
                     'must_change_password' => true,
                 ]);
                 $created = true;
+                \App\Support\AccessAudit::record('school.user.created', $school, $user);
             }
 
             if ($school->users()->where('users.id', $user->id)->exists()) {
@@ -86,10 +87,18 @@ class MemberController extends Controller
             $school->users()->attach($user->id, [
                 'role' => $data['role'], 'is_active' => true,
             ]);
+            \App\Support\AccessAudit::record('school.member.added', $school, $user, [
+                'role' => $data['role'],
+            ]);
         });
 
         if ($created) {
-            $status = \Illuminate\Support\Facades\Password::sendResetLink(['email' => $email]);
+            try {
+                $status = \Illuminate\Support\Facades\Password::sendResetLink(['email' => $email]);
+            } catch (\Throwable $exception) {
+                report($exception);
+                $status = null;
+            }
             $message = $status === \Illuminate\Support\Facades\Password::RESET_LINK_SENT
                 ? 'Nieuw account aangemaakt en instellink verstuurd.'
                 : 'Account aangemaakt, maar de instellink kon niet verzonden worden. Controleer de mailinstellingen.';
@@ -120,9 +129,15 @@ class MemberController extends Controller
             throw ValidationException::withMessages(['role' => 'Je kunt je eigen beheertoegang niet verwijderen.']);
         }
 
-        $school->users()->updateExistingPivot($user->id, [
-            'role' => $data['role'], 'is_active' => $data['is_active'],
-        ]);
+        DB::transaction(function () use ($school, $user, $data) {
+            $school->users()->updateExistingPivot($user->id, [
+                'role' => $data['role'], 'is_active' => $data['is_active'],
+            ]);
+            \App\Support\AccessAudit::record('school.member.updated', $school, $user, [
+                'role' => $data['role'],
+                'active' => (bool) $data['is_active'],
+            ]);
+        });
         return back()->with('success', 'Schoolrechten bijgewerkt.');
     }
 }
