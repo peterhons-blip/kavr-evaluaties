@@ -47,6 +47,11 @@ class SchoolRoleController extends Controller
         $data = $this->validateRole($request, $school, $role);
         if ($role->is_system) {
             unset($data['slug']); // Preserve existing school_user.role references.
+        } elseif ($role->slug !== $data['slug'] &&
+            $school->users()->wherePivot('role', $role->slug)->exists()) {
+            throw ValidationException::withMessages([
+                'slug' => 'Deze rol is al toegewezen. De rolcode kan niet meer wijzigen.',
+            ]);
         }
         $role->update($data);
         return redirect()->route('platform.schools.roles.index', $school)->with('success', 'Rechten bijgewerkt.');
