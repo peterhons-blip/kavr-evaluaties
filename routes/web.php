@@ -9,6 +9,7 @@ use App\Http\Controllers\Platform\SchoolSettingsController;
 use App\Http\Controllers\Platform\UserController;
 use App\Http\Controllers\Platform\SchoolRoleController;
 use App\Http\Controllers\School\MemberController;
+use App\Http\Controllers\School\RoleController as SchoolRoleManagementController;
 
 
 // Startpagina
@@ -41,6 +42,13 @@ Route::middleware('auth')->group(function () {
 
     // Beheer van schoolgebruikers vereist schoollidmaatschap en rechten.
     Route::middleware('active.school')->group(function () {
+        Route::get('/school/rollen', [SchoolRoleManagementController::class, 'index'])->name('school.roles.index');
+        Route::get('/school/rollen/create', [SchoolRoleManagementController::class, 'create'])->name('school.roles.create');
+        Route::post('/school/rollen', [SchoolRoleManagementController::class, 'store'])->name('school.roles.store');
+        Route::get('/school/rollen/{role}/edit', [SchoolRoleManagementController::class, 'edit'])->name('school.roles.edit');
+        Route::put('/school/rollen/{role}', [SchoolRoleManagementController::class, 'update'])->name('school.roles.update');
+        Route::delete('/school/rollen/{role}', [SchoolRoleManagementController::class, 'destroy'])->name('school.roles.destroy');
+
         Route::get('/school/gebruikers', [MemberController::class, 'index'])
             ->name('school.members.index');
         Route::post('/school/gebruikers', [MemberController::class, 'store'])
