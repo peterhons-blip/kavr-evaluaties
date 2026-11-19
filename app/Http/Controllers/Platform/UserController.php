@@ -187,6 +187,15 @@ class UserController extends Controller
 
     public function sendSetupLink(User $user): RedirectResponse
     {
+        if (! $user->is_active || (! $user->is_platform_admin &&
+            ! $user->schools()->where('schools.is_active', true)
+                ->wherePivot('is_active', true)
+                ->wherePivotNull('dko3_hidden_at')->exists())) {
+            throw ValidationException::withMessages([
+                'email' => 'Dit personeelsaccount heeft geen actieve toegang. Activeer eerst het account en de schoolkoppeling.',
+            ]);
+        }
+
         try {
             $status = Password::sendResetLink(['email' => $user->email]);
         } catch (\Throwable $exception) {
