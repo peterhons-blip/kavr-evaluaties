@@ -77,6 +77,7 @@ class MemberController extends Controller
                     'password' => \Illuminate\Support\Str::random(64),
                     'is_active' => true,
                     'must_change_password' => true,
+                    'password_set_at' => null,
                 ]);
                 $created = true;
                 \App\Support\AccessAudit::record('school.user.created', $school, $user);
