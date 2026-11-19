@@ -50,7 +50,7 @@ class UserController extends Controller
                         $membership->where('schools.id', $schoolId);
                     }
                     if ($roleFilter !== '') {
-                        $membership->wherePivot('role', $roleFilter);
+                        $membership->where('school_user.role', $roleFilter);
                     }
                 });
             })
