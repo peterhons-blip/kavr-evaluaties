@@ -6,7 +6,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1">
 
-    <title>Dashboard | EvolvIT</title>
+    <title>Dashboard | Artelynx</title>
 
     <style>
         * {
@@ -78,7 +78,11 @@
 
 
 <header>
-    <div class="logo">Evaluatieplatform</div>
+    <div class="logo">@if (file_exists(public_path('images/artelynx-logo.webp')))
+                <img src="{{ asset('images/artelynx-logo.webp') }}" alt="Artelynx" style="display:block;width:185px;max-width:100%;height:auto;background:white;padding:6px 12px;border-radius:9px">
+            @else
+                <span>Artelynx</span>
+            @endif</div>
 
     <div style="display:flex; gap:15px; align-items:center;">
 

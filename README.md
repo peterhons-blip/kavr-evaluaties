@@ -1,4 +1,4 @@
-# Evaluatieplatform
+# Artelynx – Evaluatieplatform
 
 ### Kunstacademie Voeren-Riemst
 

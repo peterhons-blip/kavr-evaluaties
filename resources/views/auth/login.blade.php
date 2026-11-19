@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>EvolvIT | Aanmelden</title>
+    <title>Artelynx | Aanmelden</title>
 
     <link rel="icon"
           type="image/x-icon"
@@ -71,7 +71,7 @@
         }
 
         /* ================================
-           LINKERPANEEL - EVOLVIT
+           LINKERPANEEL - ARTELYNX
         ================================= */
 
         .login-panel {
@@ -260,7 +260,7 @@
            SCHOOLLOGO - DEFINITIEVE CSS
         ================================= */
 
-        .evolvit-school-logo {
+        .artelynx-school-logo {
             display: flex;
             align-items: center;
             justify-content: flex-start;
@@ -275,7 +275,7 @@
             box-sizing: border-box;
         }
 
-        .evolvit-school-logo > img {
+        .artelynx-school-logo > img {
             display: block;
             width: auto;
             height: auto;
@@ -473,7 +473,7 @@
                 height: 5px;
             }
 
-            .evolvit-school-logo > img {
+            .artelynx-school-logo > img {
                 max-width: 160px;
                 max-height: 60px;
             }
@@ -486,17 +486,18 @@
 <div class="login-container">
 
     <!-- =====================================
-         LINKERKANT: EVOLVIT + LOGIN
+         LINKERKANT: ARTELYNX + LOGIN
     ====================================== -->
 
     <section class="login-panel">
 
-        <!-- Officieel EvolvIT-logo -->
+        <!-- Officieel Artelynx-logo -->
         <div class="platform-brand">
-            <img
-                src="{{ asset('images/evolvit-logo.webp') }}"
-                alt="EvolvIT - Elk talent in ontwikkeling"
-                width="185">
+            @if (file_exists(public_path('images/artelynx-logo.webp')))
+                <img src="{{ asset('images/artelynx-logo.webp') }}" alt="Artelynx" width="185">
+            @else
+                <strong style="font-size:30px;color:#142b45;">Artelynx</strong>
+            @endif
         </div>
 
         <!-- Aanmeldformulier -->
@@ -593,7 +594,7 @@
         <div class="school-header">
 
             @if ($school->settings?->logo_path)
-                <div class="evolvit-school-logo">
+                <div class="artelynx-school-logo">
                     <img
                         src="{{ asset('storage/' . $school->settings->logo_path) }}"
                         alt="Logo van {{ $school->name }}">
@@ -628,7 +629,7 @@
 
             <p class="school-description">
                 {{ $school->settings?->login_description
-                    ?? 'Welkom bij EvolvIT.' }}
+                    ?? 'Welkom bij Artelynx.' }}
             </p>
 
         </div>
