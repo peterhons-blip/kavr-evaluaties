@@ -16,7 +16,7 @@ class DashboardController extends Controller
         // Middleware active.school has already verified the membership.
         $school = School::query()
             ->with('settings')
-            ->withCount(['users', 'locations', 'roles'])
+            ->withCount(['users' => fn ($query) => $query->wherePivotNull('dko3_hidden_at'), 'locations', 'roles'])
             ->findOrFail($request->session()->get('active_school_id'));
 
         $canViewUsers = SchoolAccess::allows($request->user(), $school, 'users.view')
@@ -26,6 +26,7 @@ class DashboardController extends Controller
         // Gevoelige gebruikers-/auditinformatie alleen ophalen voor beheerders.
         $recentMembers = $canViewUsers
             ? $school->users()
+                ->wherePivotNull('dko3_hidden_at')
                 ->orderByPivot('created_at', 'desc')
                 ->limit(4)
                 ->get(['users.id', 'users.name', 'users.first_name', 'users.last_name', 'users.email'])
