@@ -1,10 +1,10 @@
 @extends('layouts.platform')
-@section('title', 'Gebruikers')
-@section('page-title', 'Gebruikersbeheer')
+@section('title', 'Personeelsleden')
+@section('page-title', 'Personeelsleden')
 
 @section('content')
 <div class="page-header">
-    <h1>Gebruikers</h1>
+    <h1>Personeelsleden</h1>
     <p>Zoek rechtstreeks in alle accounts en filter op school, schoolrol en accountstatus.</p>
 </div>
 
@@ -20,10 +20,13 @@
 <div class="card um-panel">
     <div class="um-heading">
         <div>
-            <h2>Gebruikersoverzicht</h2>
+            <h2>Personeelsledenoverzicht</h2>
             <p>Eén account kan meerdere schoolgebonden rollen hebben.</p>
         </div>
-        <a class="btn" href="{{ route('platform.users.create') }}">+ Gebruiker toevoegen</a>
+        <div class="um-header-actions">
+            <a class="btn btn-secondary" href="{{ route('platform.users.import') }}">↓ Importeren uit DKO3</a>
+            <a class="btn" href="{{ route('platform.users.create') }}">+ Personeelslid toevoegen</a>
+        </div>
     </div>
 
     <form method="GET" action="{{ route('platform.users.index') }}" id="um-filter-form"
@@ -74,6 +77,27 @@
         </div>
     </form>
 
+    <form id="um-bulk-form" method="POST" action="{{ route('platform.users.bulk') }}" class="um-bulk">
+        @csrf
+        <span id="um-selected-count"><strong>0</strong> geselecteerd</span>
+        <select name="action" id="um-bulk-action" required aria-label="Bulkactie">
+            <option value="">Kies bulkactie…</option>
+            <option value="activate">Accounts activeren</option>
+            <option value="deactivate">Accounts deactiveren</option>
+            <option value="set_role">Schoolrol wijzigen</option>
+            <option value="send_setup_links">Wachtwoordinstellinks versturen</option>
+        </select>
+        <select name="school_id" id="um-bulk-school" aria-label="School voor rolwijziging" hidden disabled>
+            <option value="">Kies school</option>
+            @foreach($schools as $school)
+                <option value="{{ $school->id }}">{{ $school->name }}</option>
+            @endforeach
+        </select>
+        <select name="role" id="um-bulk-role" aria-label="Nieuwe schoolrol" hidden disabled>
+            <option value="">Kies rol</option>
+        </select>
+        <button type="submit" class="btn" id="um-bulk-apply" disabled>Toepassen</button>
+    </form>
     <div id="um-feedback" class="um-feedback" aria-live="polite"></div>
     <div id="um-results">
         @include('platform.users.partials.results')
@@ -84,6 +108,14 @@
 @push('styles')
 <style>
 .um-panel{min-width:0}
+.um-header-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.um-bulk{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:13px 16px;background:#f1f7f8;border:1px solid #dcebec;border-radius:10px;margin:0 0 17px}
+.um-bulk select{border:1px solid #d5dfe7;background:#fff;padding:9px;border-radius:8px;font:inherit;font-size:12px;max-width:220px}
+.um-bulk select[hidden]{display:none}
+.um-bulk span{font-size:12px;margin-right:6px;white-space:nowrap}
+.um-bulk .btn:disabled{opacity:.5;cursor:not-allowed}
+.um-table th:first-child,.um-table td:first-child{width:38px}
+.um-person-check,#um-select-all{height:16px;width:16px;accent-color:#1b949b;cursor:pointer}
 .um-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px}
 .um-heading h2{margin:0 0 5px;font-size:19px}
 .um-heading p{margin:0;color:#718096;font-size:12px}
@@ -137,6 +169,61 @@
     const allRoles = @json($roles->map(fn ($r) => ['school_id' => (int) $r->school_id, 'slug' => $r->slug, 'name' => $r->name])->values());
     if (!form || !results || !window.fetch || !window.AbortController) return;
 
+    const bulkForm = document.getElementById('um-bulk-form');
+    const bulkAction = document.getElementById('um-bulk-action');
+    const bulkSchool = document.getElementById('um-bulk-school');
+    const bulkRole = document.getElementById('um-bulk-role');
+    const bulkSubmit = document.getElementById('um-bulk-apply');
+    const selection = document.getElementById('um-selected-count');
+    function selectedBoxes() {
+        return [...results.querySelectorAll('.um-person-check:checked')];
+    }
+    function updateSelection() {
+        const count = selectedBoxes().length;
+        selection.innerHTML = '<strong>' + count + '</strong> geselecteerd';
+        bulkSubmit.disabled = count === 0 || !bulkAction.value;
+        const all = results.querySelector('#um-select-all');
+        const boxes = results.querySelectorAll('.um-person-check');
+        if (all) {
+            all.checked = boxes.length > 0 && count === boxes.length;
+            all.indeterminate = count > 0 && count < boxes.length;
+        }
+    }
+    function refreshBulkRoles() {
+        const selectedSchool = bulkSchool.value;
+        bulkRole.replaceChildren(new Option('Kies rol', ''));
+        allRoles.filter(item => String(item.school_id) === selectedSchool)
+            .forEach(item => bulkRole.add(new Option(item.name, item.slug)));
+    }
+    bulkAction.addEventListener('change', function () {
+        const changingRole = this.value === 'set_role';
+        bulkSchool.hidden = !changingRole;
+        bulkRole.hidden = !changingRole;
+        bulkSchool.disabled = !changingRole;
+        bulkRole.disabled = !changingRole;
+        bulkSchool.required = changingRole;
+        bulkRole.required = changingRole;
+        updateSelection();
+    });
+    bulkSchool.addEventListener('change', refreshBulkRoles);
+    results.addEventListener('change', function (event) {
+        if (event.target.id === 'um-select-all') {
+            results.querySelectorAll('.um-person-check').forEach(box => box.checked = event.target.checked);
+        }
+        updateSelection();
+    });
+    bulkForm.addEventListener('submit', function (event) {
+        const count = selectedBoxes().length;
+        if (count === 0) {event.preventDefault(); return;}
+        const action = bulkAction.value;
+        const messages = {
+            deactivate: 'accounts deactiveren',
+            activate: 'accounts activeren',
+            set_role: 'schoolrollen aanpassen',
+            send_setup_links: 'wachtwoordinstellinks per e-mail versturen'
+        };
+        if (!confirm(count + ' geselecteerde personeelsleden: ' + (messages[action] || action) + '?')) event.preventDefault();
+    });
     let debounce = null;
     let pending = null;
     let requestNumber = 0;
@@ -184,6 +271,7 @@
             const html = await response.text();
             if (id !== requestNumber) return;
             results.innerHTML = html;
+            updateSelection();
             feedback.textContent = '';
             if (pushHistory) history.replaceState(null, '', url);
         } catch (error) {
@@ -228,6 +316,7 @@
         load(link.href, true);
     });
     updateRoleOptions();
+    updateSelection();
 })();
 </script>
 @endpush
