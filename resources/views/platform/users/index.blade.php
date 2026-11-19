@@ -81,6 +81,14 @@
             </select>
         </label>
 
+        <label class="um-field">
+            <span>Per pagina</span>
+            <select name="per_page" id="um-per-page">
+                <option value="20" @selected($perPage === 20)>20 personeelsleden</option>
+                <option value="50" @selected($perPage === 50)>50 personeelsleden</option>
+                <option value="100" @selected($perPage === 100)>100 personeelsleden</option>
+            </select>
+        </label>
         <div class="um-filter-actions">
             <button type="button" id="um-reset" class="btn btn-secondary">Wissen</button>
             <button type="submit" class="btn um-submit">Zoeken</button>
@@ -90,6 +98,7 @@
     <form id="um-bulk-form" method="POST" action="{{ route('platform.users.bulk') }}" class="um-bulk">
         @csrf
         <span id="um-selected-count"><strong>0</strong> geselecteerd</span>
+        <small style="color:#637b8c">Alleen selectie op deze pagina (max. 100)</small>
         <select name="action" id="um-bulk-action" required aria-label="Bulkactie">
             <option value="">Kies bulkactie…</option>
             <option value="activate">Accounts activeren</option>
@@ -129,7 +138,7 @@
 .um-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px}
 .um-heading h2{margin:0 0 5px;font-size:19px}
 .um-heading p{margin:0;color:#718096;font-size:12px}
-.um-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));;align-items:end;gap:12px;padding:19px;background:#f7fafb;border:1px solid #e5edf2;border-radius:12px;margin-bottom:20px}
+.um-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:12px;padding:19px;background:#f7fafb;border:1px solid #e5edf2;border-radius:12px;margin-bottom:20px}
 .um-field{display:flex;flex-direction:column;min-width:0;gap:7px}
 .um-field>span{font-size:11px;font-weight:800;color:#475d73}
 .um-field input,.um-field select{height:42px;width:100%;border:1px solid #d5dfe7;border-radius:9px;background:#fff;padding:0 12px;font:inherit;font-size:12px;color:#172e4d}
@@ -316,6 +325,7 @@
         role.value = '';
         form.querySelector('#um-status').value = '';
         form.querySelector('#um-password').value = '';
+        form.querySelector('#um-per-page').value = '20';
         updateRoleOptions();
         refresh();
     });
