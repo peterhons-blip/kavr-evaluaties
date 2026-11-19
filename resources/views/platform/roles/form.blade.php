@@ -9,7 +9,7 @@
 <div class="card rf-card">
     <div class="rf-grid">
         <label>Naam *<input required maxlength="100" name="name" value="{{ old('name',$role->name) }}"></label>
-        <label>Technische rolcode *<input required maxlength="50" name="slug" value="{{ old('slug',$role->slug) }}" @readonly($role->is_system)></label>
+        <label>Technische rolcode *<input required maxlength="30" name="slug" value="{{ old('slug',$role->slug) }}" @readonly($role->is_system)></label>
         <label class="rf-full">Beschrijving<textarea name="description" maxlength="1000" rows="2">{{ old('description',$role->description) }}</textarea></label>
     </div>
     <h2>Toegestane functies</h2>
