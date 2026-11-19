@@ -561,14 +561,12 @@
 
         </a>
 
-        <!-- Gebruikers: nog niet beschikbaar -->
-        <span class="nav-item disabled"
-              title="Binnenkort beschikbaar">
-
+        <!-- Gebruikersbeheer -->
+        <a href="{{ route('platform.users.index') }}"
+           class="nav-item {{ request()->routeIs('platform.users.*') ? 'active' : '' }}">
             <span class="nav-icon">♙</span>
             <span class="nav-text">Gebruikers</span>
-
-        </span>
+        </a>
 
         <div class="menu-label">BEHEER</div>
 
