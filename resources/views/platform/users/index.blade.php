@@ -7,6 +7,7 @@
     <p>Beheer accounts centraal. Elke gebruiker kan afzonderlijke rollen hebben per school.</p>
 </div>
 @if(session('success')) <div class="um-notice">{{ session('success') }}</div> @endif
+@if($errors->any())<div class="um-notice" style="background:#fff1f2;color:#9f1239">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 <div class="card">
     <div class="um-heading">
         <div><h2>Alle gebruikers</h2><p>{{ $users->total() }} accounts</p></div>
@@ -31,7 +32,12 @@
                     </td>
                     <td>@if($user->is_platform_admin)<span class="um-tag">Platformadmin</span>@else — @endif</td>
                     <td><span class="um-tag {{ $user->is_active ? 'um-on' : 'um-off' }}">{{ $user->is_active ? 'Actief' : 'Inactief' }}</span></td>
-                    <td><a class="btn btn-secondary" href="{{ route('platform.users.edit',$user) }}">Bewerken</a></td>
+                    <td><div style="display:flex;flex-wrap:wrap;gap:7px;">
+    <a class="btn btn-secondary" href="{{ route('platform.users.edit',$user) }}">Bewerken</a>
+    <form method="POST" action="{{ route('platform.users.setup-link',$user) }}" onsubmit="return confirm('Beveiligde instellink versturen?');">
+        @csrf <button class="btn btn-secondary" type="submit">Instellink</button>
+    </form>
+</div></td>
                 </tr>
                 @empty <tr><td colspan="5">Geen gebruikers gevonden.</td></tr> @endforelse
             </tbody>
