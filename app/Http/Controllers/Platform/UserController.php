@@ -9,6 +9,8 @@ use App\Support\SchoolRoleCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -69,9 +71,9 @@ class UserController extends Controller
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'email' => strtolower($data['email']),
-                'password' => $data['password'],
+                'password' => $data['password'] ?? Str::random(64),
                 'is_active' => (bool) $data['is_active'],
-                'must_change_password' => false,
+                'must_change_password' => empty($data['password']),
             ]);
             $user->is_platform_admin = (bool) $data['is_platform_admin'];
             $user->save();
@@ -110,6 +112,19 @@ class UserController extends Controller
         return redirect()->route('platform.users.index')->with('success', 'Gebruiker bijgewerkt.');
     }
 
+    public function sendSetupLink(User $user): RedirectResponse
+    {
+        $status = Password::sendResetLink(['email' => $user->email]);
+
+        if ($status !== Password::RESET_LINK_SENT) {
+            throw ValidationException::withMessages([
+                'email' => 'De instellink kon niet verzonden worden. Controleer de mailinstellingen.',
+            ]);
+        }
+
+        return back()->with('success', 'Instellink verzonden naar '.$user->email.'.');
+    }
+
     private function validateUser(Request $request, ?User $user = null): array
     {
         $isExisting = $user?->exists ?? false;
@@ -118,7 +133,7 @@ class UserController extends Controller
             'first_name' => ['required','string','max:100'],
             'last_name' => ['required','string','max:100'],
             'email' => ['required','email','max:255',Rule::unique('users','email')->ignore($user?->id)],
-            'password' => [$isExisting ? 'nullable' : 'required','confirmed','string','min:12'],
+            'password' => ['nullable','confirmed','string','min:12'],
             'is_active' => ['required','boolean'],
             'is_platform_admin' => ['required','boolean'],
             'memberships' => ['sometimes','array'],
