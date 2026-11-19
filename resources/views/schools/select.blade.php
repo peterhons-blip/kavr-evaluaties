@@ -6,7 +6,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1">
 
-    <title>Omgeving kiezen | EvolvIT</title>
+    <title>Omgeving kiezen | Artelynx</title>
 
     <style>
         :root {
@@ -158,7 +158,7 @@
 
 <div class="container">
 
-    <div class="eyebrow">EvolvIT</div>
+    <div class="eyebrow">Artelynx</div>
 
     <h1>
         Welkom, {{ auth()->user()->first_name }}!
