@@ -11,7 +11,7 @@ return new class extends Migration {
         Schema::create('school_roles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('school_id')->constrained('schools')->cascadeOnDelete();
-            $table->string('slug', 50);
+            $table->string('slug', 30);
             $table->string('name', 100);
             $table->text('description')->nullable();
             $table->json('permissions');
