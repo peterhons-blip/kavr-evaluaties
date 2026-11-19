@@ -14,7 +14,7 @@
 <div class="card">
     <div class="su-head">
         <div><h2>Personeelsleden van deze school</h2><p>Direct zoeken en filteren op schoolrol of status</p></div>
-        <a class="btn" href="{{ route('platform.users.create') }}">+ Gebruiker toevoegen</a>
+        <a class="btn" href="{{ route('platform.users.create') }}">+ Personeelslid toevoegen</a>
     </div>
     <form id="su-filter-form" method="GET" action="{{ route('platform.schools.users.index', $school) }}" class="su-filters" role="search">
         <label>Zoeken
