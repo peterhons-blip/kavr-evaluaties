@@ -578,6 +578,11 @@
 
             </form>
 
+            <a href="{{ route('password.request') }}"
+               style="display:inline-block;margin-top:18px;color:var(--primary);font-size:12px;font-weight:700;text-decoration:none;">
+                Wachtwoord vergeten of instellen?
+            </a>
+
         </div>
 
     </section>
