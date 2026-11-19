@@ -6,6 +6,9 @@ use App\Http\Controllers\SchoolSelectionController;
 use App\Http\Controllers\Platform\SchoolController;
 use App\Http\Controllers\Platform\SchoolLocationController;
 use App\Http\Controllers\Platform\SchoolSettingsController;
+use App\Http\Controllers\Platform\UserController;
+use App\Http\Controllers\Platform\SchoolRoleController;
+use App\Http\Controllers\School\MemberController;
 
 
 // Startpagina
@@ -35,6 +38,16 @@ Route::middleware('auth')->group(function () {
     })
     ->middleware('active.school')
     ->name('dashboard');
+
+    // Beheer van schoolgebruikers vereist schoollidmaatschap en rechten.
+    Route::middleware('active.school')->group(function () {
+        Route::get('/school/gebruikers', [MemberController::class, 'index'])
+            ->name('school.members.index');
+        Route::post('/school/gebruikers', [MemberController::class, 'store'])
+            ->name('school.members.store');
+        Route::put('/school/gebruikers/{user}', [MemberController::class, 'update'])
+            ->name('school.members.update');
+    });
 
     Route::post('/logout', [LoginController::class, 'logout'])
         ->name('logout');
@@ -92,6 +105,21 @@ Route::middleware(['auth', 'platform.admin'])
             ));
 
         })->name('dashboard');
+
+
+        // Centrale gebruikersadministratie.
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+
+        Route::get('/schools/{school}/roles', [SchoolRoleController::class, 'index'])->name('schools.roles.index');
+        Route::get('/schools/{school}/roles/create', [SchoolRoleController::class, 'create'])->name('schools.roles.create');
+        Route::post('/schools/{school}/roles', [SchoolRoleController::class, 'store'])->name('schools.roles.store');
+        Route::get('/schools/{school}/roles/{role}/edit', [SchoolRoleController::class, 'edit'])->name('schools.roles.edit');
+        Route::put('/schools/{school}/roles/{role}', [SchoolRoleController::class, 'update'])->name('schools.roles.update');
+        Route::delete('/schools/{school}/roles/{role}', [SchoolRoleController::class, 'destroy'])->name('schools.roles.destroy');
 
         Route::get('/schools', [SchoolController::class, 'index'])
             ->name('schools.index');
