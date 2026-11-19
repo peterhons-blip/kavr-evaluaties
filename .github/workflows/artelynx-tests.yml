@@ -1,10 +1,9 @@
 name: Artelynx code and authorization tests
 
 on:
-  push:
-    branches: [feature/school-users-roles]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -27,6 +26,14 @@ jobs:
           php artisan key:generate
           mkdir -p database
           touch database/database.sqlite
+      - name: Compile Blade templates
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+        run: php artisan view:cache
+      - name: Verify routes
+        run: php artisan route:list --path=platform
       - name: Feature tests
         env:
           APP_ENV: testing
