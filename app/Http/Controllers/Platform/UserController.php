@@ -77,10 +77,6 @@ class UserController extends Controller
             ]);
             $user->is_platform_admin = (bool) $data['is_platform_admin'];
             $user->save();
-            if (! empty($data['password'])) {
-                DB::table('sessions')->where('user_id', $user->id)->delete();
-                Password::deleteToken($user);
-            }
             $this->syncSchools($user, $data['memberships'] ?? []);
             \App\Support\AccessAudit::record('user.created', null, $user, [
                 'platform_admin' => (bool) $data['is_platform_admin'],
@@ -118,6 +114,10 @@ class UserController extends Controller
             $user->fill($changes);
             $user->is_platform_admin = (bool) $data['is_platform_admin'];
             $user->save();
+            if (! empty($data['password'])) {
+                DB::table('sessions')->where('user_id', $user->id)->delete();
+                Password::deleteToken($user);
+            }
             $this->syncSchools($user, $data['memberships'] ?? []);
             \App\Support\AccessAudit::record('user.updated', null, $user, [
                 'platform_admin' => (bool) $data['is_platform_admin'],
