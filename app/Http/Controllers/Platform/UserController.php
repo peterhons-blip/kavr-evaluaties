@@ -25,6 +25,7 @@ class UserController extends Controller
             'role' => ['nullable', 'string', 'max:30'],
             'status' => ['nullable', Rule::in(['active', 'inactive'])],
             'password' => ['nullable', Rule::in(['not_set', 'set', 'unknown'])],
+            'per_page' => ['nullable', Rule::in(['20','50','100'])],
         ]);
 
         $search = trim($filters['q'] ?? '');
@@ -32,6 +33,7 @@ class UserController extends Controller
         $roleFilter = $filters['role'] ?? '';
         $statusFilter = $filters['status'] ?? '';
         $passwordFilter = $filters['password'] ?? '';
+        $perPage = (int)($filters['per_page'] ?? 20);
 
         // Combineer school en rol op DEZELFDE koppeling, zodat rollen van
         // een tweede school geen foutieve matches opleveren.
@@ -70,7 +72,7 @@ class UserController extends Controller
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->orderBy('id')
-            ->paginate(20)
+            ->paginate($perPage)
             ->withQueryString();
 
         $schools = School::orderBy('name')->get(['id', 'name']);
@@ -83,7 +85,7 @@ class UserController extends Controller
         }
 
         return view('platform.users.index', compact(
-            'users', 'search', 'schoolId', 'roleFilter', 'statusFilter', 'passwordFilter', 'schools', 'roles'
+            'users', 'search', 'schoolId', 'roleFilter', 'statusFilter', 'passwordFilter', 'perPage', 'schools', 'roles'
         ));
     }
 
