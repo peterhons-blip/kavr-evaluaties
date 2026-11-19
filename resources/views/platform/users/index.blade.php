@@ -71,6 +71,16 @@
             </select>
         </label>
 
+        <label class="um-field um-field-password">
+            <span>Wachtwoord</span>
+            <select name="password" id="um-password">
+                <option value="">Alle wachtwoordstatussen</option>
+                <option value="not_set" @selected($passwordFilter === 'not_set')>Nog instellen</option>
+                <option value="set" @selected($passwordFilter === 'set')>Ingesteld</option>
+                <option value="unknown" @selected($passwordFilter === 'unknown')>Onbekend (oud account)</option>
+            </select>
+        </label>
+
         <div class="um-filter-actions">
             <button type="button" id="um-reset" class="btn btn-secondary">Wissen</button>
             <button type="submit" class="btn um-submit">Zoeken</button>
@@ -119,7 +129,7 @@
 .um-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:24px}
 .um-heading h2{margin:0 0 5px;font-size:19px}
 .um-heading p{margin:0;color:#718096;font-size:12px}
-.um-filters{display:grid;grid-template-columns:minmax(210px,1.55fr) minmax(160px,1.2fr) minmax(135px,1fr) minmax(120px,.8fr) auto;align-items:end;gap:12px;padding:19px;background:#f7fafb;border:1px solid #e5edf2;border-radius:12px;margin-bottom:20px}
+.um-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));;align-items:end;gap:12px;padding:19px;background:#f7fafb;border:1px solid #e5edf2;border-radius:12px;margin-bottom:20px}
 .um-field{display:flex;flex-direction:column;min-width:0;gap:7px}
 .um-field>span{font-size:11px;font-weight:800;color:#475d73}
 .um-field input,.um-field select{height:42px;width:100%;border:1px solid #d5dfe7;border-radius:9px;background:#fff;padding:0 12px;font:inherit;font-size:12px;color:#172e4d}
@@ -151,7 +161,7 @@
 .um-notice{padding:15px;background:#edf8f3;border-radius:9px;color:#246b52;margin-bottom:20px}
 .um-notice-error{background:#fff1f2;color:#9f1239}
 .um-loading{opacity:.53;transition:opacity .15s}
-@media(max-width:1250px){.um-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.um-field-search{grid-column:1/-1}.um-filter-actions{justify-content:flex-end}}
+@media(max-width:1250px){.um-filters{grid-template-columns:repeat(2,minmax(0,1fr))} .um-field-search{grid-column:1/-1}.um-filter-actions{justify-content:flex-end}}
 @media(max-width:660px){.um-filters{grid-template-columns:1fr}.um-field-search{grid-column:auto}.um-filter-actions{justify-content:stretch}.um-filter-actions button{flex:1}}
 </style>
 @endpush
@@ -305,6 +315,7 @@
         school.value = '';
         role.value = '';
         form.querySelector('#um-status').value = '';
+        form.querySelector('#um-password').value = '';
         updateRoleOptions();
         refresh();
     });
