@@ -11,12 +11,14 @@ body{font-family:system-ui,sans-serif;margin:0;background:#f0f4f7;color:#142b45}
 @if(session('success'))<div class="success">{{ session('success') }}</div>@endif
 @if($errors->any())<div class="error">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 @if($canManage)
-<div class="card"><h2>Bestaand account koppelen</h2>
+<div class="card"><h2>Gebruiker toevoegen of koppelen</h2>
 <form method="POST" action="{{ route('school.members.store') }}" class="inline">@csrf
-<input name="email" type="email" placeholder="E-mailadres" required style="min-width:260px">
+<input name="first_name" type="text" placeholder="Voornaam (nieuw account)" style="min-width:150px">
+<input name="last_name" type="text" placeholder="Achternaam (nieuw account)" style="min-width:150px">
+<input name="email" type="email" placeholder="E-mailadres" required style="min-width:220px">
 <select name="role" required><option value="">Kies een rol</option>@foreach($roles as $role)<option value="{{ $role->slug }}">{{ $role->name }}</option>@endforeach</select>
 <button class="btn" type="submit">Koppelen</button></form>
-<p class="muted">Nieuwe accounts worden veilig aangemaakt via platformbeheer. Hier koppel je bestaande accounts aan de school.</p>
+<p class="muted">Bestaat het e-mailadres al, dan wordt het account gekoppeld en blijven de bestaande persoonsgegevens behouden. Voor een nieuw account vul je ook voornaam en achternaam in. Er wordt automatisch een beveiligde wachtwoordinstellink verstuurd.</p>
 </div>
 @endif
 <div class="card"><h2>Schoolgebruikers</h2><div style="overflow-x:auto"><table>
