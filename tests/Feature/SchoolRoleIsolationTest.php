@@ -146,4 +146,45 @@ class SchoolRoleIsolationTest extends TestCase
         $this->assertTrue($school->users()->where('users.id', $created->id)->exists());
         $this->assertFalse(SchoolAccess::allows($created, $school, 'users.manage'));
     }
+
+    public function test_platform_admin_can_assign_different_roles_to_two_schools(): void
+    {
+        $schoolA = $this->school('A');
+        $schoolB = $this->school('B');
+        $admin = $this->user();
+        $admin->is_platform_admin = true;
+        $admin->save();
+
+        $this->actingAs($admin)
+            ->post(route('platform.users.store'), [
+                'first_name' => 'Noor',
+                'last_name' => 'De Smet',
+                'email' => 'noor@example.test',
+                'is_active' => '1',
+                'is_platform_admin' => '0',
+                'memberships' => [
+                    $schoolA->id => ['role' => 'teacher', 'is_active' => '1'],
+                    $schoolB->id => ['role' => 'director', 'is_active' => '1'],
+                ],
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('platform.users.index'));
+
+        $created = User::where('email', 'noor@example.test')->firstOrFail();
+        $this->assertFalse($created->is_platform_admin);
+        $this->assertSame('teacher',
+            $created->schools()->where('schools.id', $schoolA->id)->firstOrFail()->pivot->role);
+        $this->assertSame('director',
+            $created->schools()->where('schools.id', $schoolB->id)->firstOrFail()->pivot->role);
+        $this->assertTrue(SchoolAccess::allows($created, $schoolB, 'users.manage'));
+        $this->assertFalse(SchoolAccess::allows($created, $schoolA, 'users.manage'));
+    }
+
+    public function test_general_login_is_available_even_when_default_school_is_inactive(): void
+    {
+        $school = $this->school('KAVR');
+        $school->update(['is_active' => false]);
+
+        $this->get(route('login'))->assertOk();
+    }
 }
