@@ -1,9 +1,9 @@
 @extends('layouts.platform')
-@section('title', $user->exists ? 'Gebruiker bewerken' : 'Gebruiker toevoegen')
+@section('title', $user->exists ? 'Personeelslid bewerken' : 'Personeelslid toevoegen')
 @section('page-title', 'Gebruikersbeheer')
 @section('content')
 <div class="page-header">
-    <h1>{{ $user->exists ? 'Gebruiker bewerken' : 'Nieuwe gebruiker' }}</h1>
+    <h1>{{ $user->exists ? 'Personeelslid bewerken' : 'Nieuw personeelslid' }}</h1>
     <p>Accountgegevens en schoolkoppelingen worden afzonderlijk beheerd.</p>
 </div>
 @if($errors->any())
@@ -63,7 +63,7 @@
     </div>
     <div class="uf-actions">
         <a class="btn btn-secondary" href="{{ route('platform.users.index') }}">Annuleren</a>
-        <button class="btn" type="submit">Gebruiker opslaan</button>
+        <button class="btn" type="submit">Personeelslid opslaan</button>
     </div>
 </form>
 @endsection
