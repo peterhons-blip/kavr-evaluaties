@@ -1,4 +1,6 @@
 # PROJECT_CONTEXT.md
+
+> **Stand 19 november 2026 – Artelynx.** De multischooltabellen, platformscholenbeheer en vestigingsplaatsen zijn aanwezig. Op de ontwikkelbranch `feature/school-users-roles` worden centrale gebruikersaccounts, schoolgebonden rollen/rechten, wachtwoordinstellingen en beheerhistoriek toegevoegd. Lees `docs/GEBRUIKERS_EN_RECHTEN.md` voor de actuele beveiligingsregels. Oudere statusregels hieronder beschrijven de oorspronkelijke projectplanning.
 # Artelynx – Evaluatieplatform voor kunstacademies
 
 **Productnaam:** Artelynx  

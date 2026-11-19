@@ -8,9 +8,7 @@
 
     <title>@yield('title', 'Platformbeheer') | Artelynx</title>
 
-    <link rel="icon"
-          type="image/x-icon"
-          href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=3">
 
     <link rel="preconnect"
           href="https://fonts.googleapis.com">
@@ -561,16 +559,20 @@
 
         </a>
 
-        <!-- Gebruikers: nog niet beschikbaar -->
-        <span class="nav-item disabled"
-              title="Binnenkort beschikbaar">
-
+        <!-- Gebruikersbeheer -->
+        <a href="{{ route('platform.users.index') }}"
+           class="nav-item {{ request()->routeIs('platform.users.*') ? 'active' : '' }}">
             <span class="nav-icon">♙</span>
-            <span class="nav-text">Gebruikers</span>
-
-        </span>
+            <span class="nav-text">Personeelsleden</span>
+        </a>
 
         <div class="menu-label">BEHEER</div>
+
+        <a href="{{ route('platform.audit.index') }}"
+           class="nav-item {{ request()->routeIs('platform.audit.*') ? 'active' : '' }}">
+            <span class="nav-icon">☷</span>
+            <span class="nav-text">Beheerhistoriek</span>
+        </a>
 
         <!-- Platforminstellingen: later -->
         <span class="nav-item disabled"

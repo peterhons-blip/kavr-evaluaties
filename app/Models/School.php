@@ -57,4 +57,8 @@ class School extends Model
     {
         return $this->hasMany(SchoolLocation::class);
     }
+    public function roles(): HasMany
+    {
+        return $this->hasMany(SchoolRole::class);
+    }
 }

@@ -8,9 +8,7 @@
 
     <title>Artelynx | Aanmelden</title>
 
-    <link rel="icon"
-          type="image/x-icon"
-          href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=3">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect"
@@ -579,6 +577,11 @@
                 </button>
 
             </form>
+
+            <a href="{{ route('password.request') }}"
+               style="display:inline-block;margin-top:18px;color:var(--primary);font-size:12px;font-weight:700;text-decoration:none;">
+                Wachtwoord vergeten of instellen?
+            </a>
 
         </div>
 

@@ -7,9 +7,10 @@
 @section('content')
 
 <!-- WELKOM -->
-<div class="page-header dashboard-heading">
+<div class="page-header dashboard-heading artelynx-hero">
 
-    <div>
+    <img src="{{ asset('images/branding/artelynx-lynx.webp') }}" alt="" class="artelynx-hero-mark" aria-hidden="true">
+    <div class="artelynx-hero-content">
         <h1>
             Welkom terug, {{ auth()->user()->first_name }}!
         </h1>
@@ -20,9 +21,9 @@
         </p>
     </div>
 
-    <a href="{{ route('platform.schools.index') }}"
-       class="btn">
-        Scholen beheren
+    <a href="{{ route('platform.users.index') }}"
+       class="btn artelynx-hero-button">
+        Personeelsleden beheren
     </a>
 
 </div>
@@ -75,7 +76,7 @@
 
     </div>
 
-    <!-- Gebruikers -->
+    <!-- Personeelsleden -->
     <div class="stat-card">
 
         <div class="stat-top">
@@ -266,6 +267,16 @@
 
             </a>
 
+            <a href="{{ route('platform.users.index') }}"
+               class="quick-action">
+                <span class="quick-icon quick-icon-teal">♙</span>
+                <span class="quick-text">
+                    <strong>Gebruikers beheren</strong>
+                    <small>Accounts, schoolkoppelingen en toegangsrechten</small>
+                </span>
+                <span class="quick-arrow">&rsaquo;</span>
+            </a>
+
             <a href="{{ route('schools.select') }}"
                class="quick-action">
 
@@ -292,6 +303,36 @@
 
 @push('styles')
 <style>
+
+    /* Artelynx-branding voor het centrale dashboard */
+    .artelynx-hero {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        min-height: 145px;
+        padding: 26px 30px;
+        border-radius: 17px;
+        background: linear-gradient(110deg,#fff 40%,#f3f8fb);
+        border: 1px solid #e1e8ee;
+        box-shadow: 0 9px 30px rgba(20,43,69,.04);
+    }
+    .artelynx-hero-content { position: relative; z-index: 1; max-width: 68%; }
+    .artelynx-hero-mark {
+        position: absolute;
+        z-index: 0;
+        width: 290px;
+        right: -12px;
+        top: -68px;
+        opacity: .15;
+        transform: rotate(-12deg);
+        pointer-events: none;
+    }
+    .artelynx-hero-button { position: relative; z-index: 1; }
+    @media (max-width:650px) {
+        .artelynx-hero { padding: 24px; }
+        .artelynx-hero-content { max-width:100%; }
+        .artelynx-hero-mark { opacity:.06; }
+    }
 
     /* DASHBOARD HEADER */
 

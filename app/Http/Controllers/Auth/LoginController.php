@@ -17,10 +17,12 @@ class LoginController extends Controller
      */
     public function showLogin(): View
     {
+        // Algemene login blijft bereikbaar voor platformadmins,
+        // ook wanneer de standaardacademie gedeactiveerd is.
         $school = School::with('settings')
             ->where('code', 'KAVR')
-            ->where('is_active', true)
-            ->firstOrFail();
+            ->first()
+            ?? School::with('settings')->orderBy('id')->firstOrFail();
 
         return view('auth.login', compact('school'));
     }
@@ -48,7 +50,7 @@ class LoginController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials + ['is_active' => true])) {
             $request->session()->regenerate();
 
             return redirect()->route('schools.select');
