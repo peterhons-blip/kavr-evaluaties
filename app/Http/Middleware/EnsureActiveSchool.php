@@ -12,6 +12,12 @@ class EnsureActiveSchool
         Request $request,
         Closure $next
     ): Response {
+        // Een gedeactiveerd account verliest onmiddellijk toegang,
+        // ook als de gebruiker nog een bestaande sessie heeft.
+        if (! $request->user() || ! $request->user()->is_active) {
+            abort(403, 'Uw gebruikersaccount is niet actief.');
+        }
+
         $schoolId = $request->session()->get('active_school_id');
 
         if (!$schoolId) {
