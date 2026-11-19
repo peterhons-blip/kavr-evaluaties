@@ -7,6 +7,7 @@ use App\Http\Controllers\SchoolSelectionController;
 use App\Http\Controllers\Platform\SchoolController;
 use App\Http\Controllers\Platform\SchoolLocationController;
 use App\Http\Controllers\Platform\SchoolSettingsController;
+use App\Http\Controllers\Platform\AccessAuditController;
 use App\Http\Controllers\Platform\UserController;
 use App\Http\Controllers\Platform\SchoolRoleController;
 use App\Http\Controllers\School\MemberController;
@@ -120,6 +121,8 @@ Route::middleware(['auth', 'platform.admin'])
 
         })->name('dashboard');
 
+
+        Route::get('/audit', [AccessAuditController::class, 'index'])->name('audit.index');
 
         // Centrale gebruikersadministratie.
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
