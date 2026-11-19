@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\School;
 use App\Support\SchoolAccess;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -22,6 +23,24 @@ class DashboardController extends Controller
             || SchoolAccess::allows($request->user(), $school, 'users.manage');
         $canManageRoles = SchoolAccess::allows($request->user(), $school, 'roles.manage');
 
-        return view('dashboard', compact('school', 'canViewUsers', 'canManageRoles'));
+        // Gevoelige gebruikers-/auditinformatie alleen ophalen voor beheerders.
+        $recentMembers = $canViewUsers
+            ? $school->users()
+                ->orderByPivot('created_at', 'desc')
+                ->limit(4)
+                ->get(['users.id', 'users.name', 'users.first_name', 'users.last_name', 'users.email'])
+            : collect();
+
+        $recentEvents = $canManageRoles
+            ? DB::table('access_audit_events')
+                ->where('school_id', $school->id)
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get(['action', 'created_at'])
+            : collect();
+
+        return view('dashboard', compact(
+            'school', 'canViewUsers', 'canManageRoles', 'recentMembers', 'recentEvents'
+        ));
     }
 }
