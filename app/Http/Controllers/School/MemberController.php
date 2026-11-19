@@ -43,6 +43,8 @@ class MemberController extends Controller
         $school = $this->authorizeSchool($request, 'users.manage');
         $data = $request->validate([
             'email' => ['required','email','max:255'],
+            'first_name' => ['nullable','string','max:100'],
+            'last_name' => ['nullable','string','max:100'],
             'role' => ['required','string','max:50'],
         ]);
 
@@ -50,21 +52,51 @@ class MemberController extends Controller
             throw ValidationException::withMessages(['role' => 'Ongeldige schoolrol.']);
         }
 
-        $user = User::where('email', $data['email'])->first();
-        if (! $user) {
+        $email = strtolower(trim($data['email']));
+        $user = User::where('email', $email)->first();
+        $created = false;
+
+        if (! $user && (empty($data['first_name']) || empty($data['last_name']))) {
             throw ValidationException::withMessages([
-                'email' => 'Dit account bestaat nog niet. Vraag een platformadministrator het account aan te maken.',
+                'first_name' => 'Voor een nieuw account zijn voornaam en achternaam vereist.',
             ]);
         }
 
-        if ($school->users()->where('users.id', $user->id)->exists()) {
-            throw ValidationException::withMessages(['email' => 'Deze gebruiker is al gekoppeld aan de school.']);
+        DB::transaction(function () use (&$user, &$created, $email, $data, $school) {
+            if (! $user) {
+                // Onbekend wachtwoord: toegang pas na wachtwoordinstelling via e-mail.
+                $user = User::create([
+                    'name' => trim($data['first_name'].' '.$data['last_name']),
+                    'first_name' => $data['first_name'],
+                    'last_name' => $data['last_name'],
+                    'email' => $email,
+                    'password' => \Illuminate\Support\Str::random(64),
+                    'is_active' => true,
+                    'must_change_password' => true,
+                ]);
+                $created = true;
+            }
+
+            if ($school->users()->where('users.id', $user->id)->exists()) {
+                throw ValidationException::withMessages([
+                    'email' => 'Deze gebruiker is al gekoppeld aan de school.',
+                ]);
+            }
+
+            $school->users()->attach($user->id, [
+                'role' => $data['role'], 'is_active' => true,
+            ]);
+        });
+
+        if ($created) {
+            $status = \Illuminate\Support\Facades\Password::sendResetLink(['email' => $email]);
+            $message = $status === \Illuminate\Support\Facades\Password::RESET_LINK_SENT
+                ? 'Nieuw account aangemaakt en instellink verstuurd.'
+                : 'Account aangemaakt, maar de instellink kon niet verzonden worden. Controleer de mailinstellingen.';
+            return back()->with('success', $message);
         }
 
-        $school->users()->attach($user->id, [
-            'role' => $data['role'], 'is_active' => true,
-        ]);
-        return back()->with('success', 'Gebruiker aan de school gekoppeld.');
+        return back()->with('success', 'Bestaande gebruiker aan deze school gekoppeld.');
     }
 
     public function update(Request $request, User $user): RedirectResponse
