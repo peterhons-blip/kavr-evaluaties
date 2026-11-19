@@ -55,7 +55,7 @@ class Dko3TeacherImportTest extends TestCase
                 'file' => UploadedFile::fake()->createWithContent('personeel.csv', $csv),
             ])
             ->assertOk()
-            ->assertSee('Import controleren')
+            ->assertSee('DKO3-import controleren')
             ->assertSee('gone@example.test');
 
         $token = session('dko3_import_token');
