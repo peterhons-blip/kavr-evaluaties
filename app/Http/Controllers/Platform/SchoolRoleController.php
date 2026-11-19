@@ -30,7 +30,7 @@ class SchoolRoleController extends Controller
 
     public function edit(School $school, SchoolRole $role): View
     {
-        abort_unless($role->school_id === $school->id, 404);
+        abort_unless((int) $role->school_id === (int) $school->id, 404);
         return view('platform.roles.form', compact('school', 'role'));
     }
 
@@ -47,7 +47,7 @@ class SchoolRoleController extends Controller
 
     public function update(Request $request, School $school, SchoolRole $role): RedirectResponse
     {
-        abort_unless($role->school_id === $school->id, 404);
+        abort_unless((int) $role->school_id === (int) $school->id, 404);
         $data = $this->validateRole($request, $school, $role);
         if ($role->is_system) {
             unset($data['slug']); // Preserve existing school_user.role references.
@@ -67,7 +67,7 @@ class SchoolRoleController extends Controller
 
     public function destroy(School $school, SchoolRole $role): RedirectResponse
     {
-        abort_unless($role->school_id === $school->id, 404);
+        abort_unless((int) $role->school_id === (int) $school->id, 404);
         if ($role->is_system || $school->users()->wherePivot('role', $role->slug)->exists()) {
             throw ValidationException::withMessages(['role' => 'Deze standaardrol of een toegewezen rol kan niet verwijderd worden.']);
         }
