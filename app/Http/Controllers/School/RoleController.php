@@ -40,7 +40,7 @@ class RoleController extends Controller
     public function edit(Request $request, SchoolRole $role): View
     {
         $school = $this->school($request);
-        abort_unless($role->school_id === $school->id, 404);
+        abort_unless((int) $role->school_id === (int) $school->id, 404);
         return view('school.roles.form', compact('school','role'));
     }
 
@@ -59,7 +59,7 @@ class RoleController extends Controller
     public function update(Request $request, SchoolRole $role): RedirectResponse
     {
         $school = $this->school($request);
-        abort_unless($role->school_id === $school->id, 404);
+        abort_unless((int) $role->school_id === (int) $school->id, 404);
         $data = $this->validated($request, $school, $role);
         if ($role->is_system) {
             unset($data['slug']);
@@ -84,7 +84,7 @@ class RoleController extends Controller
     public function destroy(Request $request, SchoolRole $role): RedirectResponse
     {
         $school = $this->school($request);
-        abort_unless($role->school_id === $school->id, 404);
+        abort_unless((int) $role->school_id === (int) $school->id, 404);
         if ($role->is_system || $school->users()->wherePivot('role',$role->slug)->exists()) {
             throw ValidationException::withMessages(['role'=>'Standaardrollen en toegewezen rollen mogen niet verwijderd worden.']);
         }
