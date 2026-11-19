@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\SchoolSelectionController;
 use App\Http\Controllers\Platform\SchoolController;
 use App\Http\Controllers\Platform\SchoolLocationController;
@@ -25,6 +26,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [LoginController::class, 'login'])
         ->middleware('throttle:5,1')
         ->name('login.submit');
+
+    Route::get('/forgot-password', [PasswordResetController::class, 'requestForm'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'requestLink'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'resetForm'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:5,1')->name('password.update');
 
     Route::get('/s/{slug}/login', [
         LoginController::class,
@@ -121,6 +127,7 @@ Route::middleware(['auth', 'platform.admin'])
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::post('/users/{user}/setup-link', [UserController::class, 'sendSetupLink'])->middleware('throttle:3,1')->name('users.setup-link');
 
         Route::get('/schools/{school}/roles', [SchoolRoleController::class, 'index'])->name('schools.roles.index');
         Route::get('/schools/{school}/roles/create', [SchoolRoleController::class, 'create'])->name('schools.roles.create');
