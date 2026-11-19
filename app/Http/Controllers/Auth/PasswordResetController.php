@@ -56,6 +56,7 @@ class PasswordResetController extends Controller
                     'password' => Hash::make($password),
                     'email_verified_at' => now(),
                     'must_change_password' => false,
+                    'password_set_at' => now(),
                     'remember_token' => Str::random(60),
                 ])->save();
                 // Database-sessies van andere apparaten vervallen na reset.
