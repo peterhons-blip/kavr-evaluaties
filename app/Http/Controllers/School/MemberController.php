@@ -36,7 +36,7 @@ class MemberController extends Controller
             403
         );
         SchoolRoleCatalog::ensureFor($school);
-        $members = $school->users()->orderBy('last_name')->orderBy('first_name')->paginate(20);
+        $members = $school->users()->wherePivotNull('dko3_hidden_at')->orderBy('last_name')->orderBy('first_name')->paginate(20);
         $roles = $school->roles()->orderBy('name')->get();
         $canManage = SchoolAccess::allows($request->user(), $school, 'users.manage');
         return view('school.members.index', compact('school','members','roles','canManage'));
