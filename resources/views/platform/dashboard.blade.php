@@ -23,7 +23,7 @@
 
     <a href="{{ route('platform.users.index') }}"
        class="btn artelynx-hero-button">
-        Gebruikers beheren
+        Personeelsleden beheren
     </a>
 
 </div>
@@ -76,7 +76,7 @@
 
     </div>
 
-    <!-- Gebruikers -->
+    <!-- Personeelsleden -->
     <div class="stat-card">
 
         <div class="stat-top">
