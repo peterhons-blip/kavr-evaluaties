@@ -7,6 +7,7 @@
           content="width=device-width, initial-scale=1">
 
     <title>Dashboard | Artelynx</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('artelynx-favicon.svg') }}">
 
     <style>
         * {
