@@ -568,6 +568,12 @@
 
         <div class="menu-label">BEHEER</div>
 
+        <a href="{{ route('platform.audit.index') }}"
+           class="nav-item {{ request()->routeIs('platform.audit.*') ? 'active' : '' }}">
+            <span class="nav-icon">☷</span>
+            <span class="nav-text">Beheerhistoriek</span>
+        </a>
+
         <!-- Platforminstellingen: later -->
         <span class="nav-item disabled"
               title="Binnenkort beschikbaar">
