@@ -1,2 +1,5 @@
+
 *
 !.gitignore
+!school-logos/
+!school-logos/**
