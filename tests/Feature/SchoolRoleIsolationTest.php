@@ -96,4 +96,54 @@ class SchoolRoleIsolationTest extends TestCase
             ->get(route('school.members.index'))
             ->assertRedirect(route('schools.select'));
     }
+
+    public function test_an_inactive_user_with_an_existing_session_is_denied(): void
+    {
+        $school = $this->school('A');
+        $user = $this->user();
+        $school->users()->attach($user->id, ['role' => 'teacher', 'is_active' => true]);
+        $user->update(['is_active' => false]);
+
+        $this->actingAs($user)
+            ->withSession(['active_school_id' => $school->id])
+            ->get(route('dashboard'))
+            ->assertForbidden();
+    }
+
+    public function test_school_admin_cannot_edit_another_schools_role(): void
+    {
+        $a = $this->school('A');
+        $b = $this->school('B');
+        $admin = $this->user();
+        $a->users()->attach($admin->id, ['role' => 'school_admin', 'is_active' => true]);
+        $otherRole = $b->roles()->where('slug', 'teacher')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->withSession(['active_school_id' => $a->id])
+            ->get(route('school.roles.edit', $otherRole))
+            ->assertNotFound();
+    }
+
+    public function test_school_admin_can_invite_a_user_without_platform_admin_rights(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $school = $this->school('A');
+        $admin = $this->user();
+        $school->users()->attach($admin->id, ['role' => 'school_admin', 'is_active' => true]);
+
+        $this->actingAs($admin)
+            ->withSession(['active_school_id' => $school->id])
+            ->post(route('school.members.store'), [
+                'first_name' => 'Eva',
+                'last_name' => 'Janssens',
+                'email' => 'eva@example.test',
+                'role' => 'teacher',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $created = User::where('email', 'eva@example.test')->firstOrFail();
+        $this->assertFalse((bool) $created->is_platform_admin);
+        $this->assertTrue($school->users()->where('users.id', $created->id)->exists());
+        $this->assertFalse(SchoolAccess::allows($created, $school, 'users.manage'));
+    }
 }
