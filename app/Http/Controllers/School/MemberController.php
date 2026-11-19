@@ -10,7 +10,6 @@ use App\Support\SchoolRoleCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -30,7 +29,12 @@ class MemberController extends Controller
 
     public function index(Request $request): View
     {
-        $school = $this->authorizeSchool($request, 'users.view');
+        $school = $this->school($request);
+        abort_unless(
+            SchoolAccess::allows($request->user(), $school, 'users.view') ||
+            SchoolAccess::allows($request->user(), $school, 'users.manage'),
+            403
+        );
         SchoolRoleCatalog::ensureFor($school);
         $members = $school->users()->orderBy('last_name')->orderBy('first_name')->paginate(20);
         $roles = $school->roles()->orderBy('name')->get();
@@ -53,7 +57,7 @@ class MemberController extends Controller
         }
 
         $email = strtolower(trim($data['email']));
-        $user = User::where('email', $email)->first();
+        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
         $created = false;
 
         if (! $user && (empty($data['first_name']) || empty($data['last_name']))) {
