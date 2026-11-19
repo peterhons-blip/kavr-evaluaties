@@ -521,10 +521,11 @@
         <a href="{{ route('platform.dashboard') }}"
            aria-label="Artelynx – Platformbeheer">
 
-            <img
-                src="{{ asset('images/artelynx-logo.webp') }}"
-                alt="Artelynx"
-                class="brand-logo">
+            @if (file_exists(public_path('images/artelynx-logo.webp')))
+                <img src="{{ asset('images/artelynx-logo.webp') }}" alt="Artelynx" class="brand-logo">
+            @else
+                <strong style="font-size:24px;color:#142b45;">Artelynx</strong>
+            @endif
 
         </a>
 
