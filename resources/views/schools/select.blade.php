@@ -105,6 +105,34 @@
             font-size: 24px;
         }
 
+        .school-logo-box {
+            width: 76px;
+            height: 68px;
+            flex: 0 0 76px;
+            background: #ffffff;
+            border: 1px solid #e3eaf0;
+            padding: 7px;
+        }
+
+        .school-logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .school-logo-fallback {
+            font-size: 25px;
+        }
+
+        @media (max-width: 600px) {
+            .school-logo-box {
+                width: 62px;
+                height: 60px;
+                flex-basis: 62px;
+            }
+        }
+
         .option-text {
             flex: 1;
             min-width: 0;
@@ -217,7 +245,18 @@
 
                 <button type="submit" class="option">
 
-                    <span class="option-icon">🏫</span>
+                    <span class="option-icon school-logo-box">
+                        @if ($school->settings?->logo_path)
+                            <img
+                                src="{{ asset('storage/' . $school->settings->logo_path) }}"
+                                alt="Logo van {{ $school->name }}"
+                                loading="lazy"
+                                onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+                            <span class="school-logo-fallback" hidden aria-hidden="true">🏫</span>
+                        @else
+                            <span class="school-logo-fallback" aria-hidden="true">🏫</span>
+                        @endif
+                    </span>
 
                     <span class="option-text">
 
