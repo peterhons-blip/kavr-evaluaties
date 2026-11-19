@@ -1,6 +1,6 @@
 @extends('layouts.platform')
-@section('title','Schoolgebruikers')
-@section('page-title','Schoolgebruikers')
+@section('title','Personeelsleden')
+@section('page-title','Personeelsleden')
 @section('content')
 @include('platform.schools.partials.breadcrumbs', [
     'school' => $school,
@@ -13,7 +13,7 @@
 @include('platform.schools.partials.tabs', ['school' => $school])
 <div class="card">
     <div class="su-head">
-        <div><h2>Gebruikers van deze school</h2><p>Direct zoeken en filteren op schoolrol of status</p></div>
+        <div><h2>Personeelsleden van deze school</h2><p>Direct zoeken en filteren op schoolrol of status</p></div>
         <a class="btn" href="{{ route('platform.users.create') }}">+ Gebruiker toevoegen</a>
     </div>
     <form id="su-filter-form" method="GET" action="{{ route('platform.schools.users.index', $school) }}" class="su-filters" role="search">
