@@ -1,5 +1,7 @@
 # AGENTS.md – Artelynx Evaluatieplatform
 
+> **Nieuwe afspraken (november 2026):** Bekijk `docs/GEBRUIKERS_EN_RECHTEN.md`. Centrale gebruikers bestaan in `users`; schoolkoppelingen in `school_user`; per-school rolrechten in `school_roles`. Controleer met `App\\Support\\SchoolAccess::allows` bij elke schoolgebonden beheeractie. Platformadministrators krijgen niet automatisch inhoudelijke inzagerechten. Verwijder geen auditrecords en log geen wachtwoorden of resetlinks.
+
 ## 1. Projectcontext
 
 De officiële merknaam van de applicatie is **Artelynx** (voorheen EvolvIT). Gebruik Artelynx in alle zichtbare productteksten, branding en paginatitels. Bestaande technische namen, databanktabelnamen en repositorypaden hoeven niet hernoemd te worden.
