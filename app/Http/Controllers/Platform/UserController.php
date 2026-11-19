@@ -147,7 +147,7 @@ class UserController extends Controller
             'is_active' => ['required','boolean'],
             'is_platform_admin' => ['required','boolean'],
             'memberships' => ['sometimes','array'],
-            'memberships.*.role' => ['required','string','max:50'],
+            'memberships.*.role' => ['required','string','max:30'],
             'memberships.*.is_active' => ['required','boolean'],
         ]);
 
