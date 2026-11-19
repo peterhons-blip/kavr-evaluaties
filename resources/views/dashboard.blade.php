@@ -123,7 +123,7 @@
             @if ($canViewUsers || $canManageRoles)
                 <div class="nav-label">BEHEER</div>
                 @if ($canViewUsers)
-                    <a class="nav-link" href="{{ route('school.members.index') }}"><span class="nav-icon">♙</span> Gebruikers</a>
+                    <a class="nav-link" href="{{ route('school.members.index') }}"><span class="nav-icon">♙</span> Personeelsleden</a>
                 @endif
                 @if ($canManageRoles)
                     <a class="nav-link" href="{{ route('school.roles.index') }}"><span class="nav-icon">⚙</span> Rollen &amp; rechten</a>
@@ -206,7 +206,7 @@
                     @if ($canViewUsers)
                         <div class="panel">
                             <div class="panel-head">
-                                <div><h2>Recent gekoppelde gebruikers</h2><p class="panel-sub">Medewerkers van jouw school</p></div>
+                                <div><h2>Recent gekoppelde personeelsleden</h2><p class="panel-sub">Medewerkers van jouw school</p></div>
                                 <a class="panel-link" href="{{ route('school.members.index') }}">Alle bekijken →</a>
                             </div>
                             @forelse ($recentMembers as $member)
@@ -229,7 +229,7 @@
                         </div>
                         @if ($canViewUsers)
                             <a class="feature-row" href="{{ route('school.members.index') }}">
-                                <span class="feature-icon">♙</span><span class="feature-text"><strong>Gebruikers beheren</strong><small>Accountkoppelingen en medewerkers</small></span><span class="feature-arrow">›</span>
+                                <span class="feature-icon">♙</span><span class="feature-text"><strong>Personeelsleden beheren</strong><small>Accountkoppelingen en medewerkers</small></span><span class="feature-arrow">›</span>
                             </a>
                         @endif
                         @if ($canManageRoles)
