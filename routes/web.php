@@ -10,6 +10,7 @@ use App\Http\Controllers\Platform\SchoolSettingsController;
 use App\Http\Controllers\Platform\AccessAuditController;
 use App\Http\Controllers\Platform\UserController;
 use App\Http\Controllers\Platform\SchoolRoleController;
+use App\Http\Controllers\Platform\SchoolMemberController;
 use App\Http\Controllers\School\MemberController;
 use App\Http\Controllers\School\RoleController as SchoolRoleManagementController;
 
@@ -131,6 +132,8 @@ Route::middleware(['auth', 'platform.admin'])
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::post('/users/{user}/setup-link', [UserController::class, 'sendSetupLink'])->middleware('throttle:3,1')->name('users.setup-link');
+
+        Route::get('/schools/{school}/users', [SchoolMemberController::class, 'index'])->name('schools.users.index');
 
         Route::get('/schools/{school}/roles', [SchoolRoleController::class, 'index'])->name('schools.roles.index');
         Route::get('/schools/{school}/roles/create', [SchoolRoleController::class, 'create'])->name('schools.roles.create');
