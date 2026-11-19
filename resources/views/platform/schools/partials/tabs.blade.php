@@ -25,6 +25,12 @@
             Huisstijl
     </a>
 
+    <a href="{{ route('platform.schools.users.index', $school) }}"
+       class="school-tab {{ request()->routeIs('platform.schools.users.*') ? 'active' : '' }}"
+       @if(request()->routeIs('platform.schools.users.*')) aria-current="page" @endif>
+        Gebruikers
+    </a>
+
     <a href="{{ route('platform.schools.roles.index', $school) }}"
        class="school-tab {{ request()->routeIs('platform.schools.roles.*') ? 'active' : '' }}"
        @if(request()->routeIs('platform.schools.roles.*')) aria-current="page" @endif>
