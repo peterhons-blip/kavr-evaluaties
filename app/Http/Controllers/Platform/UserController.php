@@ -121,6 +121,7 @@ class UserController extends Controller
                 'password' => $data['password'] ?? Str::random(64),
                 'is_active' => (bool) $data['is_active'],
                 'must_change_password' => empty($data['password']),
+                'password_set_at' => empty($data['password']) ? null : now(),
             ]);
             $user->is_platform_admin = (bool) $data['is_platform_admin'];
             $user->save();
@@ -153,6 +154,7 @@ class UserController extends Controller
             if (! empty($data['password'])) {
                 $changes['password'] = $data['password'];
                 $changes['must_change_password'] = false;
+                $changes['password_set_at'] = now();
             }
 
             if (strtolower((string) $user->email) !== strtolower($data['email'])) {
