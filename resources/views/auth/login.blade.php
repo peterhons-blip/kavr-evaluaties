@@ -71,7 +71,7 @@
         }
 
         /* ================================
-           LINKERPANEEL - EVOLVIT
+           LINKERPANEEL - ARTELYNX
         ================================= */
 
         .login-panel {
@@ -260,7 +260,7 @@
            SCHOOLLOGO - DEFINITIEVE CSS
         ================================= */
 
-        .evolvit-school-logo {
+        .artelynx-school-logo {
             display: flex;
             align-items: center;
             justify-content: flex-start;
@@ -275,7 +275,7 @@
             box-sizing: border-box;
         }
 
-        .evolvit-school-logo > img {
+        .artelynx-school-logo > img {
             display: block;
             width: auto;
             height: auto;
@@ -473,7 +473,7 @@
                 height: 5px;
             }
 
-            .evolvit-school-logo > img {
+            .artelynx-school-logo > img {
                 max-width: 160px;
                 max-height: 60px;
             }
@@ -486,7 +486,7 @@
 <div class="login-container">
 
     <!-- =====================================
-         LINKERKANT: EVOLVIT + LOGIN
+         LINKERKANT: ARTELYNX + LOGIN
     ====================================== -->
 
     <section class="login-panel">
@@ -593,7 +593,7 @@
         <div class="school-header">
 
             @if ($school->settings?->logo_path)
-                <div class="evolvit-school-logo">
+                <div class="artelynx-school-logo">
                     <img
                         src="{{ asset('storage/' . $school->settings->logo_path) }}"
                         alt="Logo van {{ $school->name }}">
