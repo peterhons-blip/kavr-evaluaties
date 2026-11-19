@@ -37,7 +37,11 @@ class SchoolRoleController extends Controller
     public function store(Request $request, School $school): RedirectResponse
     {
         $data = $this->validateRole($request, $school);
-        $school->roles()->create($data + ['is_system' => false]);
+        $createdRole = $school->roles()->create($data + ['is_system' => false]);
+        \App\Support\AccessAudit::record('school.role.created', $school, null, [
+            'slug' => $createdRole->slug,
+            'permissions' => $createdRole->permissions,
+        ]);
         return redirect()->route('platform.schools.roles.index', $school)->with('success', 'Schoolrol aangemaakt.');
     }
 
@@ -54,6 +58,10 @@ class SchoolRoleController extends Controller
             ]);
         }
         $role->update($data);
+        \App\Support\AccessAudit::record('school.role.updated', $school, null, [
+            'slug' => $role->slug,
+            'permissions' => $role->permissions,
+        ]);
         return redirect()->route('platform.schools.roles.index', $school)->with('success', 'Rechten bijgewerkt.');
     }
 
@@ -64,6 +72,9 @@ class SchoolRoleController extends Controller
             throw ValidationException::withMessages(['role' => 'Deze standaardrol of een toegewezen rol kan niet verwijderd worden.']);
         }
         $role->delete();
+        \App\Support\AccessAudit::record('school.role.deleted', $school, null, [
+            'slug' => $role->slug,
+        ]);
         return redirect()->route('platform.schools.roles.index', $school)->with('success', 'Schoolrol verwijderd.');
     }
 
