@@ -1,6 +1,8 @@
 # PROJECT_CONTEXT.md
-# Evaluatieplatform – Kunstacademie Voeren-Riemst
+# Artelynx – Evaluatieplatform voor kunstacademies
 
+**Productnaam:** Artelynx  
+**Slogan:** Elk talent in ontwikkeling.  
 **Projectstatus:** In ontwikkeling  
 **Startproject:** Kunstacademie Voeren-Riemst  
 **Architectuur:** Multischool / multi-tenant  
