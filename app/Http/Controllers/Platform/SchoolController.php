@@ -96,6 +96,7 @@ class SchoolController extends Controller
         // School en instellingen samen opslaan.
         DB::transaction(function () use ($validated) {
             $school = School::create($validated);
+            \App\Support\SchoolRoleCatalog::ensureFor($school);
 
             // Standaardinstellingen van de school.
             $school->settings()->create([
