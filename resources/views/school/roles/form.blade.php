@@ -5,7 +5,7 @@
 <form method="POST" action="{{ $role->exists ? route('school.roles.update',$role) : route('school.roles.store') }}">@csrf @if($role->exists) @method('PUT') @endif
 <div class="card"><div class="fields">
 <label>Naam *<input name="name" maxlength="100" required value="{{ old('name',$role->name) }}"></label>
-<label>Rolcode *<input name="slug" maxlength="50" required value="{{ old('slug',$role->slug) }}" @readonly($role->is_system)></label>
+<label>Rolcode *<input name="slug" maxlength="30" required value="{{ old('slug',$role->slug) }}" @readonly($role->is_system)></label>
 <label class="full">Beschrijving<textarea name="description" rows="2" maxlength="1000">{{ old('description',$role->description) }}</textarea></label>
 </div><h2>Functierechten</h2><p>Toegewezen leerling- en lesgroepgegevens worden later aanvullend gecontroleerd.</p>
 @php $selected=old('permissions',$role->permissions ?? []); @endphp
