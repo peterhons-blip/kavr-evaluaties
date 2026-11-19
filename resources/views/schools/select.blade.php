@@ -34,7 +34,7 @@
 
         .container {
             width: 100%;
-            max-width: 620px;
+            max-width: 690px;
             padding: 42px;
             background: white;
             border-radius: 18px;
@@ -172,7 +172,8 @@
     </h1>
 
     <p class="description">
-        Kies de omgeving waarin je wilt werken.
+        Hieronder staan uitsluitend de scholen waarvoor jouw account actieve toegangsrechten heeft.
+        Kies de school waarin je wilt werken.
     </p>
 
     @if ($isPlatformAdmin)
@@ -202,7 +203,7 @@
 
     @if ($schools->isNotEmpty())
 
-        <div class="section-label">Mijn scholen</div>
+        <div class="section-label">Mijn scholen ({{ $schools->count() }})</div>
 
         @foreach ($schools as $school)
 
@@ -225,11 +226,11 @@
                         </span>
 
                         <span class="option-description">
-                            {{ ucfirst(str_replace(
-                                '_',
-                                ' ',
-                                $school->pivot->role
-                            )) }}
+                            {{ $roleNames->get($school->id . ':' . $school->pivot->role)?->name
+                                ?? ucfirst(str_replace('_', ' ', $school->pivot->role)) }}
+                            @if ((int) session('active_school_id') === (int) $school->id)
+                                <span style="margin-left:8px;color:#168980;font-weight:700">· Huidige school</span>
+                            @endif
                         </span>
 
                     </span>
