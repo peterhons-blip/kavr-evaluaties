@@ -15,7 +15,7 @@
         </h1>
 
         <p>
-            Dit is het centrale overzicht van EvolvIT.
+            Dit is het centrale overzicht van Artelynx.
             Beheer hier alle aangesloten scholen en gebruikers.
         </p>
     </div>
@@ -47,7 +47,7 @@
         </div>
 
         <div class="stat-note">
-            Geregistreerd in EvolvIT
+            Geregistreerd in Artelynx
         </div>
 
     </div>
@@ -132,7 +132,7 @@
 
             <div>
                 <h2>Recent toegevoegde scholen</h2>
-                <p>De nieuwste scholen binnen EvolvIT.</p>
+                <p>De nieuwste scholen binnen Artelynx.</p>
             </div>
 
             <a href="{{ route('platform.schools.index') }}"
