@@ -78,6 +78,10 @@ class UserController extends Controller
             $user->is_platform_admin = (bool) $data['is_platform_admin'];
             $user->save();
             $this->syncSchools($user, $data['memberships'] ?? []);
+            \App\Support\AccessAudit::record('user.created', null, $user, [
+                'platform_admin' => (bool) $data['is_platform_admin'],
+                'schools' => array_keys($data['memberships'] ?? []),
+            ]);
         });
 
         return redirect()->route('platform.users.index')->with('success', 'Gebruiker aangemaakt.');
@@ -107,6 +111,11 @@ class UserController extends Controller
             $user->is_platform_admin = (bool) $data['is_platform_admin'];
             $user->save();
             $this->syncSchools($user, $data['memberships'] ?? []);
+            \App\Support\AccessAudit::record('user.updated', null, $user, [
+                'platform_admin' => (bool) $data['is_platform_admin'],
+                'active' => (bool) $data['is_active'],
+                'schools' => array_keys($data['memberships'] ?? []),
+            ]);
         });
 
         return redirect()->route('platform.users.index')->with('success', 'Gebruiker bijgewerkt.');
@@ -122,6 +131,7 @@ class UserController extends Controller
             ]);
         }
 
+        \App\Support\AccessAudit::record('user.setup_link_sent', null, $user);
         return back()->with('success', 'Instellink verzonden naar '.$user->email.'.');
     }
 
