@@ -45,7 +45,7 @@ class MemberController extends Controller
             'email' => ['required','email','max:255'],
             'first_name' => ['nullable','string','max:100'],
             'last_name' => ['nullable','string','max:100'],
-            'role' => ['required','string','max:50'],
+            'role' => ['required','string','max:30'],
         ]);
 
         if (! $school->roles()->where('slug', $data['role'])->exists()) {
@@ -114,7 +114,7 @@ class MemberController extends Controller
         abort_unless($school->users()->where('users.id', $user->id)->exists(), 404);
 
         $data = $request->validate([
-            'role' => ['required','string','max:50'],
+            'role' => ['required','string','max:30'],
             'is_active' => ['required','boolean'],
         ]);
 
