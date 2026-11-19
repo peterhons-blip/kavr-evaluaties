@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Artelynx">
+  <defs>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#18365c"/><stop offset="1" stop-color="#071b40"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#00c8db"/><stop offset="1" stop-color="#39b2b5"/>
+    </linearGradient>
+    <linearGradient id="warm" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#e43f70"/><stop offset="1" stop-color="#ffc02c"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="62" fill="url(#navy)"/>
+  <path d="M12 87C11 58 38 38 65 36" fill="none" stroke="url(#teal)" stroke-width="9" stroke-linecap="round"/>
+  <path d="M79 30C105 27 119 42 112 61" fill="none" stroke="url(#warm)" stroke-width="8" stroke-linecap="round"/>
+  <path d="M27 103 56 22Q61 12 69 22L101 105H84L75 81H49L40 105H27ZM55 67H69L62 44Z" fill="#fff"/>
+  <path d="M43 75Q64 49 89 76Q64 93 43 75Z" fill="#071b40"/>
+  <path d="M53 74Q65 61 78 74Q66 87 53 74Z" fill="#ffa51d"/>
+  <circle cx="68" cy="72" r="6" fill="#071b40"/>
+  <circle cx="72" cy="69" r="2.7" fill="#fff"/>
+  <path d="M28 106C45 119 75 121 99 111" fill="none" stroke="#b642a2" stroke-width="6" stroke-linecap="round"/>
+</svg>
