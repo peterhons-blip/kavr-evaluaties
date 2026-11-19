@@ -18,6 +18,7 @@ class SchoolSelectionController extends Controller
 
         // Actieve scholen van deze gebruiker ophalen.
         $schools = $user->schools()
+            ->with('settings')
             ->where('schools.is_active', true)
             ->wherePivot('is_active', true)
             ->orderBy('schools.name')
