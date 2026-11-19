@@ -24,6 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'is_active',
         'must_change_password',
+        'password_set_at',
     ];
 
     /**
@@ -47,6 +48,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_active' => 'boolean',
             'must_change_password' => 'boolean',
+            'password_set_at' => 'datetime',
             'is_platform_admin' => 'boolean',
         ];
     }
