@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -37,22 +38,17 @@ class SchoolSelectionController extends Controller
             abort(403, 'U heeft geen toegang tot een actieve school.');
         }
 
-        // Gewone gebruiker met slechts één school:
-        // automatisch naar het schooldashboard.
-        if (!$isPlatformAdmin && $schools->count() === 1) {
-            $request->session()->put(
-                'active_school_id',
-                $schools->first()->id
-            );
+        // Toon altijd de toegewezen scholen, ook wanneer er maar één is.
+        // Dit maakt de keuze en de toegewezen rol transparant.
+        $roleNames = DB::table('school_roles')
+            ->whereIn('school_id', $schools->pluck('id'))
+            ->get(['school_id', 'slug', 'name'])
+            ->keyBy(fn ($role) => $role->school_id . ':' . $role->slug);
 
-            return redirect()->route('dashboard');
-        }
-
-        // Platformadmins krijgen altijd de omgevingskeuze.
-        // Gebruikers met meerdere scholen ook.
         return view('schools.select', compact(
             'schools',
-            'isPlatformAdmin'
+            'isPlatformAdmin',
+            'roleNames'
         ));
     }
 
