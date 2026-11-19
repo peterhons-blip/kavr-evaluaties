@@ -8,6 +8,7 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -57,6 +58,9 @@ class PasswordResetController extends Controller
                     'must_change_password' => false,
                     'remember_token' => Str::random(60),
                 ])->save();
+                // Database-sessies van andere apparaten vervallen na reset.
+                DB::table('sessions')->where('user_id', $user->id)->delete();
+                \App\Support\AccessAudit::record('user.password_reset', null, $user);
                 event(new PasswordReset($user));
             }
         );
