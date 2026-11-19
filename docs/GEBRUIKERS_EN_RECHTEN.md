@@ -89,4 +89,6 @@ Open `/platform/users`, `/platform/schools/{id}/roles`, en via een schoolomgevin
 - Controleer de beheerhistoriek.
 - Test instellinks met `MAIL_MAILER=log` en daarna met echte SMTP vóór productie.
 
+Als de rolaudit onbekende oude rolcodes meldt, pas dan de schoolkoppelingen bewust aan. Met `php artisan artelynx:roles-audit --repair-defaults` kun je ontbrekende standaardrollen aanvullen; deze optie verandert geen bestaande rolrechten of gebruikerskoppelingen.
+
 De testworkflow `.github/workflows/artelynx-tests.yml` voert PHP-syntaxcontrole, Blade-compilatie, routecontrole en Laravel-featuretests uit op pull requests.
