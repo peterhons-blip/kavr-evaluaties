@@ -63,6 +63,18 @@ class Dko3TeacherImportController extends Controller
             'deactivate' => $missing->count(),
         ];
 
+        // Opruimen van achtergelaten persoonlijke gegevens uit oudere previews.
+        $disk = Storage::disk('local');
+        foreach ($disk->files('dko3-imports') as $stale) {
+            if ($disk->lastModified($stale) < now()->subDay()->timestamp) {
+                $disk->delete($stale);
+            }
+        }
+        $previousToken = (string) $request->session()->get('dko3_import_token', '');
+        if (preg_match('/^[A-Za-z0-9]{48}$/', $previousToken)) {
+            $disk->delete('dko3-imports/'.$previousToken.'.json');
+        }
+
         // Bestanden staan tijdelijk buiten public; nooit pushen naar Git.
         $token = Str::random(48);
         $path = 'dko3-imports/'.$token.'.json';
