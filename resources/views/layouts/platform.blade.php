@@ -8,7 +8,7 @@
 
     <title>@yield('title', 'Platformbeheer') | Artelynx</title>
 
-    <link rel="icon" type="image/svg+xml" href="{{ asset('artelynx-favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=3">
 
     <link rel="preconnect"
           href="https://fonts.googleapis.com">
