@@ -123,7 +123,12 @@ class UserController extends Controller
 
     public function sendSetupLink(User $user): RedirectResponse
     {
-        $status = Password::sendResetLink(['email' => $user->email]);
+        try {
+            $status = Password::sendResetLink(['email' => $user->email]);
+        } catch (\Throwable $exception) {
+            report($exception);
+            $status = null;
+        }
 
         if ($status !== Password::RESET_LINK_SENT) {
             throw ValidationException::withMessages([
@@ -137,8 +142,6 @@ class UserController extends Controller
 
     private function validateUser(Request $request, ?User $user = null): array
     {
-        $isExisting = $user?->exists ?? false;
-
         $data = $request->validate([
             'first_name' => ['required','string','max:100'],
             'last_name' => ['required','string','max:100'],
