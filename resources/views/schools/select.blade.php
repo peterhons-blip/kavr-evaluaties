@@ -7,7 +7,7 @@
           content="width=device-width, initial-scale=1">
 
     <title>Omgeving kiezen | Artelynx</title>
-    <link rel="icon" type="image/svg+xml" href="{{ asset('artelynx-favicon.svg') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}?v=3">
 
     <style>
         :root {
