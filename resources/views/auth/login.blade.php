@@ -493,10 +493,11 @@
 
         <!-- Officieel Artelynx-logo -->
         <div class="platform-brand">
-            <img
-                src="{{ asset('images/artelynx-logo.webp') }}"
-                alt="Artelynx - Elk talent in ontwikkeling"
-                width="185">
+            @if (file_exists(public_path('images/artelynx-logo.webp')))
+                <img src="{{ asset('images/artelynx-logo.webp') }}" alt="Artelynx" width="185">
+            @else
+                <strong style="font-size:30px;color:#142b45;">Artelynx</strong>
+            @endif
         </div>
 
         <!-- Aanmeldformulier -->
