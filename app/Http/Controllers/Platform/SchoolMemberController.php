@@ -22,7 +22,7 @@ class SchoolMemberController extends Controller
         $roleFilter = $filters['role'] ?? '';
         $statusFilter = $filters['status'] ?? '';
 
-        $members = $school->users()
+        $members = $school->users()->wherePivotNull('dko3_hidden_at')
             ->when($search !== '', function ($query) use ($search) {
                 $term = '%' . addcslashes($search, '%_\\\\') . '%';
                 $query->where(function ($q) use ($term) {
