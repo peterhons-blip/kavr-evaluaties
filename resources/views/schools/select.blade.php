@@ -7,6 +7,7 @@
           content="width=device-width, initial-scale=1">
 
     <title>Omgeving kiezen | Artelynx</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 
     <style>
         :root {
@@ -158,7 +159,13 @@
 
 <div class="container">
 
-    <div class="eyebrow">Artelynx</div>
+    <div class="eyebrow">
+        @if (file_exists(public_path('images/artelynx-logo.webp')))
+            <img src="{{ asset('images/artelynx-logo.webp') }}" alt="Artelynx" style="display:block;width:210px;max-width:100%;height:auto;margin-bottom:10px;">
+        @else
+            Artelynx
+        @endif
+    </div>
 
     <h1>
         Welkom, {{ auth()->user()->first_name }}!
