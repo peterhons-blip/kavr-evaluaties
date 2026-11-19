@@ -24,12 +24,14 @@ class UserController extends Controller
             'school_id' => ['nullable', 'integer', 'exists:schools,id'],
             'role' => ['nullable', 'string', 'max:30'],
             'status' => ['nullable', Rule::in(['active', 'inactive'])],
+            'password' => ['nullable', Rule::in(['not_set', 'set', 'unknown'])],
         ]);
 
         $search = trim($filters['q'] ?? '');
         $schoolId = isset($filters['school_id']) ? (int) $filters['school_id'] : null;
         $roleFilter = $filters['role'] ?? '';
         $statusFilter = $filters['status'] ?? '';
+        $passwordFilter = $filters['password'] ?? '';
 
         // Combineer school en rol op DEZELFDE koppeling, zodat rollen van
         // een tweede school geen foutieve matches opleveren.
@@ -62,6 +64,9 @@ class UserController extends Controller
                 });
             })
             ->when($statusFilter !== '', fn ($query) => $query->where('is_active', $statusFilter === 'active'))
+            ->when($passwordFilter === 'not_set', fn ($query) => $query->where('must_change_password', true))
+            ->when($passwordFilter === 'set', fn ($query) => $query->whereNotNull('password_set_at'))
+            ->when($passwordFilter === 'unknown', fn ($query) => $query->whereNull('password_set_at')->where('must_change_password',false))
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->orderBy('id')
@@ -78,7 +83,7 @@ class UserController extends Controller
         }
 
         return view('platform.users.index', compact(
-            'users', 'search', 'schoolId', 'roleFilter', 'statusFilter', 'schools', 'roles'
+            'users', 'search', 'schoolId', 'roleFilter', 'statusFilter', 'passwordFilter', 'schools', 'roles'
         ));
     }
 
