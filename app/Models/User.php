@@ -96,4 +96,11 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return (bool) $this->is_platform_admin;
     }
+    /**
+     * Check een schoolgebonden recht. Platformbeheer is een afzonderlijke rol.
+     */
+    public function hasSchoolPermission(\App\Models\School|int $school, string $permission): bool
+    {
+        return \App\Support\SchoolAccess::allows($this, $school, $permission);
+    }
 }
