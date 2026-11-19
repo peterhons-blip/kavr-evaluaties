@@ -61,8 +61,32 @@
         .stat-num{font-size:30px;line-height:1.15;font-weight:800;letter-spacing:-.6px}
         .stat-label{font-size:12px;font-weight:800;margin-top:5px}
         .stat-desc{font-size:11px;color:var(--muted);margin-top:5px}
-        .panels{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.85fr);gap:20px;margin-top:24px}
+        .panels{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,.8fr);gap:20px;margin-top:24px}
         .panel{background:#fff;border-radius:15px;border:1px solid var(--line);padding:25px;box-shadow:0 6px 22px #132b4405}
+
+        .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}
+        .panel-head h2{margin:0 0 5px;font-size:16px}
+        .panel-head .panel-sub{margin:0}
+        .panel-link{color:#168a91;font-size:11px;font-weight:800;text-decoration:none;white-space:nowrap}
+        .panel-link:hover{text-decoration:underline}
+        .activity-row{display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid #edf1f5}
+        .activity-row:last-child{border-bottom:0;padding-bottom:0}
+        .activity-symbol{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border-radius:50%;background:#e8f6f5;color:#15959d;font-size:20px}
+        .activity-symbol.purple{background:#f2eafd;color:#935bb5}
+        .activity-symbol.gold{background:#fff3e6;color:#d58a34}
+        .activity-info{min-width:0;flex:1}
+        .activity-info strong{font-size:12px;display:block}
+        .activity-info small{font-size:11px;color:var(--muted);display:block;margin-top:3px}
+        .activity-date{font-size:10px;color:#98a8b8;white-space:nowrap}
+        .dashboard-right{display:flex;flex-direction:column;gap:20px}
+        .empty-activity{padding:24px 0 16px;color:var(--muted);font-size:12px;line-height:1.8}
+        .mini-avatar{flex:0 0 37px;width:37px;height:37px;display:grid;place-items:center;border-radius:50%;background:#e9f1fb;color:#346da2;font-size:12px;font-weight:800}
+        .member-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #edf1f5}
+        .member-row:last-child{border:0;padding-bottom:0}
+        .member-row strong{font-size:12px;display:block}
+        .member-row small{font-size:10px;color:var(--muted);display:block;margin-top:3px;overflow-wrap:anywhere}
+        .intro-band{display:flex;align-items:center;gap:10px;margin:0 0 20px;padding:13px 17px;background:#edf8f7;border:1px solid #d5eae8;border-radius:11px;color:#397c7c;font-size:12px}
+        .intro-band strong{color:#176c74}
         .panel h2{font-size:16px;font-weight:800;margin:0 0 4px}
         .panel-sub{color:var(--muted);font-size:12px;margin:0 0 21px}
         .feature-row{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid #edf1f5;text-decoration:none}
@@ -138,32 +162,88 @@
                 <div class="stat"><div class="stat-icon gold">✧</div><div class="stat-num">{{ $school->roles_count }}</div><div class="stat-label">Schoolrollen</div><div class="stat-desc">Eigen rollen en functies</div></div>
             </section>
 
+            <div class="intro-band">
+                <span aria-hidden="true">✦</span>
+                <span><strong>Jouw schoolomgeving.</strong> Je ziet alleen gegevens en beheerfuncties waarvoor je rechten hebt.</span>
+            </div>
+
             <section class="panels">
                 <div class="panel">
-                    <h2>Snel naar</h2>
-                    <p class="panel-sub">De onderdelen die voor jouw school beschikbaar zijn</p>
-                    @if ($canViewUsers)
-                        <a class="feature-row" href="{{ route('school.members.index') }}">
-                            <span class="feature-icon">♙</span><span class="feature-text"><strong>Gebruikersbeheer</strong><small>Leerkrachten en medewerkers beheren</small></span><span class="feature-arrow">›</span>
-                        </a>
+                    <div class="panel-head">
+                        <div><h2>Recente activiteiten</h2><p class="panel-sub">Wijzigingen en updates binnen jouw school</p></div>
+                    </div>
+                    @if ($canManageRoles && $recentEvents->isNotEmpty())
+                        @foreach ($recentEvents as $event)
+                            @php
+                                $activityLabels = [
+                                    'school.member.added' => 'Gebruiker toegevoegd',
+                                    'school.member.updated' => 'Schoolkoppeling gewijzigd',
+                                    'school.user.created' => 'Nieuw account aangemaakt',
+                                    'school.role.created' => 'Schoolrol aangemaakt',
+                                    'school.role.updated' => 'Rechten aangepast',
+                                    'school.role.deleted' => 'Schoolrol verwijderd',
+                                ];
+                                $activityLabel = $activityLabels[$event->action] ?? 'Beheeractie uitgevoerd';
+                            @endphp
+                            <div class="activity-row">
+                                <span class="activity-symbol {{ $loop->index % 3 === 1 ? 'purple' : ($loop->index % 3 === 2 ? 'gold' : '') }}" aria-hidden="true">
+                                    {{ str_contains($event->action, 'role') ? '⚙' : '✓' }}
+                                </span>
+                                <div class="activity-info">
+                                    <strong>{{ $activityLabel }}</strong>
+                                    <small>{{ $school->name }}</small>
+                                </div>
+                                <span class="activity-date">{{ \Illuminate\Support\Carbon::parse($event->created_at)->format('d/m/Y H:i') }}</span>
+                            </div>
+                        @endforeach
+                    @elseif ($canManageRoles)
+                        <p class="empty-activity">Er zijn nog geen beheeracties geregistreerd voor deze school. Nieuwe wijzigingen verschijnen hier automatisch.</p>
+                    @else
+                        <p class="empty-activity">De evaluatie- en activiteitenoverzichten worden beschikbaar wanneer deze modules zijn ontwikkeld. Je kunt ondertussen je schoolomgeving gebruiken.</p>
                     @endif
-                    @if ($canManageRoles)
-                        <a class="feature-row" href="{{ route('school.roles.index') }}">
-                            <span class="feature-icon alt">⚙</span><span class="feature-text"><strong>Rollen en rechten</strong><small>Instellen wie welke functies mag gebruiken</small></span><span class="feature-arrow">›</span>
-                        </a>
-                    @endif
-                    <div class="feature-row feature-off"><span class="feature-icon gold">✧</span><span class="feature-text"><strong>Evaluaties</strong><small>Beschikbaar wanneer de evaluatiemodule klaar is</small></span><span class="pill">Binnenkort</span></div>
-                    <div class="feature-row feature-off"><span class="feature-icon alt">▦</span><span class="feature-text"><strong>Leerlingen en lesgroepen</strong><small>Volgende fase van Artelynx</small></span><span class="pill">Binnenkort</span></div>
                 </div>
-                <div class="panel">
-                    <h2>Jouw omgeving</h2>
-                    <p class="panel-sub">Je werkt momenteel voor</p>
-                    <div style="font-weight:800;font-size:17px;line-height:1.5">{{ $school->name }}</div>
-                    @if ($school->settings?->slogan)
-                        <p style="color:#70829c;font-size:13px;margin-top:10px">{{ $school->settings->slogan }}</p>
+                <div class="dashboard-right">
+                    @if ($canViewUsers)
+                        <div class="panel">
+                            <div class="panel-head">
+                                <div><h2>Recent gekoppelde gebruikers</h2><p class="panel-sub">Medewerkers van jouw school</p></div>
+                                <a class="panel-link" href="{{ route('school.members.index') }}">Alle bekijken →</a>
+                            </div>
+                            @forelse ($recentMembers as $member)
+                                <div class="member-row">
+                                    <span class="mini-avatar">{{ mb_strtoupper(mb_substr($member->first_name ?: $member->name ?: 'G', 0, 1)) }}</span>
+                                    <span style="min-width:0">
+                                        <strong>{{ $member->full_name ?: $member->name }}</strong>
+                                        <small>{{ $member->email }}</small>
+                                    </span>
+                                </div>
+                            @empty
+                                <p class="empty-activity">Nog geen gebruikers gekoppeld.</p>
+                            @endforelse
+                        </div>
                     @endif
-                    <p style="margin-top:24px;padding-top:18px;border-top:1px solid #e8edf3;font-size:12px;color:#70829c">Artelynx ondersteunt meerdere scholen. Je rollen en rechten worden per school afzonderlijk ingesteld.</p>
-                    <a class="platform-link" href="{{ route('schools.select') }}">Andere omgeving kiezen →</a>
+
+                    <div class="panel">
+                        <div class="panel-head">
+                            <div><h2>Snel naar</h2><p class="panel-sub">Jouw beschikbare functies</p></div>
+                        </div>
+                        @if ($canViewUsers)
+                            <a class="feature-row" href="{{ route('school.members.index') }}">
+                                <span class="feature-icon">♙</span><span class="feature-text"><strong>Gebruikers beheren</strong><small>Accountkoppelingen en medewerkers</small></span><span class="feature-arrow">›</span>
+                            </a>
+                        @endif
+                        @if ($canManageRoles)
+                            <a class="feature-row" href="{{ route('school.roles.index') }}">
+                                <span class="feature-icon alt">⚙</span><span class="feature-text"><strong>Rollen en rechten</strong><small>Toegang instellen voor je school</small></span><span class="feature-arrow">›</span>
+                            </a>
+                        @endif
+                        <a class="feature-row" href="{{ route('schools.select') }}">
+                            <span class="feature-icon gold">⇄</span><span class="feature-text"><strong>Andere school kiezen</strong><small>Overschakelen naar jouw andere omgevingen</small></span><span class="feature-arrow">›</span>
+                        </a>
+                        <div class="feature-row feature-off">
+                            <span class="feature-icon alt">✧</span><span class="feature-text"><strong>Evaluaties en leerdoelen</strong><small>Wordt later beschikbaar</small></span><span class="pill">Binnenkort</span>
+                        </div>
+                    </div>
                 </div>
             </section>
             <footer class="foot">Artelynx &copy; {{ date('Y') }} · Elk talent in ontwikkeling.</footer>
