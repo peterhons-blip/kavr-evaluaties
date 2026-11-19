@@ -31,6 +31,14 @@ class UserBulkController extends Controller
                 ->where('school_id',$data['school_id'])
                 ->where('slug',$data['role'])->exists();
             if (! $valid) throw ValidationException::withMessages(['role'=>'Kies een bestaande rol voor de gekozen school.']);
+            $validMembers = DB::table('school_user')
+                ->where('school_id', $data['school_id'])
+                ->whereNull('dko3_hidden_at')
+                ->whereIn('user_id', $users->pluck('id'))
+                ->count();
+            if ($validMembers !== $users->count()) {
+                throw ValidationException::withMessages(['school_id' => 'Een of meer geselecteerde personeelsleden behoren niet tot deze school. Filter eerst op de school voordat je rollen in bulk wijzigt.']);
+            }
         }
 
         if ($action === 'deactivate' && $users->contains(fn (User $user) => $user->is($request->user()))) {
@@ -84,6 +92,6 @@ class UserBulkController extends Controller
             }
         });
 
-        return back()->with('success',$users->count().' gebruikers verwerkt. Actie: '.$action.'.');
+        return back()->with('success',$users->count().' personeelsleden verwerkt. Actie: '.$action.'.');
     }
 }
