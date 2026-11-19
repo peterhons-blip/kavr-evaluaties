@@ -130,7 +130,7 @@ Route::middleware(['auth', 'platform.admin'])
         Route::get('/users/import', [Dko3TeacherImportController::class, 'create'])->name('users.import');
         Route::post('/users/import/preview', [Dko3TeacherImportController::class, 'preview'])->name('users.import.preview');
         Route::post('/users/import/commit', [Dko3TeacherImportController::class, 'commit'])->name('users.import.commit');
-        Route::post('/users/bulk', UserBulkController::class)->name('users.bulk');
+        Route::post('/users/bulk', UserBulkController::class)->middleware('throttle:2,1')->name('users.bulk');
 
         // Centrale personeelsadministratie.
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
