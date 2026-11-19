@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>EvolvIT | Aanmelden</title>
+    <title>Artelynx | Aanmelden</title>
 
     <link rel="icon"
           type="image/x-icon"
@@ -491,11 +491,11 @@
 
     <section class="login-panel">
 
-        <!-- Officieel EvolvIT-logo -->
+        <!-- Officieel Artelynx-logo -->
         <div class="platform-brand">
             <img
-                src="{{ asset('images/evolvit-logo.webp') }}"
-                alt="EvolvIT - Elk talent in ontwikkeling"
+                src="{{ asset('images/artelynx-logo.webp') }}"
+                alt="Artelynx - Elk talent in ontwikkeling"
                 width="185">
         </div>
 
@@ -628,7 +628,7 @@
 
             <p class="school-description">
                 {{ $school->settings?->login_description
-                    ?? 'Welkom bij EvolvIT.' }}
+                    ?? 'Welkom bij Artelynx.' }}
             </p>
 
         </div>
