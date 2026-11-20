@@ -39,7 +39,9 @@
                 $saved = old('memberships.'.$school->id, $assigned[$school->id] ?? null);
                 $selected = is_array($saved);
                 $roleValue = $saved['role'] ?? '';
-                $activeValue = $saved['is_active'] ?? true;
+                // Eloquent geeft een boolean terug; (string) false is '' en niet '0'.
+                // Normaliseer naar 0/1 zodat een inactieve koppeling inactief geselecteerd blijft.
+                $activeValue = isset($saved['is_active']) ? (int) $saved['is_active'] : 1;
             @endphp
             <div class="uf-school {{ (string) request('school_id') === (string) $school->id ? 'uf-school-focus' : '' }}">
                 <div class="uf-school-title"><label><input type="checkbox" class="uf-school-check" data-target="uf-school-{{ $school->id }}" @checked($selected)> <strong>{{ $school->name }}</strong></label></div>
@@ -54,8 +56,8 @@
                     </label>
                     <label>Status bij {{ $school->name }}
                         <select data-field="is_active" name="{{ $selected ? 'memberships['.$school->id.'][is_active]' : '' }}" @disabled(!$selected)>
-                            <option value="1" @selected((string)$activeValue === '1')>Actief</option>
-                            <option value="0" @selected((string)$activeValue === '0')>Inactief</option>
+                            <option value="1" @selected($activeValue === 1)>Actief</option>
+                            <option value="0" @selected($activeValue === 0)>Inactief</option>
                         </select>
                     </label>
                 </div>
