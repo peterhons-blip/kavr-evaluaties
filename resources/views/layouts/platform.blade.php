@@ -574,14 +574,11 @@
             <span class="nav-text">Beheerhistoriek</span>
         </a>
 
-        <!-- Platforminstellingen: later -->
-        <span class="nav-item disabled"
-              title="Binnenkort beschikbaar">
-
+        <a href="{{ route('platform.settings.edit') }}"
+           class="nav-item {{ request()->routeIs('platform.settings.*') ? 'active' : '' }}">
             <span class="nav-icon">⚙</span>
             <span class="nav-text">Platforminstellingen</span>
-
-        </span>
+        </a>
 
     </nav>
 
