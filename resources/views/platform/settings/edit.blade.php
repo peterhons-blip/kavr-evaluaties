@@ -26,9 +26,6 @@
             <p>Basisgegevens van het volledige Artelynx-platform, niet van één school.</p>
         </div></div>
         <div class="ps-grid">
-            <label class="ps-field"><span>Platformnaam</span>
-                <input type="text" name="platform_name" required maxlength="100" value="{{ old('platform_name',$settings->platform_name ?: 'Artelynx') }}">
-            </label>
             <label class="ps-field"><span>Support-e-mailadres</span>
                 <input type="email" name="support_email" maxlength="255" placeholder="support@voorbeeld.be" value="{{ old('support_email',$settings->support_email) }}">
                 <small>Contactadres voor vragen over het platform.</small>
