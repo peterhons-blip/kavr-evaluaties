@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Platform;
 use App\Http\Controllers\Controller;
 use App\Models\PlatformSetting;
 use App\Support\AccessAudit;
+use App\Support\MailDiagnostics;
 use App\Support\PlatformMailConfig;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -96,7 +97,12 @@ class PlatformSettingsController extends Controller
             );
 
             $settings->forceFill(['last_test_at' => now(), 'last_test_result' => 'success'])->save();
-            AccessAudit::record('platform.mail.test', null, null, ['success' => true, 'driver' => $settings->mail_driver]);
+            AccessAudit::record('platform.mail.test', null, null, [
+                'success' => true,
+                'driver' => $settings->mail_driver,
+                'recipient' => $data['recipient'],
+                'result' => $settings->mail_driver === 'log' ? 'logged_only' : 'accepted_by_server',
+            ]);
 
             if ($settings->mail_driver === 'log') {
                 return back()->with('success', 'Logmodus getest: het bericht staat in storage/logs/laravel.log. Er is GEEN echte e-mail verzonden.');
@@ -106,10 +112,16 @@ class PlatformSettingsController extends Controller
         } catch (Throwable $exception) {
             report($exception);
             $settings->forceFill(['last_test_at' => now(), 'last_test_result' => 'failed'])->save();
-            AccessAudit::record('platform.mail.test', null, null, ['success' => false, 'driver' => $settings->mail_driver]);
+            $diagnosis = MailDiagnostics::classify($exception);
+            AccessAudit::record('platform.mail.test', null, null, [
+                'success' => false,
+                'driver' => $settings->mail_driver,
+                'recipient' => $data['recipient'],
+                'diagnosis' => $diagnosis,
+            ]);
 
             throw ValidationException::withMessages([
-                'recipient' => 'De testmail is niet verzonden. Controleer SMTP-server, poort, beveiliging, gebruikersnaam en app-wachtwoord. Details staan in de Laravel-log.',
+                'recipient' => 'De testmail is niet verzonden. Bekijk de veilige foutdiagnose onder Beheerhistoriek → E-maillog.',
             ]);
         }
     }
