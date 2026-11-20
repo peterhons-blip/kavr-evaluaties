@@ -26,4 +26,23 @@ class AccessAuditController extends Controller
 
         return view('platform.audit.index', compact('events'));
     }
+    public function mail(Request $request): View
+    {
+        $status = $request->validate([
+            'status' => ['nullable', \Illuminate\Validation\Rule::in(['success', 'failed'])],
+        ])['status'] ?? '';
+
+        $events = DB::table('access_audit_events as e')
+            ->leftJoin('users as actor', 'actor.id', '=', 'e.actor_id')
+            ->where('e.action', 'platform.mail.test')
+            ->when($status === 'success', fn ($q) => $q->where('e.details', 'like', '%"success":true%'))
+            ->when($status === 'failed', fn ($q) => $q->where('e.details', 'like', '%"success":false%'))
+            ->select(['e.id', 'e.details', 'e.created_at', 'actor.name as actor_name'])
+            ->orderByDesc('e.id')
+            ->paginate(25)
+            ->withQueryString();
+
+        return view('platform.audit.mail', compact('events', 'status'));
+    }
+
 }

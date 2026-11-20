@@ -7,6 +7,7 @@ use App\Http\Controllers\SchoolSelectionController;
 use App\Http\Controllers\Platform\SchoolController;
 use App\Http\Controllers\Platform\SchoolLocationController;
 use App\Http\Controllers\Platform\SchoolSettingsController;
+use App\Http\Controllers\Platform\PlatformSettingsController;
 use App\Http\Controllers\Platform\AccessAuditController;
 use App\Http\Controllers\Platform\UserController;
 use App\Http\Controllers\Platform\Dko3TeacherImportController;
@@ -125,6 +126,12 @@ Route::middleware(['auth', 'platform.admin'])
 
 
         Route::get('/audit', [AccessAuditController::class, 'index'])->name('audit.index');
+        Route::get('/audit/mail', [AccessAuditController::class, 'mail'])->name('audit.mail');
+
+        Route::get('/settings', [PlatformSettingsController::class, 'edit'])->name('settings.edit');
+        Route::put('/settings', [PlatformSettingsController::class, 'update'])->name('settings.update');
+        Route::post('/settings/test-mail', [PlatformSettingsController::class, 'test'])
+            ->middleware('throttle:3,1')->name('settings.test-mail');
 
         // DKO3-personeelimport met controle en definitieve bevestiging.
         Route::get('/users/import', [Dko3TeacherImportController::class, 'create'])->name('users.import');

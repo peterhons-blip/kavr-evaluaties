@@ -20,7 +20,7 @@
                         {{ $member->pivot->is_active ? 'Actief' : 'Inactief' }}
                     </span>
                 </td>
-                <td><a class="btn btn-secondary" href="{{ route('platform.users.edit', $member) }}">Bewerken</a></td>
+                <td><a class="btn btn-secondary" href="{{ route('platform.users.edit', ['user' => $member, 'school_id' => $school->id]) }}">Bewerken</a></td>
             </tr>
         @empty
             <tr><td colspan="5" style="text-align:center;padding:30px;color:#718096">Geen gebruikers gevonden. Pas je filters aan.</td></tr>

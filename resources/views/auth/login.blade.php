@@ -189,6 +189,26 @@
                 box-shadow .2s;
         }
 
+        .password-recovery {
+            margin: -7px 0 22px;
+            text-align: right;
+        }
+
+        .password-recovery a {
+            display: inline-block;
+            padding: 6px 0;
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 800;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        .password-recovery a:hover,
+        .password-recovery a:focus-visible {
+            color: #178b92;
+        }
+
         .login-button:hover {
             opacity: .94;
             box-shadow: 0 7px 18px rgba(20, 43, 69, .15);
@@ -572,16 +592,17 @@
 
                 </div>
 
+                <div class="password-recovery">
+                    <a href="{{ route('password.request') }}">
+                        Wachtwoord vergeten of nog instellen?
+                    </a>
+                </div>
+
                 <button type="submit" class="login-button">
                     Aanmelden
                 </button>
 
             </form>
-
-            <a href="{{ route('password.request') }}"
-               style="display:inline-block;margin-top:18px;color:var(--primary);font-size:12px;font-weight:700;text-decoration:none;">
-                Wachtwoord vergeten of instellen?
-            </a>
 
         </div>
 

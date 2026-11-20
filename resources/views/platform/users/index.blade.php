@@ -5,7 +5,7 @@
 @section('content')
 <div class="page-header">
     <h1>Personeelsleden</h1>
-    <p>Zoek rechtstreeks in alle accounts en filter op school, schoolrol en accountstatus.</p>
+    <p>Zoek personeelsleden en filter op school en rol. Algemene accountstatus en schoolstatus zijn afzonderlijk.</p>
 </div>
 
 @if(session('success'))
@@ -63,7 +63,7 @@
         </label>
 
         <label class="um-field um-field-status">
-            <span>Accountstatus</span>
+            <span>Algemene accountstatus</span>
             <select name="status" id="um-status">
                 <option value="">Alle statussen</option>
                 <option value="active" @selected($statusFilter === 'active')>Actief</option>
