@@ -34,7 +34,6 @@ class PlatformSettingsController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'platform_name' => ['required', 'string', 'max:100'],
             'support_email' => ['nullable', 'email', 'max:255'],
             'default_timezone' => ['required', Rule::in(['Europe/Brussels', 'UTC'])],
             'mail_driver' => ['required', Rule::in(['log', 'smtp'])],
@@ -55,7 +54,9 @@ class PlatformSettingsController extends Controller
         if (empty($data['mail_password'])) {
             unset($data['mail_password']); // Laat opgeslagen geheim intact.
         }
+        // De platformnaam is vast: nooit aanpasbaar via het formulier.
         $settings->fill($data);
+        $settings->platform_name = 'Artelynx';
         $settings->save();
 
         PlatformMailConfig::fresh();
