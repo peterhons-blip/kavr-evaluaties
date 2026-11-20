@@ -87,7 +87,7 @@
 <section class="card ps-card">
     <div class="ps-section-title"><div class="ps-icon">✓</div><div>
         <h2>Testmail versturen</h2>
-        <p>Sla eerst de instellingen op. De knop gebruikt de momenteel opgeslagen configuratie.</p>
+        <p>Sla eerst de instellingen op. De knop gebruikt de momenteel opgeslagen configuratie. <a href="{{ route('platform.audit.mail') }}">Bekijk de e-maillog en foutdiagnose</a>.</p>
     </div></div>
     <div class="ps-test-grid">
         <div>
