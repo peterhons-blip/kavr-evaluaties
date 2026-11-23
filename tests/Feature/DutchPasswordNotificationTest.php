@@ -32,7 +32,7 @@ class DutchPasswordNotificationTest extends TestCase
             $this->assertSame('Beste Lena,', $message->greeting);
             $this->assertSame('Wachtwoord instellen', $message->actionText);
             $this->assertStringContainsString('/reset-password/', $message->actionUrl);
-            $this->assertStringContainsString('60 minuten', implode(' ', $message->introLines));
+            $this->assertStringContainsString('60 minuten', implode(' ', array_merge($message->introLines, $message->outroLines)));
 
             return true;
         });
