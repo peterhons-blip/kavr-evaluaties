@@ -99,7 +99,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendPasswordResetNotification($token): void
     {
-        $this->notify((new \\App\\Notifications\\NederlandseWachtwoordReset($token))->locale('nl'));
+        $this->notify((new \App\Notifications\NederlandseWachtwoordReset($token))->locale('nl'));
     }
 
     public function isPlatformAdmin(): bool
