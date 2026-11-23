@@ -94,6 +94,14 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withTimestamps();
     }
     
+    /**
+     * Gebruik voor zowel wachtwoord vergeten als instellinks de Nederlandse mail.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify((new \\App\\Notifications\\NederlandseWachtwoordReset($token))->locale('nl'));
+    }
+
     public function isPlatformAdmin(): bool
     {
         return (bool) $this->is_platform_admin;
