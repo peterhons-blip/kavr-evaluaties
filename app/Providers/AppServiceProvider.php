@@ -23,10 +23,10 @@ class AppServiceProvider extends ServiceProvider
         // het publieke HTTPS-adres gebruiken (nooit http of localhost).
         $publicUrl = (string) config('app.url');
         if (app()->isProduction() && str_starts_with($publicUrl, 'https://')) {
-            \\Illuminate\\Support\\Facades\\URL::forceRootUrl(rtrim($publicUrl, '/'));
-            \\Illuminate\\Support\\Facades\\URL::forceScheme('https');
+            \Illuminate\Support\Facades\URL::forceRootUrl(rtrim($publicUrl, '/'));
+            \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 
-        \\App\\Support\\PlatformMailConfig::apply();
+        \App\Support\PlatformMailConfig::apply();
     }
 }
