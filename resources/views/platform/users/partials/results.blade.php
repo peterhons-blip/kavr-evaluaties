@@ -57,7 +57,8 @@
                         @if($user->must_change_password)
                             <span class="um-tag um-off">Nog instellen</span>
                         @elseif($user->password_set_at)
-                            <span class="um-tag um-on" title="Ingesteld op {{ $user->password_set_at->format('d/m/Y') }}">Ingesteld</span>
+                            <span class="um-tag um-on">Ingesteld</span>
+                            <small class="um-password-date">Sinds {{ $user->password_set_at->format('d/m/Y') }}</small>
                         @else
                             <span class="um-tag" title="Account bestaat van vóór de wachtwoordregistratie">Onbekend (oud account)</span>
                         @endif
