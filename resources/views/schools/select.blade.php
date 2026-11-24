@@ -180,6 +180,13 @@
                 font-size: 26px;
             }
         }
+
+        .selection-actions{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:12px;margin-top:28px}
+        .selection-profile{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:9px;background:#e9f3f2;border:1px solid #d4e7e4;color:#286e69;text-decoration:none;font-weight:700;font-size:13px}
+        .selection-profile:hover{background:#d7ebe8}
+        .selection-actions .logout{margin:0}
+        .selection-actions .logout button{padding:12px 18px;background:#142b45;border:1px solid #142b45;border-radius:9px;text-decoration:none;color:#fff;font-weight:700;cursor:pointer;font-size:13px}
+        .selection-actions .logout button:hover{background:#223e5b}
     </style>
 </head>
 
@@ -267,9 +274,7 @@
                         <span class="option-description">
                             {{ $roleNames->get($school->id . ':' . $school->pivot->role)?->name
                                 ?? ucfirst(str_replace('_', ' ', $school->pivot->role)) }}
-                            @if ((int) session('active_school_id') === (int) $school->id)
-                                <span style="margin-left:8px;color:#168980;font-weight:700">· Huidige school</span>
-                            @endif
+
                         </span>
 
                     </span>
@@ -283,15 +288,13 @@
 
     @endif
 
-    <p style="text-align:center;margin-top:24px"><a href="{{ route('profile.edit') }}" style="color:#286e69;font-weight:700">Mijn profiel · gegevens en wachtwoord aanpassen</a></p>
-    <form method="POST"
-          action="{{ route('logout') }}"
-          class="logout">
-        @csrf
-
-        <button type="submit">Afmelden</button>
-    </form>
-
+    <div class="selection-actions">
+        <a class="selection-profile" href="{{ route('profile.edit') }}">♙ Mijn profiel aanpassen</a>
+        <form method="POST" action="{{ route('logout') }}" class="logout">
+            @csrf
+            <button type="submit">Afmelden</button>
+        </form>
+    </div>
 </div>
 
 </body>
