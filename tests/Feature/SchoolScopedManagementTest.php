@@ -235,11 +235,12 @@ class SchoolScopedManagementTest extends TestCase
         $this->put(route('school.members.details.update', $teacher), [
             'first_name' => 'Testvoornaam',
             'last_name' => 'Testfamilienaam',
-            'email' => 'schoolperson@example.test',
+            'email' => 'schoolperson@example.com',
             'phone' => '012345678',
             'role' => 'teacher',
             'is_active' => '1',
-        ])->assertRedirect(route('school.members.edit', $teacher));
+        ])->assertRedirect(route('school.members.edit', $teacher))
+          ->assertSessionHasNoErrors();
         $this->assertDatabaseHas('users', [
             'id' => $teacher->id,
             'first_name' => 'Testvoornaam',
