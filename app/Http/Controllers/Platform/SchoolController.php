@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Platform;
 
 use App\Http\Controllers\Controller;
 use App\Models\School;
+use App\Models\PlatformSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +29,9 @@ class SchoolController extends Controller
             ->orderBy('name')
             ->paginate(15);
 
-        return view('platform.schools.index', compact('schools'));
+        $defaultLoginSchoolId = PlatformSetting::query()->value('default_login_school_id');
+
+        return view('platform.schools.index', compact('schools', 'defaultLoginSchoolId'));
     }
 
     /**
@@ -138,7 +141,9 @@ class SchoolController extends Controller
      */
     public function edit(School $school): View
     {
-        return view('platform.schools.edit', compact('school'));
+        $defaultLoginSchoolId = PlatformSetting::query()->value('default_login_school_id');
+
+        return view('platform.schools.edit', compact('school', 'defaultLoginSchoolId'));
     }
 
     /**
@@ -193,13 +198,34 @@ class SchoolController extends Controller
             'country_code' => ['required', 'string', 'size:2'],
             'director_name' => ['nullable', 'string', 'max:255'],
             'is_active' => ['required', 'boolean'],
+            'default_login' => ['required', 'boolean'],
         ]);
 
-        $school->update($validated);
+        if ($validated['default_login'] && ! $validated['is_active']) {
+            throw ValidationException::withMessages([
+                'default_login' => 'Een inactieve school kan niet als standaardlogin worden ingesteld.',
+            ]);
+        }
+
+        DB::transaction(function () use ($school, $validated) {
+            $school->update(collect($validated)->except('default_login')->all());
+
+            $settings = PlatformSetting::query()->firstOrNew([]);
+            $isCurrentDefault = (int) $settings->default_login_school_id === (int) $school->id;
+
+            if ($validated['default_login']) {
+                $settings->default_login_school_id = $school->id;
+                $settings->platform_name = 'Artelynx';
+                $settings->save();
+            } elseif ($isCurrentDefault) {
+                $settings->default_login_school_id = null;
+                $settings->save();
+            }
+        });
 
         return redirect()
             ->route('platform.schools.index')
-            ->with('success', 'De schoolgegevens zijn bijgewerkt.');
+            ->with('success', 'De schoolgegevens en standaardlogin zijn bijgewerkt.');
     }
 
 
