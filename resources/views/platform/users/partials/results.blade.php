@@ -79,4 +79,4 @@
         </tbody>
     </table>
 </div>
-<div class="um-pagination">{{ $users->links() }}</div>
+<div class="um-pagination">{{ $users->links('vendor.pagination.artelynx') }}</div>
