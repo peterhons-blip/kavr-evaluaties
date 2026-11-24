@@ -1,13 +1,9 @@
-<!doctype html>
-<html lang="nl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gebruikers – {{ $school->name }} | Artelynx</title>
-<link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-<style>
-body{font-family:system-ui,sans-serif;margin:0;background:#f0f4f7;color:#142b45}.wrap{max-width:1100px;margin:35px auto;padding:0 20px}.header{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}.card{background:#fff;border:1px solid #e1e8ee;border-radius:13px;padding:24px;margin:20px 0}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #e1e8ee;padding:14px;text-align:left}small{display:block;color:#718096}.btn{background:#142b45;color:white;border:0;padding:11px 15px;border-radius:8px;cursor:pointer;text-decoration:none}input,select{padding:10px;border:1px solid #d5dfe7;border-radius:8px}form.inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.success{background:#edf8f3;color:#246b52;padding:14px;border-radius:9px}.error{background:#fff1f2;color:#9f1239;padding:14px;border-radius:9px}.muted{color:#718096}
-</style></head>
-<body><div class="wrap">
-<div class="header"><div><h1>Personeelsleden — {{ $school->name }}</h1><p class="muted">Beheer uitsluitend personeelslidskoppelingen van deze school.</p></div><a class="btn" href="{{ route('dashboard') }}">Terug naar dashboard</a><a class="btn" href="{{ route('profile.edit') }}">Mijn profiel</a></div>
+@extends('layouts.school')
+@section('title','Personeelsleden')
+@section('page-title','Personeelsleden')
+@section('content')
+<div class="wrap">
+<div class="header"><div><h1>Personeelsleden — {{ $school->name }}</h1><p class="muted">Beheer uitsluitend personeelslidskoppelingen van deze school.</p></div></div>
 @if(session('success'))<div class="success">{{ session('success') }}</div>@endif
 @if($errors->any())<div class="error">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 @if($canManage)
@@ -37,4 +33,13 @@ body{font-family:system-ui,sans-serif;margin:0;background:#f0f4f7;color:#142b45}
 </td></tr>
 @empty<tr><td colspan="4">Geen personeelsleden gekoppeld.</td></tr>@endforelse
 </tbody></table></div><div style="margin-top:18px">{{ $members->links() }}</div></div>
-</div></body></html>
+</div>
+@endsection
+@push('styles')
+<style>
+
+body{font-family:system-ui,sans-serif;margin:0;background:#f0f4f7;color:#142b45}.wrap{max-width:1100px;margin:35px auto;padding:0 20px}.header{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}.card{background:#fff;border:1px solid #e1e8ee;border-radius:13px;padding:24px;margin:20px 0}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #e1e8ee;padding:14px;text-align:left}small{display:block;color:#718096}.btn{background:#142b45;color:white;border:0;padding:11px 15px;border-radius:8px;cursor:pointer;text-decoration:none}input,select{padding:10px;border:1px solid #d5dfe7;border-radius:8px}form.inline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.success{background:#edf8f3;color:#246b52;padding:14px;border-radius:9px}.error{background:#fff1f2;color:#9f1239;padding:14px;border-radius:9px}.muted{color:#718096}
+
+.wrap{max-width:1120px;margin:0 auto;padding:0} .wrap>.header,.wrap>.head{margin-bottom:20px} .wrap h1{font-size:25px;line-height:1.3;margin:0 0 8px} .wrap>p{color:#718096;font-size:12px} .wrap .card{margin-top:19px} .wrap table{width:100%} .wrap .btn{font-family:inherit;font-weight:700} .wrap .btn.alt{background:#e9f3f2;color:#286e69} .wrap .error{border-radius:9px;margin:12px 0} .wrap .success{border-radius:9px;margin:12px 0}
+</style>
+@endpush
