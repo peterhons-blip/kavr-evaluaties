@@ -109,4 +109,48 @@ class SchoolScopedManagementTest extends TestCase
             ])->assertRedirect();
         $this->assertSame('Ongewijzigd', $b->settings()->first()->slogan);
     }
+    public function test_school_admin_can_upload_logo_only_to_own_school(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $a = $this->academy('LOGOA');
+        $b = $this->academy('LOGOB');
+        $b->settings()->create(['slogan' => 'Andere academie']);
+        $admin = $this->member($a, 'school_admin');
+        $file = \Illuminate\Http\UploadedFile::fake()->image('academie.png', 120, 80);
+
+        $this->actingAs($admin)->withSession(['active_school_id' => $a->id])
+            ->put(route('school.settings.update'), [
+                'slogan' => 'Mijn academie',
+                'primary_color' => '#142B45',
+                'secondary_color' => '#59AAA5',
+                'accent_color' => '#E5A65B',
+                'language' => 'nl',
+                'timezone' => 'Europe/Brussels',
+                'logo' => $file,
+            ])->assertRedirect(route('school.settings.edit'));
+
+        $logo = $a->settings()->first()->logo_path;
+        $this->assertNotEmpty($logo);
+        $this->assertStringStartsWith('school-logos/'.$a->id.'/', $logo);
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($logo);
+        $this->assertSame('Andere academie', $b->settings()->first()->slogan);
+        $this->assertNull($b->settings()->first()->logo_path);
+        $this->get(route('dashboard'))->assertOk()->assertSee('Logo van '.$a->name);
+    }
+
+    public function test_school_member_filters_do_not_show_users_of_other_schools(): void
+    {
+        $a = $this->academy('STAFFA');
+        $b = $this->academy('STAFFB');
+        $admin = $this->member($a, 'school_admin');
+        $other = $this->member($b, 'teacher');
+        $other->update(['first_name' => 'UniekeAndereAcademie']);
+        $this->actingAs($admin)->withSession(['active_school_id' => $a->id])
+            ->get(route('school.members.index', ['q' => 'UniekeAndereAcademie']))
+            ->assertOk()->assertDontSee('UniekeAndereAcademie');
+        $this->get(route('school.members.index', ['role' => 'teacher', 'status' => 'active']))
+            ->assertOk();
+        $this->get(route('school.roles.index'))->assertOk()->assertSee('Rechtenmatrix');
+    }
+
 }
