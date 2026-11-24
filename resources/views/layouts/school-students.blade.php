@@ -25,7 +25,9 @@
 <a class="logo" href="{{ route('dashboard') }}">Arte<span style="color:#5dc8c6">lynx</span></a>
 <a class="nav" href="{{ route('dashboard') }}">⌂ Dashboard</a>
 <a class="nav active" href="{{ route('school.students.index') }}">♙ Leerlingen</a>
+@if(\App\Support\SchoolAccess::allows(auth()->user(), $school, 'users.view') || \App\Support\SchoolAccess::allows(auth()->user(), $school, 'users.manage'))
 <a class="nav" href="{{ route('school.members.index') }}">Personeelsleden</a>
+@endif
 <small>{{ $school->name }}</small>
 </aside><div class="main"><header class="top"><strong>@yield('page-title', 'Leerlingen')</strong><a class="btn btn-secondary" href="{{ route('schools.select') }}">Wissel school</a></header><main class="content">@yield('content')</main></div></div>
 @stack('scripts')
