@@ -121,6 +121,12 @@
         .school-identity-name{min-width:0;overflow-wrap:anywhere}
         .school-identity-name small{display:block;font-size:10px;letter-spacing:1px;font-weight:700;color:#b5c7d8;margin-bottom:4px}
         .school-identity-name strong{display:block;font-size:12px;color:#fff;line-height:1.5}
+        .school-top-identity{display:flex;align-items:center;gap:12px;min-width:0}
+        .school-top-logo{width:54px;height:54px;flex:0 0 54px;display:flex;align-items:center;justify-content:center;padding:5px;border-radius:10px;background:#fff;border:1px solid #dde7ee}
+        .school-top-logo img{display:block;max-width:100%;max-height:100%;object-fit:contain}
+        .school-top-copy{min-width:0}
+        .school-top-copy .top-crumb{overflow-wrap:anywhere}
+        @media(max-width:730px){.school-top-logo{width:42px;height:42px;flex-basis:42px}.school-top-identity{gap:9px}}
         .top-action-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #dbe7eb;border-radius:9px;padding:10px 14px;background:#e9f3f2;color:#286e69;text-decoration:none;font:inherit;font-size:12px;font-weight:750;white-space:nowrap;transition:background .2s,border-color .2s}
         .top-action-btn:hover{background:#d7ebe8;border-color:#bcd7d3}
         .logout-btn{height:40px;padding:9px 15px;background:#142b45;color:#fff;border:1px solid #142b45;font-size:12px;font-weight:700}
@@ -201,9 +207,18 @@
     </aside>
     <div class="main">
         <header class="topbar">
-            <div>
-                <div class="top-title">@yield('page-title','Schoolomgeving')</div>
-                <div class="top-crumb">Artelynx / {{ $school->name }}</div>
+            <div class="school-top-identity">
+                @if($schoolLogoPath)
+                    <div class="school-top-logo">
+                        <img src="{{ asset('storage/' . $schoolLogoPath) }}"
+                             alt="Logo van {{ $school->name }}"
+                             onerror="this.hidden=true;this.parentElement.hidden=true;">
+                    </div>
+                @endif
+                <div class="school-top-copy">
+                    <div class="top-title">@yield('page-title','Schoolomgeving')</div>
+                    <div class="top-crumb">{{ $school->name }}</div>
+                </div>
             </div>
             <div class="top-actions">
                 <a class="top-action-btn" href="{{ route('schools.select') }}">⇄ <span>Wissel omgeving</span></a>
