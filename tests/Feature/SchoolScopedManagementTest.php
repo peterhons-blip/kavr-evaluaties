@@ -214,4 +214,69 @@ class SchoolScopedManagementTest extends TestCase
         \Illuminate\Support\Facades\Notification::assertNothingSent();
     }
 
+    public function test_school_admin_can_edit_staff_profile_and_school_role(): void
+    {
+        $school = $this->academy('PERSONA');
+        $admin = $this->member($school, 'school_admin');
+        $teacher = $this->member($school, 'teacher');
+        $this->actingAs($admin)->withSession(['active_school_id' => $school->id]);
+        $this->get(route('school.members.index'))->assertOk()
+            ->assertSee('Bewerken')
+            ->assertDontSee('sm-summary');
+        $this->get(route('school.members.edit', $teacher))->assertOk()
+            ->assertSee('Persoons- en contactgegevens');
+        $this->put(route('school.members.details.update', $teacher), [
+            'first_name' => 'Testvoornaam',
+            'last_name' => 'Testfamilienaam',
+            'email' => 'schoolperson@example.test',
+            'phone' => '012345678',
+            'role' => 'teacher',
+            'is_active' => '1',
+        ])->assertRedirect(route('school.members.edit', $teacher));
+        $this->assertDatabaseHas('users', [
+            'id' => $teacher->id,
+            'first_name' => 'Testvoornaam',
+            'email' => 'schoolperson@example.test',
+            'phone' => '012345678',
+        ]);
+    }
+
+    public function test_school_admin_cannot_edit_unlinked_staff_member(): void
+    {
+        $a = $this->academy('EDTA');
+        $b = $this->academy('EDTB');
+        $admin = $this->member($a, 'school_admin');
+        $other = $this->member($b, 'teacher');
+        $this->actingAs($admin)->withSession(['active_school_id' => $a->id])
+            ->get(route('school.members.edit', $other))->assertNotFound();
+        $this->put(route('school.members.details.update', $other), [
+            'first_name' => 'NotAllowed',
+            'last_name' => 'Test',
+            'email' => 'no@example.test',
+            'role' => 'teacher',
+            'is_active' => '1',
+        ])->assertNotFound();
+        $this->assertNotSame('NotAllowed', $other->fresh()->first_name);
+    }
+
+    public function test_shared_staff_account_requires_confirmation_before_profile_changes(): void
+    {
+        $a = $this->academy('SHRA');
+        $b = $this->academy('SHRB');
+        $admin = $this->member($a, 'school_admin');
+        $teacher = $this->member($a, 'teacher');
+        $teacher->schools()->attach($b->id, ['role' => 'teacher', 'is_active' => true]);
+
+        $this->actingAs($admin)->withSession(['active_school_id' => $a->id])
+            ->put(route('school.members.details.update', $teacher), [
+                'first_name' => 'NewName',
+                'last_name' => $teacher->last_name,
+                'email' => $teacher->email,
+                'phone' => $teacher->phone,
+                'role' => 'teacher',
+                'is_active' => '1',
+            ])->assertSessionHasErrors('confirm_shared_profile');
+        $this->assertNotSame('NewName', $teacher->fresh()->first_name);
+    }
+
 }
