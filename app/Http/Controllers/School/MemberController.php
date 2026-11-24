@@ -10,6 +10,8 @@ use App\Support\SchoolRoleCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -39,11 +41,15 @@ class MemberController extends Controller
         $filters = $request->validate([
             'q' => ['nullable','string','max:120'],
             'role' => ['nullable','string','max:30'],
-            'status' => ['nullable',\Illuminate\Validation\Rule::in(['all','active','inactive'])],
+            'status' => ['nullable',Rule::in(['all','active','inactive'])],
+            'password' => ['nullable',Rule::in(['all','not_set','set','unknown'])],
+            'per_page' => ['nullable',Rule::in(['20','50','100'])],
         ]);
         $search = trim($filters['q'] ?? '');
         $roleFilter = $filters['role'] ?? '';
         $status = $filters['status'] ?? 'all';
+        $passwordFilter = $filters['password'] ?? 'all';
+        $perPage = (int) ($filters['per_page'] ?? 20);
         $roles = $school->roles()->orderBy('name')->get();
         if ($roleFilter && ! $roles->contains('slug', $roleFilter)) {
             abort(422, 'Ongeldige schoolrol.');
@@ -61,16 +67,51 @@ class MemberController extends Controller
             })
             ->when($roleFilter !== '', fn ($query) => $query->where('school_user.role', $roleFilter))
             ->when($status !== 'all', fn ($query) => $query->where('school_user.is_active', $status === 'active'))
+            ->when($passwordFilter === 'not_set', fn ($query) => $query->where('users.must_change_password', true))
+            ->when($passwordFilter === 'set', fn ($query) => $query->whereNotNull('users.password_set_at')->where('users.must_change_password', false))
+            ->when($passwordFilter === 'unknown', fn ($query) => $query->whereNull('users.password_set_at')->where('users.must_change_password', false))
             ->orderBy('users.last_name')->orderBy('users.first_name')->orderBy('users.id')
-            ->paginate(25)->withQueryString();
+            ->paginate($perPage)->withQueryString();
         $canManage = SchoolAccess::allows($request->user(), $school, 'users.manage');
         $counts = [
             'total' => $school->users()->whereNull('school_user.dko3_hidden_at')->count(),
             'active' => $school->users()->whereNull('school_user.dko3_hidden_at')->where('school_user.is_active', true)->count(),
         ];
         return view('school.members.index', compact(
-            'school','members','roles','canManage','search','roleFilter','status','counts'
+            'school','members','roles','canManage','search','roleFilter','status','passwordFilter','perPage','counts'
         ));
+    }
+
+    /**
+     * Stuur een bestaande reset-/instellink naar een medewerker van de actieve school.
+     * Nooit het token/URL weergeven aan een beheerder of in de auditlog.
+     */
+    public function sendSetupLink(Request $request, User $user): RedirectResponse
+    {
+        $school = $this->authorizeSchool($request, 'users.manage');
+        $member = $school->users()
+            ->where('users.id', $user->id)
+            ->whereNull('school_user.dko3_hidden_at')
+            ->firstOrFail();
+
+        if (! $member->is_active || ! $member->pivot->is_active || ! $school->is_active) {
+            throw ValidationException::withMessages([
+                'email' => 'Dit account of de schoolkoppeling is inactief. Activeer deze eerst.',
+            ]);
+        }
+        try {
+            $status = Password::sendResetLink(['email' => $member->email]);
+        } catch (\Throwable $exception) {
+            report($exception);
+            $status = null;
+        }
+        if ($status !== Password::RESET_LINK_SENT) {
+            throw ValidationException::withMessages([
+                'email' => 'De wachtwoordlink kon niet worden verzonden. Controleer de mailinstellingen.',
+            ]);
+        }
+        \App\Support\AccessAudit::record('school.member.setup_link_sent', $school, $member);
+        return back()->with('success', 'Een wachtwoordinstel-/resetlink is per e-mail verzonden naar '.$member->email.'.');
     }
 
     public function store(Request $request): RedirectResponse
