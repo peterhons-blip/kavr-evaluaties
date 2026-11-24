@@ -108,7 +108,7 @@ class UserController extends Controller
 
         $roles = DB::table('school_roles')->orderBy('name')->get()->groupBy('school_id');
         $assigned = $user->exists
-            ? $user->schools->mapWithKeys(fn ($s) => [$s->id => ['role' => $s->pivot->role, 'is_active' => (bool) $s->pivot->is_active]])->all()
+            ? $user->schools->mapWithKeys(fn ($s) => [$s->id => ['role' => $s->pivot->role, 'is_active' => (bool) $s->pivot->is_active, 'dko3_roles' => $s->pivot->dko3_roles, 'dko3_active_assignments' => $s->pivot->dko3_active_assignments, 'dko3_subject_groups' => $s->pivot->dko3_subject_groups, 'dko3_locations' => $s->pivot->dko3_locations, 'dko3_subjects' => $s->pivot->dko3_subjects]])->all()
             : [];
 
         return view('platform.users.form', compact('user', 'schools', 'roles', 'assigned'));
@@ -125,6 +125,7 @@ class UserController extends Controller
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'email' => strtolower($data['email']),
+                'phone' => $data['phone'] ?? null,
                 'password' => $data['password'] ?? Str::random(64),
                 'is_active' => (bool) $data['is_active'],
                 'must_change_password' => empty($data['password']),
@@ -157,6 +158,7 @@ class UserController extends Controller
                 'last_name' => $data['last_name'],
                 'email' => strtolower($data['email']),
                 'is_active' => (bool) $data['is_active'],
+                'phone' => $data['phone'] ?? null,
             ];
             if (! empty($data['password'])) {
                 $changes['password'] = $data['password'];
@@ -226,6 +228,7 @@ class UserController extends Controller
         $data = $request->validate([
             'first_name' => ['required','string','max:100'],
             'last_name' => ['required','string','max:100'],
+            'phone' => ['nullable','string','max:60'],
             'email' => ['required','email','max:255',Rule::unique('users','email')->ignore($user?->id)],
             'password' => ['nullable','confirmed','string','min:8'],
             'is_active' => ['required','boolean'],
@@ -233,6 +236,11 @@ class UserController extends Controller
             'memberships' => ['sometimes','array'],
             'memberships.*.role' => ['required','string','max:30'],
             'memberships.*.is_active' => ['required','boolean'],
+            'memberships.*.dko3_roles' => ['nullable','string','max:10000'],
+            'memberships.*.dko3_active_assignments' => ['nullable','string','max:10000'],
+            'memberships.*.dko3_subject_groups' => ['nullable','string','max:10000'],
+            'memberships.*.dko3_locations' => ['nullable','string','max:10000'],
+            'memberships.*.dko3_subjects' => ['nullable','string','max:10000'],
         ]);
 
         foreach ($data['memberships'] ?? [] as $schoolId => $membership) {
@@ -253,6 +261,11 @@ class UserController extends Controller
                 'role' => $membership['role'],
                 'is_active' => (bool) $membership['is_active'],
             ];
+            foreach (['dko3_roles','dko3_active_assignments','dko3_subject_groups','dko3_locations','dko3_subjects'] as $field) {
+                if (array_key_exists($field, $membership)) {
+                    $sync[(int) $schoolId][$field] = $membership[$field];
+                }
+            }
         }
         $user->schools()->sync($sync);
     }
