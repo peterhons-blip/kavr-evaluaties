@@ -35,7 +35,7 @@ class PasswordResetController extends Controller
             // Neutrale melding voor bezoekers, maar wel diagnose voor beheerders.
             // Log nooit het adres of het token.
             Log::info('password.reset.request', ['status' => $status]);
-        } catch (\\Throwable $exception) {
+        } catch (\Throwable $exception) {
             report($exception);
             Log::warning('password.reset.delivery_failed');
         }
