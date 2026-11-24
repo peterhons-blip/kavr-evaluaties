@@ -1,6 +1,26 @@
 @extends('layouts.platform')
 @section('title','Rechtenbeheer')
 @section('page-title','Rollen en rechten')
+@push('styles')
+<style>
+.rights-matrix-wrap{overflow-x:auto;border:1px solid #e1e8ee;border-radius:10px;margin-top:18px}
+.rights-matrix{width:100%;min-width:850px;border-collapse:separate;border-spacing:0;font-size:12px}
+.rights-matrix th,.rights-matrix td{border-bottom:1px solid #edf1f5}
+.rights-matrix thead th{padding:14px 10px;background:#f7f9fb;color:#142b45;text-align:center}
+.rights-matrix thead th:first-child{text-align:left;min-width:220px}
+.rights-role{display:inline-flex;align-items:center;gap:7px;padding:9px 11px;border:1px solid #cbdedc;border-radius:8px;background:#e9f3f2;color:#286e69!important;text-decoration:none!important;font-weight:700;white-space:nowrap}
+.rights-role:hover{background:#d7ebe8;border-color:#59aaa5}
+.rights-role:focus-visible{outline:3px solid #59aaa5;outline-offset:2px}
+.rights-category th{text-align:left;padding:12px 15px;background:#eaf1f5;color:#142b45}
+.rights-section th{text-align:left;padding:10px 15px;background:#f7fafb;color:#49687a}
+.rights-permission td{padding:11px 13px;text-align:center}
+.rights-permission td:first-child{text-align:left;line-height:1.5}
+.rights-permission:hover td{background:#f8fbfc}
+.rights-permission small{display:block;color:#94a3b8;font-size:10px}
+.rights-yes{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#e3f3ed;color:#207653;font-size:15px;font-weight:800}
+.rights-no{color:#a5b1bc;font-size:16px}
+</style>
+@endpush
 @section('content')
 <div class="page-header"><h1>Rollen en rechten</h1><p>Beheer per school de toegestane functies, gegroepeerd per categorie en onderdeel. Individuele uitzonderingen kunnen per personeelslid worden ingesteld.</p></div>
 @if(session('success'))<div class="card" style="margin-bottom:15px;color:#15734c">{{ session('success') }}</div>@endif
@@ -19,18 +39,18 @@
 <div class="card" style="margin-bottom:20px">
     <h2>Rechtenmatrix: {{ $school->name }}</h2>
     <p style="color:#718096;font-size:12px">Vinkjes tonen de rechten per rol. Klik op een rol om de rechten te wijzigen. De platformbeheerderrol staat hier los van.</p>
-    <div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;font-size:12px">
-        <thead><tr><th style="text-align:left;padding:12px;border-bottom:1px solid #ddd">Categorie / onderdeel / functie</th>
-            @foreach($roles as $role)<th style="padding:10px;border-bottom:1px solid #ddd;min-width:110px"><a href="{{ route('platform.schools.roles.edit',[$school,$role]) }}">{{ $role->name }}</a></th>@endforeach
+    <div class="rights-matrix-wrap"><table class="rights-matrix">
+        <thead><tr><th scope="col">Categorie / onderdeel / functie</th>
+            @foreach($roles as $role)<th scope="col"><a class="rights-role" href="{{ route('platform.schools.roles.edit',[$school,$role]) }}" aria-label="Rechten van {{ $role->name }} bewerken">{{ $role->name }} <span aria-hidden="true">✎</span></a></th>@endforeach
         </tr></thead>
         <tbody>
         @foreach(\App\Support\SchoolRoleCatalog::CATEGORIES as $category => $parts)
-            <tr><th colspan="{{ $roles->count()+1 }}" style="text-align:left;padding:12px;background:#edf3f7">{{ $category }}</th></tr>
+            <tr class="rights-category"><th colspan="{{ $roles->count()+1 }}">{{ $category }}</th></tr>
             @foreach($parts as $part => $permissions)
-                <tr><th colspan="{{ $roles->count()+1 }}" style="text-align:left;padding:9px;color:#49687a">{{ $part }}</th></tr>
+                <tr class="rights-section"><th colspan="{{ $roles->count()+1 }}">{{ $part }}</th></tr>
                 @foreach($permissions as $key)
-                    <tr><td style="padding:10px 12px;border-bottom:1px solid #eef2f5">{{ \App\Support\SchoolRoleCatalog::PERMISSIONS[$key] }}<br><small style="color:#94a3b8">{{ $key }}</small></td>
-                    @foreach($roles as $role)<td style="text-align:center;border-bottom:1px solid #eef2f5">{{ in_array($key,$role->permissions ?? [],true) ? '✓' : '—' }}</td>@endforeach
+                    <tr class="rights-permission"><td>{{ \App\Support\SchoolRoleCatalog::PERMISSIONS[$key] }}<small>{{ $key }}</small></td>
+                    @foreach($roles as $role)<td>@if(in_array($key,$role->permissions ?? [],true))<span class="rights-yes" title="Toegestaan" aria-label="Toegestaan">✓</span>@else<span class="rights-no" title="Niet toegestaan" aria-label="Niet toegestaan">—</span>@endif</td>@endforeach
                     </tr>
                 @endforeach
             @endforeach
