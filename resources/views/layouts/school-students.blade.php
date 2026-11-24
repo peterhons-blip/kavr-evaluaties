@@ -24,9 +24,18 @@
 <body><div class="shell"><aside class="side">
 <a class="logo" href="{{ route('dashboard') }}">Arte<span style="color:#5dc8c6">lynx</span></a>
 <a class="nav" href="{{ route('dashboard') }}">⌂ Dashboard</a>
-<a class="nav active" href="{{ route('school.students.index') }}">♙ Leerlingen</a>
+@if(\App\Support\SchoolAccess::allows(auth()->user(), $school, 'students.view') || \App\Support\SchoolAccess::allows(auth()->user(), $school, 'students.manage'))
+<a class="nav {{ request()->routeIs('school.students.*') ? 'active' : '' }}" href="{{ route('school.students.index') }}">♙ Leerlingen</a>
+@endif
 @if(\App\Support\SchoolAccess::allows(auth()->user(), $school, 'users.view') || \App\Support\SchoolAccess::allows(auth()->user(), $school, 'users.manage'))
 <a class="nav" href="{{ route('school.members.index') }}">Personeelsleden</a>
+@endif
+@if(\App\Support\SchoolAccess::allows(auth()->user(), $school, 'roles.manage'))
+<a class="nav" href="{{ route('school.roles.index') }}">Rollen &amp; rechten</a>
+@endif
+@if(\App\Support\SchoolAccess::allows(auth()->user(), $school, 'school.settings'))
+<a class="nav {{ request()->routeIs('school.locations.*') ? 'active' : '' }}" href="{{ route('school.locations.index') }}">Vestigingsplaatsen</a>
+<a class="nav {{ request()->routeIs('school.settings.*') ? 'active' : '' }}" href="{{ route('school.settings.edit') }}">Schoolinstellingen</a>
 @endif
 <small>{{ $school->name }}</small>
 </aside><div class="main"><header class="top"><strong>@yield('page-title', 'Leerlingen')</strong><a class="btn btn-secondary" href="{{ route('schools.select') }}">Wissel school</a></header><main class="content">@yield('content')</main></div></div>
