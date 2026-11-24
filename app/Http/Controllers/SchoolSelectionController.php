@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Support\LoginAudit;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -81,6 +82,8 @@ class SchoolSelectionController extends Controller
             'active_school_id',
             $school->id
         );
+
+        LoginAudit::record($request, 'school_selected', $request->user(), $school->id);
 
         return redirect()->route('dashboard');
     }
