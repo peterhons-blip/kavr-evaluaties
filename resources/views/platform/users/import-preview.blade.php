@@ -3,6 +3,7 @@
 @section('page-title','Personeelsleden')
 @section('content')
 <div class="page-header"><h1>DKO3-import controleren</h1><p>Controleer de aantallen zorgvuldig voordat je wijzigingen toepast op <strong>{{ $school->name }}</strong>.</p></div>
+<div class="di-alert" style="margin-bottom:18px"><strong>Importmodus: {{ $mode === 'full' ? 'Volledige synchronisatie' : 'Toevoegen en bijwerken' }}</strong><p>{{ $mode === 'full' ? 'Ontbrekende leerkrachten worden gedeactiveerd bij bevestiging.' : 'Ontbrekende personeelsleden blijven ongewijzigd.' }} Er worden geen wachtwoordmails verstuurd.</p></div>
 <div class="di-summary">
     <div><strong>{{ $stats['total'] }}</strong><span>Leerkrachten in bestand</span></div>
     <div><strong>{{ $stats['new'] }}</strong><span>Nieuwe accounts</span></div>
@@ -12,8 +13,8 @@
 <div class="card di-card">
     <h2>Nieuwe en bestaande personeelsleden</h2>
     <p style="font-size:12px;color:#728198">De eerste 30 personen uit het aangeleverde bestand:</p>
-    <div style="overflow-x:auto"><table class="di-table"><thead><tr><th>Voornaam</th><th>Familienaam</th><th>E-mail</th></tr></thead>
-    <tbody>@foreach(array_slice($rows,0,30) as $row)<tr><td>{{ $row['first_name'] }}</td><td>{{ $row['last_name'] }}</td><td>{{ $row['email'] }}</td></tr>@endforeach</tbody></table></div>
+    <div style="overflow-x:auto"><table class="di-table"><thead><tr><th>Voornaam</th><th>Familienaam</th><th>E-mail</th><th>Vakken (huidig schooljaar)</th><th>Vestigingen</th></tr></thead>
+    <tbody>@foreach(array_slice($rows,0,30) as $row)<tr><td>{{ $row['first_name'] }}</td><td>{{ $row['last_name'] }}</td><td>{{ $row['email'] }}</td><td>{{ $row['dko3_subjects'] ?? '—' }}</td><td>{{ $row['dko3_locations'] ?? '—' }}</td></tr>@endforeach</tbody></table></div>
 </div>
 <div class="card di-card">
     <h2>Niet meer in DKO3: {{ $stats['deactivate'] }}</h2>
@@ -24,7 +25,7 @@
     </tbody></table></div>
     @else <p>Geen leerkrachten om uit te schakelen.</p> @endif
 </div>
-<div class="di-alert"><strong>Definitieve import</strong><p>Deze actie kan bestaande personeelsgegevens wijzigen en ontbrekende leerkrachten in de geselecteerde school deactiveren. Controleer of de export volledig is. Er worden nu nog geen e-mails verzonden.</p></div>
+<div class="di-alert"><strong>Definitieve import</strong><p>Deze actie werkt bestaande personeelsgegevens bij. Alleen bij volledige synchronisatie kunnen ontbrekende leerkrachten in de geselecteerde school worden gedeactiveerd. Controleer of de export volledig is. Er worden nu nog geen e-mails verzonden.</p></div>
 <form method="POST" action="{{ route('platform.users.import.commit') }}" class="di-actions">@csrf
 <input type="hidden" name="token" value="{{ $token }}">
 <label><input type="checkbox" name="confirm" value="1" required> Ik bevestig dat dit de volledige en juiste DKO3-personeelslijst van {{ $school->name }} is.</label>
