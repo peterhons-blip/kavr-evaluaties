@@ -1,6 +1,6 @@
 # AGENTS.md - Artelynx evaluatieplatform
 
-**Bijgewerkt: 24 november 2026.** Deze instructies zijn leidend voor Codex/AI-ontwikkelwerk in `peterhons-blip/kavr-evaluaties`. Lees ook `PROJECT_CONTEXT.md` en `docs/GEBRUIKERS_EN_RECHTEN.md`. De laatstgenoemde documentatie kan oudere featurebranch-commando's bevatten: **werk vanuit de actuele `main`**.
+**Bijgewerkt: 24 november 2026 (leerlingenbeheer).** Deze instructies zijn leidend voor Codex/AI-ontwikkelwerk in `peterhons-blip/kavr-evaluaties`. Lees ook `PROJECT_CONTEXT.md` en `docs/GEBRUIKERS_EN_RECHTEN.md`. De laatstgenoemde documentatie kan oudere featurebranch-commando's bevatten: **werk vanuit de actuele `main`**.
 
 ## Product, stack en bestaande code
 
@@ -9,8 +9,8 @@
 - Geen onnodige extra dependencies of Node-build introduceren. Gebruik bestaande componenten/lay-outs en de Artelynx-huisstijl.
 - Favicon: `public/favicon.ico`; logo doorgaans `public/images/artelynx-logo.webp`.
 - Eén globaal account per persoon in `users`; meerdere scholen via `school_user`. Schoolrollen in `school_roles`; individuele uitzonderingen in `school_user_permissions`.
-- Bestaande modules: platform-/schoolbeheer, accounts, DKO3-**personeels**import, rechtenmatrix, individueel rechtenbeheer, profiel/wachtwoord, e-mailinstellingen/-log en audit.
-- De toekomstige leerlingen-, lesgroepen-, leerdoelen-, ICJ/KCJ- en PDF-functies **niet** als geïmplementeerd voorstellen.
+- Bestaande modules: platform-/schoolbeheer, accounts, DKO3-**personeels**import, rechtenmatrix, individueel rechtenbeheer, profiel/wachtwoord, e-mailinstellingen/-log, audit en **leerlingenadministratie met veilige DKO3-leerlingenimport**.
+- Leerlingendossiers en import zijn beschikbaar; **vakken, lesgroepen, inschrijvingen, leerdoelen, ICJ/KCJ en PDF** zijn nog niet gerealiseerd. De DKO3-leerlingenexport bevat alleen stamnummer en namen.
 
 ## Autorisatie is verplicht bij elke wijziging
 
@@ -61,3 +61,12 @@ Onderwijsstructuur (vakken/graden/leerlingen/lesgroepen/inschrijvingen), DKO3-le
 - PHP op PATH kan nog `C:\xampp\php\php.exe` (8.2) zijn; kies expliciet PHP 8.4+ voordat Composer of Artisan draait.
 - Broncode via GitHub `main`, databanken en `.env` zijn omgevingsspecifiek.
 - Geen productietests die bestaande databankrecords verwijderen of wijzigen.
+
+## DKO3-leerlingenmodule (toegevoegd november 2026)
+
+- `students`: uniek `(school_id, dko3_stamnummer)`, stamnummer altijd als tekst bewaren. Eenzelfde persoon kan in een andere academie een ander stamnummer hebben; nooit op naam samenvoegen.
+- Schoolroutes `/school/leerlingen` vereisen `active.school` én server-side `students.view` of `students.manage`. Wijzigen en importeren uitsluitend `students.manage`. Platformroutes `/platform/leerlingen` zitten achter `platform.admin`.
+- `App\Support\Dko3StudentSpreadsheet` leest `stamnummer`, `naam`, `voornaam` uit XLSX/CSV. Fouten/dubbels stoppen de volledige import; preview en bevestiging zijn verplicht.
+- Preview-token is aan de sessie, uploader en school gekoppeld en verloopt na een uur. Geen ruwe export of leerlinggegevens committen naar GitHub of loggen in audits.
+- Import voegt toe/bijwerkt namen en verwijdert/deactiveert nooit afwezige leerlingen. Manuele inactieve status blijft behouden.
+- Regressietests: `tests/Feature/Dko3StudentAdministrationTest.php` en `tests/Feature/StudentModelTest.php`. Nieuwe koppelingen met vakken en lessen mogen geen naammatching zonder ambiguïteitscontrole uitvoeren.
