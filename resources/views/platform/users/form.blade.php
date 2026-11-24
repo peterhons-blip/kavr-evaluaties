@@ -19,11 +19,11 @@
             <label>Achternaam *<input name="last_name" required maxlength="100" value="{{ old('last_name',$user->last_name) }}"></label>
             <label class="uf-full">E-mailadres *<input type="email" name="email" required maxlength="255" autocomplete="off" value="{{ old('email',$user->email) }}"></label>
             <label>Wachtwoord (optioneel)
-                <input type="password" name="password" minlength="12" autocomplete="new-password">
+                <input type="password" name="password" minlength="8" autocomplete="new-password">
             </label>
             <label>Wachtwoord bevestigen<input type="password" name="password_confirmation" autocomplete="new-password"></label>
         </div>
-        <p class="uf-help">Laat het wachtwoord leeg om een willekeurig beginwachtwoord te gebruiken. Activeer het account en stuur via het overzicht een beveiligde instellink. Een handmatig gekozen wachtwoord moet minstens 12 tekens bevatten.</p>
+        <p class="uf-help">Laat het wachtwoord leeg om een willekeurig beginwachtwoord te gebruiken. Activeer het account en stuur via het overzicht een beveiligde instellink. Een handmatig gekozen wachtwoord moet minstens 8 tekens bevatten.</p>
         <div class="uf-checks">
             <label><input type="hidden" name="is_active" value="0"><input type="checkbox" name="is_active" value="1" @checked(old('is_active',$user->exists ? $user->is_active : false))> Algemene accountstatus: actief</label>
             <label><input type="hidden" name="is_platform_admin" value="0"><input type="checkbox" name="is_platform_admin" value="1" @checked(old('is_platform_admin',$user->is_platform_admin))> Platformadministrator</label>
