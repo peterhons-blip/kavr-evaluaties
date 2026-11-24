@@ -34,10 +34,10 @@ class AccessAuditController extends Controller
 
         $events = DB::table('access_audit_events as e')
             ->leftJoin('users as actor', 'actor.id', '=', 'e.actor_id')
-            ->where('e.action', 'platform.mail.test')
+            ->whereIn('e.action', ['platform.mail.test', 'platform.mail.sent'])
             ->when($status === 'success', fn ($q) => $q->where('e.details', 'like', '%"success":true%'))
             ->when($status === 'failed', fn ($q) => $q->where('e.details', 'like', '%"success":false%'))
-            ->select(['e.id', 'e.details', 'e.created_at', 'actor.name as actor_name'])
+            ->select(['e.id', 'e.action', 'e.details', 'e.created_at', 'actor.name as actor_name'])
             ->orderByDesc('e.id')
             ->paginate(25)
             ->withQueryString();
