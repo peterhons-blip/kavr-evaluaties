@@ -1,4 +1,4 @@
-@extends('layouts.school-students')
+@extends('layouts.school')
 @section('title','Schoolinstellingen')
 @section('page-title','Schoolinstellingen')
 @section('content')
