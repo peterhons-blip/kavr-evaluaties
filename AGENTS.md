@@ -85,3 +85,11 @@ Onderwijsstructuur (vakken/graden/leerlingen/lesgroepen/inschrijvingen), DKO3-le
 - `school` en `school.settings.logo_path` moeten altijd uitsluitend de actieve geautoriseerde school vertegenwoordigen. Wijzig geen globale platformrechten wanneer je een schoolspecifiek scherm maakt.
 - Platformloginlog: `LoginAudit::record()` schrijft login_success, login_failed (alleen gemaskeerde e-mailhint), logout, school_selected naar `login_events`; nooit wachtwoord, token, ruwe mislukte login-e-mail of sessie-ID bewaren. Toegang uitsluitend via `platform.admin`.
 - Nieuwe migratie vanaf 24 nov 2026: `create_login_events_table`; tests: `tests/Feature/LoginAuditTest.php` en bestaande schooldashboard- en schoolrechten-tests. Bij uitrol altijd eerst migreren en testen.
+
+## Schoolgebonden beheerpagina's
+
+- Maak schoolbeheer ongeveer even rijk en consistent als Platformbeheer, maar voer elke query en mutatie uit binnen de actieve school. Vermijd hergebruik van platformcontrollers zonder expliciete `SchoolAccess` en tenant-scope.
+- Schoolpersoneel: zoeken, status en rol filteren; schoolrol en schoolspecifieke actieve koppeling wijzigen zonder globale accountstatus te veranderen. `dko3_hidden_at` blijft uitgesloten.
+- Schoolrollen: schoolgebonden matrix via `SchoolRoleCatalog::CATEGORIES`, edits uitsluitend van rollen met dezelfde `school_id`.
+- Schoolinstellingen: upload logo naar `school-logos/{school_id}` via public disk, behoud fallback, verwijder oud logo enkel na geldige opslag en met eigen school-prefix; nieuwe foto zichtbaar in schoolselectie, schoolsidebar en bovenbalk.
+- Maak schoolinstellingen nooit platformbreed. Houd tests in `SchoolScopedManagementTest.php` groen; gebruik de bestaande schoollayout met bovenaan schoollogo.
