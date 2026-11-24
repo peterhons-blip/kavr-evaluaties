@@ -100,3 +100,10 @@ Onderwijsstructuur (vakken/graden/leerlingen/lesgroepen/inschrijvingen), DKO3-le
 - `must_change_password=true` => `Nog in te stellen`; anders `password_set_at` gevuld => `Ingesteld`; anders `Onbekend`. Interpreteer `Onbekend` niet automatisch als nooit aangemeld.
 - Wachtwoord instel-/resetlinks worden alleen als beveiligde mail aan de gekoppelde gebruiker verzonden via Laravel Password broker; toon of log nooit raw token/URL. Controleer actieve school, schoollidmaatschap, gebruikerstatus en `users.manage`. POST met CSRF en throttle; registreer verzending in de schoolaudit.
 - Test school-isolatie en wachtwoordstatus vanuit `SchoolScopedManagementTest.php`.
+
+## Beheer schoolpersoneel: afzonderlijk bewerkscherm
+
+- Schoolbeheerders kunnen voor een medewerker van hun school naam, e-mail, telefoon en hun eigen schoolrol/status bewerken via `school.members.edit` en `school.members.details.update`.
+- Naam, e-mail en telefoon zijn globale accountvelden; bij personeel met meerdere scholen vereist wijzigen bevestiging zodat de beheerder de impact op andere schoolomgevingen begrijpt. Wijzig andere schoollidmaatschappen niet.
+- Accounts met `is_platform_admin` zijn in de eigen schoolinterface niet wijzigbaar qua profielvelden: laat hiervoor Platformbeheer gebruiken. Wachtwoorden alleen via gethrottlede mailreset.
+- De personeelspagina toont geen drie statistiektegels meer. Houd de kolomindeling en uitgebreide filters behouden.
