@@ -36,10 +36,41 @@ class MemberController extends Controller
             403
         );
         SchoolRoleCatalog::ensureFor($school);
-        $members = $school->users()->wherePivotNull('dko3_hidden_at')->orderBy('last_name')->orderBy('first_name')->paginate(20);
+        $filters = $request->validate([
+            'q' => ['nullable','string','max:120'],
+            'role' => ['nullable','string','max:30'],
+            'status' => ['nullable',\Illuminate\Validation\Rule::in(['all','active','inactive'])],
+        ]);
+        $search = trim($filters['q'] ?? '');
+        $roleFilter = $filters['role'] ?? '';
+        $status = $filters['status'] ?? 'all';
         $roles = $school->roles()->orderBy('name')->get();
+        if ($roleFilter && ! $roles->contains('slug', $roleFilter)) {
+            abort(422, 'Ongeldige schoolrol.');
+        }
+        $members = $school->users()
+            ->whereNull('school_user.dko3_hidden_at')
+            ->when($search !== '', function ($query) use ($search) {
+                $like = '%'.addcslashes($search, '%_\\\\').'%';
+                $query->where(function ($nested) use ($like) {
+                    $nested->where('users.first_name','like',$like)
+                        ->orWhere('users.last_name','like',$like)
+                        ->orWhere('users.name','like',$like)
+                        ->orWhere('users.email','like',$like);
+                });
+            })
+            ->when($roleFilter !== '', fn ($query) => $query->where('school_user.role', $roleFilter))
+            ->when($status !== 'all', fn ($query) => $query->where('school_user.is_active', $status === 'active'))
+            ->orderBy('users.last_name')->orderBy('users.first_name')->orderBy('users.id')
+            ->paginate(25)->withQueryString();
         $canManage = SchoolAccess::allows($request->user(), $school, 'users.manage');
-        return view('school.members.index', compact('school','members','roles','canManage'));
+        $counts = [
+            'total' => $school->users()->whereNull('school_user.dko3_hidden_at')->count(),
+            'active' => $school->users()->whereNull('school_user.dko3_hidden_at')->where('school_user.is_active', true)->count(),
+        ];
+        return view('school.members.index', compact(
+            'school','members','roles','canManage','search','roleFilter','status','counts'
+        ));
     }
 
     public function store(Request $request): RedirectResponse
