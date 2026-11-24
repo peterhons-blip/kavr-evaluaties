@@ -16,13 +16,26 @@ class DashboardController extends Controller
         // Middleware active.school has already verified the membership.
         $school = School::query()
             ->with('settings')
-            ->withCount(['users' => fn ($query) => $query->wherePivotNull('dko3_hidden_at'), 'locations', 'roles'])
+            ->withCount(['locations', 'roles'])
             ->findOrFail($request->session()->get('active_school_id'));
 
         $canViewUsers = SchoolAccess::allows($request->user(), $school, 'users.view')
             || SchoolAccess::allows($request->user(), $school, 'users.manage');
         $canViewStudents = SchoolAccess::allows($request->user(), $school, 'students.view')
             || SchoolAccess::allows($request->user(), $school, 'students.manage');
+        // Tellingsquery los van de Eloquent pivot. Dit vermijdt ambiguiteit
+        // bij joins en houdt de schoolgrens expliciet.
+        $school->users_count = DB::table('school_user')
+            ->where('school_id', $school->id)
+            ->whereNull('dko3_hidden_at')
+            ->count();
+
+        $school->students_count = $canViewStudents
+            ? $school->students()->where('is_active', true)->count()
+            : null;
+
+        $canManageStudents = SchoolAccess::allows($request->user(), $school, 'students.manage');
+
         $canManageRoles = SchoolAccess::allows($request->user(), $school, 'roles.manage');
 
         // Gevoelige gebruikers-/auditinformatie alleen ophalen voor beheerders.
@@ -43,7 +56,7 @@ class DashboardController extends Controller
             : collect();
 
         return view('dashboard', compact(
-            'school', 'canViewUsers', 'canViewStudents', 'canManageRoles', 'recentMembers', 'recentEvents'
+            'school', 'canViewUsers', 'canViewStudents', 'canManageStudents', 'canManageRoles', 'recentMembers', 'recentEvents'
         ));
     }
 }
