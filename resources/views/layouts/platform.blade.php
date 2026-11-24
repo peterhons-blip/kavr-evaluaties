@@ -585,6 +585,12 @@
             <span class="nav-text">Beheerhistoriek</span>
         </a>
 
+        <a href="{{ route('platform.audit.logins') }}"
+           class="nav-item {{ request()->routeIs('platform.audit.logins') ? 'active' : '' }}">
+            <span class="nav-icon">⇥</span>
+            <span class="nav-text">Aanmeldgeschiedenis</span>
+        </a>
+
         <a href="{{ route('platform.audit.mail') }}"
            class="nav-item {{ request()->routeIs('platform.audit.mail') ? 'active' : '' }}">
             <span class="nav-icon">✉</span>
