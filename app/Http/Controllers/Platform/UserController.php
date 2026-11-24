@@ -262,6 +262,15 @@ class UserController extends Controller
             'memberships.*.dko3_subject_groups' => ['nullable','string','max:10000'],
             'memberships.*.dko3_locations' => ['nullable','string','max:10000'],
             'memberships.*.dko3_subjects' => ['nullable','string','max:10000'],
+        ], [
+            'email.unique' => 'Dit e-mailadres is al gekoppeld aan een bestaand personeelsaccount. Zoek het personeelslid op en bewerk de bestaande account in plaats van een nieuwe aan te maken.',
+            'email.required' => 'Vul een e-mailadres in.',
+            'email.email' => 'Vul een geldig e-mailadres in.',
+            'first_name.required' => 'Vul de voornaam in.',
+            'last_name.required' => 'Vul de achternaam in.',
+            'password.min' => 'Het wachtwoord moet minstens 8 tekens bevatten.',
+            'password.confirmed' => 'De twee wachtwoorden komen niet overeen.',
+            'memberships.*.role.required' => 'Selecteer een schoolrol voor elke aangevinkte school.',
         ]);
 
         foreach ($data['memberships'] ?? [] as $schoolId => $membership) {
