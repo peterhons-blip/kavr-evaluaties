@@ -194,6 +194,26 @@
         </div>
 
 
+        <h2>Publieke inlogpagina</h2>
+        <div class="school-status-box">
+            <div class="school-status-info">
+                <div class="school-status-title">Inloglink voor deze school</div>
+                <p>
+                    <a href="{{ route('school.login', $school->slug) }}" target="_blank" rel="noopener noreferrer">{{ route('school.login', $school->slug) }}</a>
+                    <br>Deze pagina toont het logo, de naam en de kleuren van deze school.
+                </p>
+                <p style="margin-top:12px">
+                    <label>
+                        <input type="hidden" name="default_login" value="0">
+                        <input type="checkbox" name="default_login" value="1"
+                            @checked(old('default_login', (int) $defaultLoginSchoolId === (int) $school->id))>
+                        <strong>Standaardschool voor /login</strong>
+                    </label>
+                </p>
+                <p>Er kan maar één standaardschool zijn. Als je deze school aanvinkt, wordt de vorige standaard automatisch vervangen. Alleen actieve scholen kunnen standaard zijn.</p>
+            </div>
+        </div>
+
         <div class="form-actions">
             <a href="{{ route('platform.schools.index') }}"
                class="btn btn-secondary">
