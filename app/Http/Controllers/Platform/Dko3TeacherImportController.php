@@ -53,6 +53,7 @@ class Dko3TeacherImportController extends Controller
             ->join('users as u','u.id','=','su.user_id')
             ->where('su.school_id', $school->id)
             ->where('su.role','teacher')
+            ->where('u.is_platform_admin', false)
             ->whereNull('su.dko3_hidden_at')
             ->get(['su.user_id', 'u.email']);
 
@@ -207,6 +208,7 @@ class Dko3TeacherImportController extends Controller
             $query = DB::table('school_user')
                 ->where('school_id',$school->id)
                 ->where('role','teacher')
+                ->whereNotIn('user_id', User::query()->where('is_platform_admin', true)->select('id'))
                 ->whereNull('dko3_hidden_at')
                 ->whereNotIn('user_id', $present);
             $deactivated = $mode === 'full' ? (clone $query)->count() : 0;
