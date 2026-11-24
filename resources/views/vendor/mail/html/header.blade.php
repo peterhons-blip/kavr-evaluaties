@@ -1,11 +1,11 @@
 <tr>
-    <td class="header" style="padding: 26px 0 18px; text-align: center;">
-        <a href="{{ config('app.url') }}" style="display: inline-block; text-decoration: none; color: #142b45;">
+    <td class="header" style="text-align:center; padding:34px 20px 24px; background-color:#f3f7fa;">
+        <a href="{{ config('app.url') }}" style="text-decoration:none; display:inline-block; color:#142b45;">
             <img src="{{ asset('images/branding/artelynx-lynx-128.png') }}"
-                 alt="Artelynx"
-                 width="68" height="68"
-                 style="display: block; width: 68px; height: 68px; border: 0; margin: 0 auto 8px;">
-            <span style="font-family: Arial, sans-serif; font-size: 23px; font-weight: bold; color: #142b45;">Artelynx</span>
+                 width="76" height="76" alt="Artelynx-logo"
+                 style="border:0; display:block; width:76px; height:76px; margin:0 auto 12px;">
+            <span style="font-family:Arial,Helvetica,sans-serif; font-size:26px; font-weight:700; color:#142b45; letter-spacing:-0.5px;">Artelynx</span>
+            <span style="display:block; margin-top:6px; color:#468c87; font-family:Arial,Helvetica,sans-serif; font-size:12px; font-weight:600; letter-spacing:1.4px;">EVALUATIEPLATFORM</span>
         </a>
     </td>
 </tr>
