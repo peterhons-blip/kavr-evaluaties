@@ -182,6 +182,14 @@ class UserController extends Controller
             ]);
         });
 
+        if (! empty($data['password'])) {
+            try {
+                $user->notify((new \App\Notifications\WachtwoordGewijzigd())->locale('nl'));
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
+
         return redirect()->route('platform.users.index')->with('success', 'Gebruiker bijgewerkt.');
     }
 
@@ -219,7 +227,7 @@ class UserController extends Controller
             'first_name' => ['required','string','max:100'],
             'last_name' => ['required','string','max:100'],
             'email' => ['required','email','max:255',Rule::unique('users','email')->ignore($user?->id)],
-            'password' => ['nullable','confirmed','string','min:12'],
+            'password' => ['nullable','confirmed','string','min:8'],
             'is_active' => ['required','boolean'],
             'is_platform_admin' => ['required','boolean'],
             'memberships' => ['sometimes','array'],
