@@ -101,6 +101,7 @@ class PlatformSettingsController extends Controller
                 'success' => true,
                 'driver' => $settings->mail_driver,
                 'recipient' => $data['recipient'],
+                'subject' => 'Artelynx - SMTP testbericht',
                 'result' => $settings->mail_driver === 'log' ? 'logged_only' : 'accepted_by_server',
             ]);
 
@@ -117,6 +118,7 @@ class PlatformSettingsController extends Controller
                 'success' => false,
                 'driver' => $settings->mail_driver,
                 'recipient' => $data['recipient'],
+                'subject' => 'Artelynx - SMTP testbericht',
                 'diagnosis' => $diagnosis,
             ]);
 
