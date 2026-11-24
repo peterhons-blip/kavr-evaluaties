@@ -273,6 +273,9 @@ class SchoolScopedManagementTest extends TestCase
         $b = $this->academy('SHRB');
         $admin = $this->member($a, 'school_admin');
         $teacher = $this->member($a, 'teacher');
+        // De User-factory laat first_name en last_name leeg: vul een geldig
+        // profiel in zodat we specifiek de gedeelde-accountbevestiging testen.
+        $teacher->update(['first_name' => 'Originele', 'last_name' => 'Familienaam']);
         $teacher->schools()->attach($b->id, ['role' => 'teacher', 'is_active' => true]);
 
         $this->actingAs($admin)->withSession(['active_school_id' => $a->id])
