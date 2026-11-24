@@ -125,3 +125,11 @@ Gebruik op productie nooit een testcommando dat de echte databank wijzigt. Deze 
 - Schoolinstellingen passen alleen de schoolspecifieke loginteksten, kleuren, taal en tijdzone aan. Platformbrede instellingen en technisch systeembeheer blijven centraal.
 - Het dashboard gebruikt expliciet schoolgebonden tellingen en gekwalificeerde pivot-query's om SQL-ambiguïteit te vermijden. Regressietests: `SchoolDashboardAccessTest` en `SchoolScopedManagementTest`.
 - Voor deze aanpassingen zijn geen nieuwe migraties nodig. Voer lokaal `php artisan test` uit vóór live-uitrol.
+
+## Schoollayout en aanmeldgeschiedenis (24 november 2026)
+
+- Alle operationele schoolpagina's gebruiken nu de gedeelde Blade-layout `resources/views/layouts/school.blade.php`; dashboard, leerlingen, personeelsleden, rollen, vestigingsplaatsen en schoolinstellingen hebben dezelfde navigatie, schoolgebonden rechten en platformstijl-topbalk.
+- Linksboven Artelynx; het schoollogo staat als afzonderlijke academie-identiteit bij de naam van de actieve school in de sidebar. Het schoolkeuzescherm toont geen redundant label 'Huidige school' meer en heeft een verbeterde profiel/afmeldnavigatie.
+- Platformbeheer heeft **Aanmeldgeschiedenis** op `/platform/audit/logins`, uitsluitend voor platformadmins. Login-, logout-, mislukte login- en schoolkeuze-events staan in `login_events`, met IP, browser en timestamp; school is uitsluitend bekend wanneer expliciet gekozen.
+- Mislukte loginpogingen bewaren alleen een gemaskeerde e-mailhint en geen password of token. Behandel toegang tot IP-/aanmeldgegevens als vertrouwelijke platformbeheerdersinformatie. Retentiebeleid nog te bepalen.
+- **Nieuwe migratie noodzakelijk**: `2026_11_24_235959_create_login_events_table.php` via `php artisan migrate`. Regressietest `tests/Feature/LoginAuditTest.php` toegevoegd; voer lokaal `php artisan test` uit.
