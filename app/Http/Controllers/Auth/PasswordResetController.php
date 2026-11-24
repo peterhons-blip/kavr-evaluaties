@@ -8,6 +8,7 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -26,7 +27,18 @@ class PasswordResetController extends Controller
 
         // Een neutrale bevestiging voorkomt informatielekken
         // over het bestaan van accounts.
-        Password::sendResetLink($request->only('email'));
+        try {
+            $status = Password::sendResetLink([
+                'email' => strtolower(trim($request->input('email'))),
+            ]);
+
+            // Neutrale melding voor bezoekers, maar wel diagnose voor beheerders.
+            // Log nooit het adres of het token.
+            Log::info('password.reset.request', ['status' => $status]);
+        } catch (\\Throwable $exception) {
+            report($exception);
+            Log::warning('password.reset.delivery_failed');
+        }
 
         return back()->with('status',
             'Als dit e-mailadres bekend is, ontvang je een bericht met instructies. Controleer ook je spammap.'
