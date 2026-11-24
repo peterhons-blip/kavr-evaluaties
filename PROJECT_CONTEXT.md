@@ -1,10 +1,10 @@
 # Artelynx - PROJECT_CONTEXT.md
 
-**Bijgewerkt:** 24 november 2026  
+**Bijgewerkt:** 24 november 2026 (leerlingenmodule)  
 **Product:** Artelynx - *Elk talent in ontwikkeling.*  
 **Eerste school:** Kunstacademie Voeren-Riemst (KA-VR)  
 **Repository:** `peterhons-blip/kavr-evaluaties`; actieve integratiebranch `main`  
-**Status:** actieve ontwikkeling; de platform- en gebruikersbasis bestaat, het eigenlijke leerlingen- en evaluatiegedeelte moet nog worden ontwikkeld.
+**Status:** actieve ontwikkeling; platform- en gebruikersbasis plus een eerste schoolgebonden leerlingenadministratie met DKO3-import bestaan. Vakken, lesgroepen, inschrijvingen en evaluaties volgen nog.
 
 > Dit document beschrijft de huidige, in de repository nagekeken stand; het vervangt de verouderde planning uit 13-19 november. Raadpleeg daarnaast `AGENTS.md` en `docs/GEBRUIKERS_EN_RECHTEN.md`. Laat in twijfelgevallen de bestaande code en tests beslissen, niet oudere statusnotities.
 
@@ -28,6 +28,7 @@ Beoogde onderwijsmodules: vakken en instrumenten, opleidingen/graden, leerlingen
 - Centrale authenticatie, login, wachtwoordreset/instellinks, sessies, accountstatus en eigen profiel/wachtwoordwijziging.
 - Multischoolbeheer, schoolselectie, actieve school in sessie, schoolinstellingen, vestigingsplaatsen en configureerbare standaard-/schoolspecifieke loginlinks.
 - Centrale personeelspagina met aanmaken/bewerken, schoolkoppelingen, actieve status, rolinformatie, zoeken/filteren/sorteren, bulkacties en Nederlandstalige paginering.
+- Leerlingenadministratie per school: toevoegen/bewerken, zoeken/status/paginering, CSV/XLSX-DKO3-import met eenmalig voorbeeld en expliciete bevestiging. DKO3-stamnummer is schoolgebonden uniek en blijft tekst (voorloopnullen). Import voegt toe / werkt namen bij; ontbrekende leerlingen en inactieve status blijven behouden.
 - DKO3-personeelsimport met preview, veilige gedeeltelijke import als standaard, schoolgebonden metadata, rollen en bescherming tegen ongewenste deactivering van platformbeheerders bij volledige sync. Dit is **personeelsimport**, geen reeds voltooid leerlingenimportproces.
 - Platformrollen- en rechtenmatrix, per-school rolbeheer, individuele toelaten/weigeren/overnemen-afwijkingen en beheerhistoriek.
 - Platforminstellingen, SMTP-testfunctie en uitgaande e-maillog met onderwerp voor nieuw geregistreerde mails. Het onderwerp kan privacygevoelig zijn; geen mailinhoud, wachtwoorden of resetlinks loggen.
@@ -39,6 +40,7 @@ Beoogde onderwijsmodules: vakken en instrumenten, opleidingen/graden, leerlingen
 - `schools`: school/tenant; `school_user`: gebruikerskoppeling met `role`, `is_active` en DKO3-schoolmetadata.
 - `school_roles`: schoolgebonden roldefinities en functierechten.
 - `school_user_permissions`: expliciete individuele uitzonderingen `allowed` (toestaan/weigeren) per school, gebruiker en recht.
+- `students` bevat één leerlingrecord per school en stamnummer, naamvelden en actieve status. Exports bevatten nog geen vak-/inschrijvingskoppelingen.
 - `school_settings`, schoollocaties, `school_years`, `evaluation_periods`, `access_audit_events` en de gebruikelijke Laravel-tabellen zijn aanwezig. Verifieer de actuele migraties voordat nieuwe tabellen worden gemaakt.
 - Standaardrolcodes: `school_admin`, `director`, `administration`, `coordinator`, `teacher`, `jury`, `viewer`; daarnaast maatwerkrollen.
 - Catalogus: `App\Support\SchoolRoleCatalog`. Rechtencontrole: `App\Support\SchoolAccess::allows($user, $school, $permission)`.
@@ -59,8 +61,8 @@ Gerichte **broncodecontrole** uitgevoerd op `SchoolAccess`, platformmiddleware, 
 
 ## 6. Nog te bouwen - inhoudelijke kern
 
-1. Onderwijsdatamodel: opleidingen, graden, vakken/instrumenten, leerjaren, leerlingen, inschrijvingen en lesgroepen. Leg schoolscoping en eigenaarstoewijzing vóór de bouw vast.
-2. Veilige leerlingen-/inschrijvingenimport uit DKO3; formaat en synchronisatieregels nog af te stemmen.
+1. Onderwijsdatamodel: opleidingen, graden, vakken/instrumenten, leerjaren, inschrijvingen en lesgroepen; leerlingenbasis is al gestart. Leg schoolscoping en eigenaarstoewijzing vóór de bouw vast.
+2. Leerlingenimport op basis van `alleleerlingen_2026-2027.xlsx` is beschikbaar (stamnummer, naam, voornaam); vakken-/inschrijvingenimport uit `werklijst_allevakken.xlsx` volgt later. Koppeling op naam vereist een controle bij dubbelzinnige namen.
 3. Competentie-/leerdoelenbibliotheek (o.a. gedrevenheid, creëren, vakdeskundigheid, onderzoeken, samenwerken, presenteren) met historische snapshots/versies.
 4. Gemeenschappelijke evaluatiekern voor ICJ en KCJ: periodes, feedback, rubrics, eventuele punten en afscherming per lesgroep/leerling.
 5. PDF-rapportering per leerling, groep en periode en DKO3-geschikte output; concrete DKO3-exportvereisten nog te bevestigen.
@@ -103,3 +105,13 @@ php artisan view:cache
 Gebruik op productie nooit een testcommando dat de echte databank wijzigt. Deze documentatie-update vereist op zich geen migratie. De aanvullende beveiligingswijziging evenmin.
 
 **Volgende inhoudelijke ontwikkelfase:** onderwijsstructuur. De andere infrastructuuracties zijn geen onderdeel van de huidige opdracht.
+
+## 9. Productieadres en huidige leerlingstap
+
+- Officieel productieadres: **https://www.artelynx.be/**. Het oudere `kunstonderwijs.atheneumsinttruiden.be` is niet langer het primaire adres.
+- Invoer: de DKO3-leerlingenexport heeft de kolommen `stamnummer`, `naam`, `voornaam`. Andere velden mogen niet uit deze export worden afgeleid.
+- Platformbeheer: `/platform/leerlingen?school_id=...` (alleen platformadministrator).
+- Schoolbeheer: `/school/leerlingen` (actieve school, `students.view` of `students.manage`, voor wijzigen/importeren `students.manage`).
+- Preview-bestanden staan tijdelijk op de private lokale storage, gekoppeld aan gebruikerssessie en school, met vervaltijd; nooit uploaden naar Git.
+- Alleen voorloopnullen, schoolgebonden uniekheid en persoonsnamen importeren; geen automatische uitschakeling wegens afwezigheid in export.
+- De tests in `tests/Feature/Dko3StudentAdministrationTest.php` zijn toegevoegd. **Draai ze lokaal/CI voordat je productie bijwerkt.**
