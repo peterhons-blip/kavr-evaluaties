@@ -28,7 +28,7 @@ class SettingsController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $school = $this->school($request);
-        // Alleen schoolspecifieke teksten en kleuren. Geen globale SMTP, URL of security-instellingen.
+        // Beheer enkel de eigen academie; platforminstellingen blijven centraal.
         $data = $request->validate([
             'slogan' => ['nullable', 'string', 'max:255'],
             'subtitle' => ['nullable', 'string', 'max:255'],
@@ -36,14 +36,48 @@ class SettingsController extends Controller
             'primary_color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'secondary_color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'accent_color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'language' => ['required', Rule::in(['nl','fr','en','de'])],
-            'timezone' => ['required', Rule::in(['Europe/Brussels','Europe/Amsterdam','Europe/Paris','Europe/Berlin','UTC'])],
+            'language' => ['required', Rule::in(['nl', 'fr', 'en', 'de'])],
+            'timezone' => ['required', Rule::in(['Europe/Brussels', 'Europe/Amsterdam', 'Europe/Paris', 'Europe/Berlin', 'UTC'])],
+            'logo' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'remove_logo' => ['nullable', 'boolean'],
         ]);
-        foreach (['primary_color','secondary_color','accent_color'] as $field) {
-            $data[$field] = strtoupper($data[$field]);
+        $oldLogo = $school->settings?->logo_path;
+        $newLogo = null;
+        if ($request->hasFile('logo')) {
+            $newLogo = $request->file('logo')->store('school-logos/'.$school->id, 'public');
         }
-        $school->settings()->updateOrCreate(['school_id' => $school->id], $data);
-        \App\Support\AccessAudit::record('school.settings.updated', $school, null);
-        return redirect()->route('school.settings.edit')->with('success', 'Schoolinstellingen opgeslagen.');
+        $settings = \Illuminate\Support\Arr::only($data, [
+            'slogan', 'subtitle', 'login_description', 'primary_color',
+            'secondary_color', 'accent_color', 'language', 'timezone',
+        ]);
+        foreach (['primary_color', 'secondary_color', 'accent_color'] as $field) {
+            $settings[$field] = strtoupper($settings[$field]);
+        }
+        if ($newLogo !== null || $request->boolean('remove_logo')) {
+            $settings['logo_path'] = $newLogo;
+        }
+
+        try {
+            DB::transaction(function () use ($school, $settings) {
+                $school->settings()->updateOrCreate(['school_id' => $school->id], $settings);
+                \App\Support\AccessAudit::record('school.settings.updated', $school, null, [
+                    'fields' => array_keys($settings),
+                ]);
+            });
+        } catch (\Throwable $exception) {
+            if ($newLogo !== null) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($newLogo);
+            }
+            throw $exception;
+        }
+
+        if ($oldLogo && $oldLogo !== $newLogo &&
+            ($newLogo !== null || $request->boolean('remove_logo')) &&
+            str_starts_with($oldLogo, 'school-logos/'.$school->id.'/')) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($oldLogo);
+        }
+
+        return redirect()->route('school.settings.edit')
+            ->with('success', 'Schoolinstellingen opgeslagen.');
     }
 }
