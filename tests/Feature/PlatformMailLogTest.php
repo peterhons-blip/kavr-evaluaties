@@ -57,6 +57,26 @@ class PlatformMailLogTest extends TestCase
             ->assertDontSee('user.updated');
     }
 
+    public function test_regular_outgoing_mail_is_logged_without_message_content(): void
+    {
+        $admin = User::factory()->create(['is_platform_admin' => true, 'is_active' => true]);
+        $this->actingAs($admin);
+
+        \Illuminate\Support\Facades\Config::set('mail.default', 'log');
+        \Illuminate\Support\Facades\Mail::purge('log');
+        \Illuminate\Support\Facades\Mail::raw(
+            'THIS_CONTENT_MUST_NEVER_APPEAR_IN_THE_AUDIT',
+            fn ($message) => $message->to('recipient@example.test')->subject('Wachtwoordbevestiging')
+        );
+
+        $this->assertDatabaseHas('access_audit_events', [
+            'action' => 'platform.mail.sent',
+        ]);
+        $this->get(route('platform.audit.mail'))
+            ->assertOk()->assertSee('recipient@example.test')
+            ->assertDontSee('THIS_CONTENT_MUST_NEVER_APPEAR_IN_THE_AUDIT');
+    }
+
     public function test_diagnostics_do_not_return_raw_exception_or_sensitive_values(): void
     {
         $result = MailDiagnostics::classify(new \RuntimeException(
