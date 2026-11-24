@@ -42,6 +42,12 @@ class Dko3TeacherSpreadsheetTest extends TestCase
                 'first_name' => 'Anna',
                 'last_name' => 'Janssens',
                 'email' => 'anna@example.test',
+                'phone' => '',
+                'dko3_roles' => '',
+                'dko3_active_assignments' => '',
+                'dko3_subject_groups' => '',
+                'dko3_locations' => '',
+                'dko3_subjects' => '',
             ], $parsed['rows'][0]);
         } finally {
             @unlink($path);
