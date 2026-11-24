@@ -107,6 +107,36 @@ final class Dko3TeacherSpreadsheet
         return preg_replace('/[^a-z0-9]/', '', $value);
     }
 
+    /**
+     * Selecteer alleen een transactioneel adres als de naam ondubbelzinnig
+     * overeenkomt. Bij meerdere kandidaten zonder duidelijke match is
+     * handmatige correctie veiliger dan aan de verkeerde persoon koppelen.
+     */
+    private static function chooseTransactionalEmail(array $candidates, string $first, string $last): string
+    {
+        if (count($candidates) === 1) {
+            return $candidates[0];
+        }
+
+        $firstKey = self::key($first);
+        $lastKey = self::key($last);
+        if ($firstKey === '' || $lastKey === '') {
+            return '';
+        }
+
+        $scored = [];
+        foreach ($candidates as $candidate) {
+            $local = explode('@', $candidate, 2)[0];
+            $localKey = self::key($local);
+            $both = str_contains($localKey, $firstKey) && str_contains($localKey, $lastKey);
+            $score = $both ? 2 : 0;
+            $scored[] = ['email' => $candidate, 'score' => $score];
+        }
+
+        $matches = array_values(array_filter($scored, static fn (array $item) => $item['score'] === 2));
+        return count($matches) === 1 ? $matches[0]['email'] : '';
+    }
+
     private static function normalize(array $rows): array
     {
         $aliases = [
@@ -114,6 +144,11 @@ final class Dko3TeacherSpreadsheet
             'first_name' => ['voornaam', 'firstname', 'first name', 'roepnaam'],
             'last_name' => ['familienaam', 'achternaam', 'lastname', 'last name'],
             'email' => ['e-mailadres account', 'email account', 'email', 'e mail', 'emailadres', 'e mailadres', 'mailadres', 'mail'],
+            'transactional_emails' => [
+                'e-mailadressen transactioneel (gescheiden door komma)',
+                'e-mailadressen transactioneel (gescheiden door puntkomma)',
+                'e-mailadressen transactioneel',
+            ],
             'phone' => ['telefoonnummers', 'telefoonnummer', 'telefoon'],
             'dko3_roles' => ['rol(len)', 'rollen'],
             'dko3_active_assignments' => ['actieve opdrachten'],
@@ -135,7 +170,7 @@ final class Dko3TeacherSpreadsheet
                     }
                 }
             }
-            if (isset($mapping['email']) &&
+            if ((isset($mapping['email']) || isset($mapping['transactional_emails'])) &&
                 (isset($mapping['full_name']) ||
                     (isset($mapping['first_name']) && isset($mapping['last_name'])))) {
                 $headers = $mapping;
@@ -146,7 +181,7 @@ final class Dko3TeacherSpreadsheet
 
         if ($headers === null) {
             throw ValidationException::withMessages([
-                'file' => 'Kolommen naam (Achternaam, Voornaam) of voornaam en familienaam, plus e-mailadres account, niet gevonden.',
+                'file' => 'Kolommen naam (Achternaam, Voornaam) of voornaam en familienaam, plus account- of transactioneel e-mailadres, niet gevonden.',
             ]);
         }
 
@@ -172,11 +207,22 @@ final class Dko3TeacherSpreadsheet
             }
 
             $email = mb_strtolower($value('email'));
+            if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $transactional = $value('transactional_emails');
+                $candidates = array_values(array_unique(array_filter(
+                    array_map(
+                        static fn (string $candidate) => mb_strtolower(trim($candidate)),
+                        preg_split('/[,;\\s]+/', $transactional) ?: []
+                    ),
+                    static fn (string $candidate) => (bool) filter_var($candidate, FILTER_VALIDATE_EMAIL)
+                )));
+                $email = self::chooseTransactionalEmail($candidates, $first, $last);
+            }
             if ($first === '' && $last === '' && $email === '') {
                 continue;
             }
             if ($first === '' || $last === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = 'Rij '.($i + 1).': naam of account-e-mailadres ontbreekt of is ongeldig.';
+                $errors[] = 'Rij '.($i + 1).': naam of geldig e-mailadres ontbreekt; controleer accountadres en transactionele adressen (bij meerdere adressen is een duidelijke naamsmatch vereist).';
                 continue;
             }
             if (isset($seen[$email])) {

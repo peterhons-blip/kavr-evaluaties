@@ -186,6 +186,53 @@ class Dko3TeacherImportTest extends TestCase
         ]);
     }
 
+    public function test_transactional_email_fallback_and_administrative_role(): void
+    {
+        $school = $this->school('A');
+        $admin = User::factory()->create(['is_platform_admin' => true, 'is_active' => true]);
+
+        $csv = "naam;e-mailadres account;e-mailadressen transactioneel (gescheiden door komma);rol(len)\n"
+            ."Binon, Robin;;robin.something@example.test,robin.binon@example.test;administratie\n";
+
+        $this->actingAs($admin)->post(route('platform.users.import.preview'), [
+            'school_id' => $school->id,
+            'mode' => 'update_only',
+            'file' => UploadedFile::fake()->createWithContent('dko3.csv', $csv),
+        ])->assertOk()->assertSee('robin.binon@example.test');
+
+        $this->post(route('platform.users.import.commit'), [
+            'token' => session('dko3_import_token'),
+            'confirm' => '1',
+        ])->assertRedirect();
+
+        $user = User::where('email', 'robin.binon@example.test')->firstOrFail();
+        $this->assertDatabaseHas('school_user', [
+            'school_id' => $school->id,
+            'user_id' => $user->id,
+            'role' => 'administration',
+        ]);
+    }
+
+    public function test_ambiguous_transactional_addresses_are_rejected(): void
+    {
+        $school = $this->school('A');
+        $admin = User::factory()->create(['is_platform_admin' => true, 'is_active' => true]);
+        $csv = "naam;e-mailadres account;e-mailadressen transactioneel (gescheiden door puntkomma)\n"
+            ."Binon, Robin;;robin.binon@school.example;binon.robin@other.example\n";
+        // Een puntkomma moet binnen dit CSV-veld gequote worden.
+        $csv = "naam;e-mailadres account;e-mailadressen transactioneel (gescheiden door puntkomma)\n"
+            ."Binon, Robin;;\"robin.binon@school.example;binon.robin@other.example\"\n";
+
+        $this->actingAs($admin)->from(route('platform.users.import'))->post(
+            route('platform.users.import.preview'),
+            [
+                'school_id' => $school->id,
+                'mode' => 'update_only',
+                'file' => UploadedFile::fake()->createWithContent('dko3.csv', $csv),
+            ]
+        )->assertSessionHasErrors('file');
+    }
+
     public function test_bulk_deactivation_will_not_disable_the_current_administrator(): void
     {
         $admin = User::factory()->create(['is_platform_admin'=>true,'is_active'=>true]);
