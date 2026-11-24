@@ -95,6 +95,9 @@ Route::middleware('auth')->group(function () {
             ->name('school.members.index');
         Route::post('/school/gebruikers', [MemberController::class, 'store'])
             ->name('school.members.store');
+        Route::post('/school/gebruikers/{user}/wachtwoordlink', [MemberController::class, 'sendSetupLink'])
+            ->middleware('throttle:3,1')
+            ->name('school.members.setup-link');
         Route::put('/school/gebruikers/{user}', [MemberController::class, 'update'])
             ->name('school.members.update');
     });
