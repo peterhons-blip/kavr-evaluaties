@@ -233,6 +233,54 @@ class Dko3TeacherImportTest extends TestCase
         )->assertSessionHasErrors('file');
     }
 
+    public function test_transactional_email_prefers_school_domain_then_gmail(): void
+    {
+        $school = $this->school('A');
+        $admin = User::factory()->create(['is_platform_admin' => true, 'is_active' => true]);
+        $csv = "naam;e-mailadres account;e-mailadressen transactioneel\n"
+            ."Simenon, Colette;;\"random@elsewhere.test,colette.simenon@gmail.com,colette.simenon@ka-vr.be\"\n"
+            ."Test, Lotte;;\"lotte.test@gmail.com,random@elsewhere.test\"\n";
+
+        $this->actingAs($admin)->post(route('platform.users.import.preview'), [
+            'school_id' => $school->id,
+            'mode' => 'update_only',
+            'file' => UploadedFile::fake()->createWithContent('dko3.csv', $csv),
+        ])->assertOk()->assertSee('colette.simenon@ka-vr.be')
+          ->assertSee('lotte.test@gmail.com');
+
+        $this->post(route('platform.users.import.commit'), [
+            'token' => session('dko3_import_token'),
+            'confirm' => '1',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'first_name' => 'Colette',
+            'last_name' => 'Simenon',
+            'email' => 'colette.simenon@ka-vr.be',
+        ]);
+        $this->assertDatabaseHas('users', [
+            'first_name' => 'Lotte',
+            'last_name' => 'Test',
+            'email' => 'lotte.test@gmail.com',
+        ]);
+    }
+
+    public function test_multiple_school_domain_addresses_without_name_match_are_rejected(): void
+    {
+        $school = $this->school('A');
+        $admin = User::factory()->create(['is_platform_admin' => true, 'is_active' => true]);
+        $csv = "naam;e-mailadres account;e-mailadressen transactioneel\n"
+            ."Simenon, Colette;;\"info@ka-vr.be,administratie@ka-vr.be,colette.simenon@gmail.com\"\n";
+
+        $this->actingAs($admin)->from(route('platform.users.import'))->post(
+            route('platform.users.import.preview'), [
+                'school_id' => $school->id,
+                'mode' => 'update_only',
+                'file' => UploadedFile::fake()->createWithContent('dko3.csv', $csv),
+            ]
+        )->assertSessionHasErrors('file');
+    }
+
     public function test_bulk_deactivation_will_not_disable_the_current_administrator(): void
     {
         $admin = User::factory()->create(['is_platform_admin'=>true,'is_active'=>true]);
