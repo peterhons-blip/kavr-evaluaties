@@ -23,7 +23,7 @@
     <div class="ml-table-wrap">
         <table class="ml-table">
             <thead><tr>
-                <th>Datum</th><th>Type</th><th>Uitgevoerd door</th><th>Ontvanger</th>
+                <th>Datum</th><th>Type</th><th>Onderwerp</th><th>Uitgevoerd door</th><th>Ontvanger</th>
                 <th>Modus</th><th>Resultaat</th><th>Diagnose / advies</th>
             </tr></thead>
             <tbody>
@@ -36,6 +36,7 @@
                     <tr>
                         <td class="ml-nowrap">{{ \Illuminate\Support\Carbon::parse($event->created_at)->timezone('Europe/Brussels')->format('d/m/Y H:i:s') }}</td>
                         <td>{{ $event->action === 'platform.mail.test' ? 'SMTP-test' : 'Verzonden e-mail' }}</td>
+                        <td>{{ $details['subject'] ?? 'Niet geregistreerd (oud bericht)' }}</td>
                         <td>{{ $event->actor_name ?? 'Automatisch / gebruiker' }}</td>
                         <td>{{ $details['recipient'] ?? 'Niet opgeslagen (oude test)' }}</td>
                         <td>{{ ($details['driver'] ?? 'onbekend') === 'smtp' ? 'SMTP' : 'Logmodus' }}</td>
@@ -57,14 +58,14 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="ml-empty">Er zijn nog geen uitgaande e-mails geregistreerd.</td></tr>
+                    <tr><td colspan="8" class="ml-empty">Er zijn nog geen uitgaande e-mails geregistreerd.</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
     <div class="ml-pages">{{ $events->links('vendor.pagination.artelynx') }}</div>
 </div>
-<p class="ml-footnote">Dit overzicht bewaart geen ruwe SMTP-responses, wachtwoorden of resetlinks. Deze lijst registreert uitgaande mails vanaf deze update. Een status 'Verwerkt' betekent dat de e-mail aan het ingestelde transport is aangeboden, niet dat hij daadwerkelijk werd afgeleverd. Historische mails verschijnen niet met terugwerkende kracht.</p>
+<p class="ml-footnote">Dit overzicht bewaart alleen een beperkt onderwerp zonder URL's, en geen e-mailinhoud, ruwe SMTP-responses, wachtwoorden of resetlinks. Deze lijst registreert uitgaande mails vanaf deze update. Een status 'Verwerkt' betekent dat de e-mail aan het ingestelde transport is aangeboden, niet dat hij daadwerkelijk werd afgeleverd. Historische mails verschijnen niet met terugwerkende kracht.</p>
 @endsection
 @push('styles')
 <style>
