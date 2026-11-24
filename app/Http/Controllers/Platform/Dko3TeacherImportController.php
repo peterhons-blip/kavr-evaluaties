@@ -28,9 +28,11 @@ class Dko3TeacherImportController extends Controller
     {
         $data = $request->validate([
             'school_id' => ['required','integer','exists:schools,id'],
+            'mode' => ['required', \Illuminate\Validation\Rule::in(['update_only', 'full'])],
             'file' => ['required','file','max:5120','mimes:xlsx,csv,txt'],
         ]);
         $school = School::findOrFail($data['school_id']);
+        $mode = $data['mode'];
         $file = $data['file'];
         $extension = strtolower($file->getClientOriginalExtension());
         if (! in_array($extension, ['xlsx','csv'], true)) {
@@ -54,7 +56,9 @@ class Dko3TeacherImportController extends Controller
             ->whereNull('su.dko3_hidden_at')
             ->get(['su.user_id', 'u.email']);
 
-        $missing = $current->filter(fn ($u) => ! in_array(mb_strtolower($u->email), $emails, true));
+        $missing = $mode === 'full'
+            ? $current->filter(fn ($u) => ! in_array(mb_strtolower($u->email), $emails, true))
+            : $current->take(0);
 
         $stats = [
             'total' => count($rows),
@@ -80,12 +84,13 @@ class Dko3TeacherImportController extends Controller
         $path = 'dko3-imports/'.$token.'.json';
         Storage::disk('local')->put($path, json_encode([
             'school_id' => $school->id,
+            'mode' => $mode,
             'created_at' => now()->timestamp,
             'rows' => $rows,
         ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
 
         $request->session()->put('dko3_import_token', $token);
-        return view('platform.users.import-preview', compact('school','stats','rows','missing','token'));
+        return view('platform.users.import-preview', compact('school','stats','rows','missing','token','mode'));
     }
 
     public function commit(Request $request): RedirectResponse
@@ -108,9 +113,10 @@ class Dko3TeacherImportController extends Controller
         }
         $school = School::findOrFail($snapshot['school_id']);
         $rows = $snapshot['rows'] ?? [];
-        if (! $rows) abort(422);
+        $mode = $snapshot['mode'] ?? 'update_only';
+        if (! in_array($mode, ['update_only', 'full'], true) || ! $rows) abort(422);
 
-        $report = DB::transaction(function () use ($school, $rows) {
+        $report = DB::transaction(function () use ($school, $rows, $mode) {
             SchoolRoleCatalog::ensureFor($school);
             DB::table('schools')->where('id',$school->id)->lockForUpdate()->first();
 
@@ -129,19 +135,36 @@ class Dko3TeacherImportController extends Controller
                         'password' => Str::random(64),
                         'is_active' => true,
                         'must_change_password' => true,
+                        'phone' => $item['phone'] ?: null,
                     ]);
                     $created++;
                 } else {
                     // Behoud globale accountstatus en wachtwoord. Namen bijwerken.
-                    $user->update([
+                    $updates = [
                         'name' => trim($item['first_name'].' '.$item['last_name']),
                         'first_name' => $item['first_name'],
                         'last_name' => $item['last_name'],
-                    ]);
+                    ];
+                    // Lege telefoongegevens uit DKO3 wissen een bestaande
+                    // handmatige waarde niet.
+                    if (! empty($item['phone'])) {
+                        $updates['phone'] = $item['phone'];
+                    }
+                    $user->update($updates);
                     $updated++;
                 }
 
                 $present[] = $user->id;
+                $profile = [];
+                foreach ([
+                    'dko3_roles', 'dko3_active_assignments',
+                    'dko3_subject_groups', 'dko3_locations', 'dko3_subjects',
+                ] as $field) {
+                    // CSV's zonder deze velden behouden bestaande DKO3-info.
+                    if (! empty($item[$field])) {
+                        $profile[$field] = $item[$field];
+                    }
+                }
                 $membership = DB::table('school_user')
                     ->where('school_id', $school->id)->where('user_id', $user->id)->first();
 
@@ -155,7 +178,7 @@ class Dko3TeacherImportController extends Controller
                             'dko3_managed' => true,
                             'dko3_synced_at' => now(),
                             'updated_at' => now(),
-                        ]);
+                        ] + $profile);
                 } else {
                     DB::table('school_user')->insert([
                         'school_id' => $school->id,
@@ -167,7 +190,7 @@ class Dko3TeacherImportController extends Controller
                         'dko3_synced_at' => now(),
                         'created_at' => now(),
                         'updated_at' => now(),
-                    ]);
+                    ] + $profile);
                 }
             }
 
@@ -178,8 +201,8 @@ class Dko3TeacherImportController extends Controller
                 ->where('role','teacher')
                 ->whereNull('dko3_hidden_at')
                 ->whereNotIn('user_id', $present);
-            $deactivated = (clone $query)->count();
-            $query->update([
+            $deactivated = $mode === 'full' ? (clone $query)->count() : 0;
+            if ($mode === 'full') $query->update([
                 'is_active' => false,
                 'dko3_hidden_at' => now(),
                 'updated_at' => now(),
@@ -190,6 +213,7 @@ class Dko3TeacherImportController extends Controller
                 'updated' => $updated,
                 'hidden' => $deactivated,
                 'total' => count($rows),
+                'mode' => $mode,
             ]);
             return compact('created','updated','deactivated');
         });

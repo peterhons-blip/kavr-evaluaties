@@ -110,44 +110,97 @@ final class Dko3TeacherSpreadsheet
     private static function normalize(array $rows): array
     {
         $aliases = [
-            'first_name' => ['voornaam','firstname','first name','naam voornaam','roepnaam'],
-            'last_name' => ['familienaam','achternaam','lastname','last name','naam'],
-            'email' => ['email','e mail','emailadres','e mailadres','mailadres','mail'],
+            'full_name' => ['naam', 'volledige naam'],
+            'first_name' => ['voornaam', 'firstname', 'first name', 'roepnaam'],
+            'last_name' => ['familienaam', 'achternaam', 'lastname', 'last name'],
+            'email' => ['e-mailadres account', 'email account', 'email', 'e mail', 'emailadres', 'e mailadres', 'mailadres', 'mail'],
+            'phone' => ['telefoonnummers', 'telefoonnummer', 'telefoon'],
+            'dko3_roles' => ['rol(len)', 'rollen'],
+            'dko3_active_assignments' => ['actieve opdrachten'],
+            'dko3_subject_groups' => ['vakgroepen'],
+            'dko3_locations' => ['vestigingsplaatsen'],
+            'dko3_subjects' => ['vakken (huidig schooljaar)', 'vakken'],
         ];
-        $headers = null; $headerLine = null;
+
+        $headers = null;
+        $headerLine = null;
         foreach (array_slice($rows, 0, 20, true) as $i => $row) {
             $keys = array_map(fn ($v) => self::key((string) $v), $row);
             $mapping = [];
             foreach ($aliases as $field => $names) {
                 foreach ($keys as $column => $key) {
-                    if (in_array($key, array_map([self::class,'key'], $names), true)) {
-                        $mapping[$field] = $column; break;
+                    if (in_array($key, array_map([self::class, 'key'], $names), true)) {
+                        $mapping[$field] = $column;
+                        break;
                     }
                 }
             }
-            if (count($mapping) === 3) { $headers = $mapping; $headerLine = $i; break; }
-        }
-        if ($headers === null) {
-            throw ValidationException::withMessages(['file' => 'Kolommen voornaam, familienaam en e-mailadres niet gevonden. Voeg het originele DKO3-bestand toe zodat we de kolommen kunnen afstemmen.']);
+            if (isset($mapping['email']) &&
+                (isset($mapping['full_name']) ||
+                    (isset($mapping['first_name']) && isset($mapping['last_name'])))) {
+                $headers = $mapping;
+                $headerLine = $i;
+                break;
+            }
         }
 
-        $out = []; $errors = []; $seen = [];
+        if ($headers === null) {
+            throw ValidationException::withMessages([
+                'file' => 'Kolommen naam (Achternaam, Voornaam) of voornaam en familienaam, plus e-mailadres account, niet gevonden.',
+            ]);
+        }
+
+        $out = [];
+        $errors = [];
+        $seen = [];
         foreach (array_slice($rows, $headerLine + 1, null, true) as $i => $row) {
-            $first = trim((string) ($row[$headers['first_name']] ?? ''));
-            $last = trim((string) ($row[$headers['last_name']] ?? ''));
-            $email = mb_strtolower(trim((string) ($row[$headers['email']] ?? '')));
-            if ($first === '' && $last === '' && $email === '') continue;
+            $value = static fn (string $field) => isset($headers[$field])
+                ? trim((string) ($row[$headers[$field]] ?? ''))
+                : '';
+            $first = $value('first_name');
+            $last = $value('last_name');
+            $full = $value('full_name');
+
+            if (($first === '' || $last === '') && $full !== '') {
+                // DKO3 exporteert 'Familienaam, Voornaam'. Zonder komma
+                // raden we de splitsing niet: vermijd onjuiste persoonsdata.
+                $parts = explode(',', $full, 2);
+                if (count($parts) === 2) {
+                    $last = trim($parts[0]);
+                    $first = trim($parts[1]);
+                }
+            }
+
+            $email = mb_strtolower($value('email'));
+            if ($first === '' && $last === '' && $email === '') {
+                continue;
+            }
             if ($first === '' || $last === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = 'Rij '.($i + 1).': voornaam, familienaam of e-mailadres ontbreekt of is ongeldig.';
+                $errors[] = 'Rij '.($i + 1).': naam of account-e-mailadres ontbreekt of is ongeldig.';
                 continue;
             }
             if (isset($seen[$email])) {
-                $errors[] = 'Rij '.($i + 1).': dubbel e-mailadres '.$email.'.'; continue;
+                $errors[] = 'Rij '.($i + 1).': dubbel account-e-mailadres '.$email.'.';
+                continue;
             }
+
             $seen[$email] = true;
-            $out[] = ['first_name' => mb_substr($first,0,100), 'last_name' => mb_substr($last,0,100), 'email' => $email];
+            $out[] = [
+                'first_name' => mb_substr($first, 0, 100),
+                'last_name' => mb_substr($last, 0, 100),
+                'email' => $email,
+                'phone' => mb_substr($value('phone'), 0, 60),
+                'dko3_roles' => mb_substr($value('dko3_roles'), 0, 10000),
+                'dko3_active_assignments' => mb_substr($value('dko3_active_assignments'), 0, 10000),
+                'dko3_subject_groups' => mb_substr($value('dko3_subject_groups'), 0, 10000),
+                'dko3_locations' => mb_substr($value('dko3_locations'), 0, 10000),
+                'dko3_subjects' => mb_substr($value('dko3_subjects'), 0, 10000),
+            ];
         }
-        if (count($out) === 0) $errors[] = 'Geen geldige leerkrachten gevonden.';
+        if (! count($out)) {
+            $errors[] = 'Geen geldige leerkrachten gevonden.';
+        }
+
         return ['rows' => $out, 'errors' => array_slice($errors, 0, 60), 'total_errors' => count($errors)];
     }
 }
