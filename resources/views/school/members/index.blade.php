@@ -9,12 +9,6 @@
 @if(session('success'))<div class="sm-alert sm-success">{{ session('success') }}</div>@endif
 @if($errors->any())<div class="sm-alert sm-error">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
 
-<div class="sm-summary">
-    <div class="sm-stat"><span>Personeelsleden</span><strong>{{ $counts['total'] }}</strong></div>
-    <div class="sm-stat"><span>Actieve schoolkoppelingen</span><strong>{{ $counts['active'] }}</strong></div>
-    <div class="sm-stat"><span>Beschikbare rollen</span><strong>{{ $roles->count() }}</strong></div>
-</div>
-
 <div class="card sm-panel">
     <div class="sm-head">
         <div><h2>Personeelsledenoverzicht</h2><p>Zoek, filter, controleer wachtwoordinstellingen en beheer schoolgebonden rollen.</p></div>
@@ -84,6 +78,7 @@
               <td>
                   <div class="sm-actions">
                     <form method="POST" action="{{ route('school.members.update',$member) }}" id="sm-edit-{{ $member->id }}">@csrf @method('PUT')</form>
+                    <a class="btn btn-secondary" href="{{ route('school.members.edit',$member) }}">Bewerken</a>
                     <button class="btn btn-secondary" type="submit" form="sm-edit-{{ $member->id }}">Opslaan</button>
                     <form method="POST" action="{{ route('school.members.setup-link',$member) }}" onsubmit="return confirm('Een beveiligde wachtwoordlink naar het e-mailadres van dit personeelslid sturen?');">
                         @csrf
@@ -118,9 +113,6 @@
 @endsection
 @push('styles')
 <style>
-.sm-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
-.sm-stat{border:1px solid #e1e8ee;background:#fff;border-radius:12px;padding:19px 21px}
-.sm-stat span{font-size:11px;color:#718096;display:block}.sm-stat strong{display:block;font-size:27px;margin-top:5px}
 .sm-panel{margin-bottom:22px}.sm-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:15px;margin-bottom:20px}
 .sm-head h2{font-size:18px;margin:0 0 5px}.sm-head p,.sm-help{color:#718096;font-size:12px;line-height:1.7;margin:0}
 .sm-filter{display:flex;align-items:end;gap:12px;flex-wrap:wrap;background:#f6fafb;border-radius:10px;padding:16px;margin-bottom:20px;border:1px solid #e6edf0}
