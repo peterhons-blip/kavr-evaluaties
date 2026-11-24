@@ -21,6 +21,8 @@ class DashboardController extends Controller
 
         $canViewUsers = SchoolAccess::allows($request->user(), $school, 'users.view')
             || SchoolAccess::allows($request->user(), $school, 'users.manage');
+        $canViewStudents = SchoolAccess::allows($request->user(), $school, 'students.view')
+            || SchoolAccess::allows($request->user(), $school, 'students.manage');
         $canManageRoles = SchoolAccess::allows($request->user(), $school, 'roles.manage');
 
         // Gevoelige gebruikers-/auditinformatie alleen ophalen voor beheerders.
@@ -41,7 +43,7 @@ class DashboardController extends Controller
             : collect();
 
         return view('dashboard', compact(
-            'school', 'canViewUsers', 'canManageRoles', 'recentMembers', 'recentEvents'
+            'school', 'canViewUsers', 'canViewStudents', 'canManageRoles', 'recentMembers', 'recentEvents'
         ));
     }
 }
