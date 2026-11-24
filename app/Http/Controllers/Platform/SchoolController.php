@@ -198,10 +198,10 @@ class SchoolController extends Controller
             'country_code' => ['required', 'string', 'size:2'],
             'director_name' => ['nullable', 'string', 'max:255'],
             'is_active' => ['required', 'boolean'],
-            'default_login' => ['required', 'boolean'],
+            'default_login' => ['sometimes', 'boolean'],
         ]);
 
-        if ($validated['default_login'] && ! $validated['is_active']) {
+        if (($validated['default_login'] ?? false) && ! $validated['is_active']) {
             throw ValidationException::withMessages([
                 'default_login' => 'Een inactieve school kan niet als standaardlogin worden ingesteld.',
             ]);
@@ -212,6 +212,10 @@ class SchoolController extends Controller
 
             $settings = PlatformSetting::query()->firstOrNew([]);
             $isCurrentDefault = (int) $settings->default_login_school_id === (int) $school->id;
+
+            if (! array_key_exists('default_login', $validated)) {
+                return;
+            }
 
             if ($validated['default_login']) {
                 $settings->default_login_school_id = $school->id;
