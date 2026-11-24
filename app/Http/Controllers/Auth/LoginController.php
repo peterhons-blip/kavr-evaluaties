@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\School;
 use App\Models\PlatformSetting;
+use App\Support\LoginAudit;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -58,9 +59,12 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials + ['is_active' => true])) {
             $request->session()->regenerate();
+            LoginAudit::record($request, 'login_success', Auth::user());
 
             return redirect()->route('schools.select');
         }
+
+        LoginAudit::record($request, 'login_failed', null, null, $credentials['email']);
 
         return back()
             ->withErrors([
@@ -74,6 +78,7 @@ class LoginController extends Controller
      */
     public function logout(Request $request): RedirectResponse
     {
+        LoginAudit::record($request, 'logout', $request->user(), $request->session()->get('active_school_id'));
         Auth::logout();
 
         $request->session()->invalidate();
