@@ -30,18 +30,18 @@ class StudentModelTest extends TestCase
 
         $studentA = Student::create([
             'school_id' => $schoolA->id,
-            'dko3_stamnummer' => '002012331',
+            'dko3_stamnummer' => '000123001',
             'first_name' => 'Voornaam',
             'last_name' => 'Achternaam',
         ]);
         $studentB = Student::create([
             'school_id' => $schoolB->id,
-            'dko3_stamnummer' => '002012331',
+            'dko3_stamnummer' => '000123001',
             'first_name' => 'Andere',
             'last_name' => 'Leerling',
         ]);
 
-        $this->assertSame('002012331', $studentA->fresh()->dko3_stamnummer);
+        $this->assertSame('000123001', $studentA->fresh()->dko3_stamnummer);
         $this->assertSame($schoolA->id, $studentA->school->id);
         $this->assertSame($schoolB->id, $studentB->school->id);
         $this->assertSame('Voornaam Achternaam', $studentA->full_name);
