@@ -98,6 +98,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/school/gebruikers/{user}/wachtwoordlink', [MemberController::class, 'sendSetupLink'])
             ->middleware('throttle:3,1')
             ->name('school.members.setup-link');
+        Route::get('/school/gebruikers/{user}/bewerken', [MemberController::class, 'edit'])
+            ->name('school.members.edit');
+        Route::put('/school/gebruikers/{user}/gegevens', [MemberController::class, 'updateDetails'])
+            ->name('school.members.details.update');
         Route::put('/school/gebruikers/{user}', [MemberController::class, 'update'])
             ->name('school.members.update');
     });
