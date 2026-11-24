@@ -19,6 +19,8 @@ use App\Http\Controllers\Platform\SchoolRoleController;
 use App\Http\Controllers\Platform\SchoolMemberController;
 use App\Http\Controllers\School\MemberController;
 use App\Http\Controllers\School\DashboardController;
+use App\Http\Controllers\School\SettingsController as SchoolScopedSettingsController;
+use App\Http\Controllers\School\LocationController as SchoolScopedLocationController;
 use App\Http\Controllers\School\RoleController as SchoolRoleManagementController;
 
 
@@ -62,6 +64,15 @@ Route::middleware('auth')->group(function () {
 
     // Beheer van schoolgebruikers vereist schoollidmaatschap en rechten.
     Route::middleware('active.school')->group(function () {
+        // Eigen schoolbeheer, altijd afgeschermd door active.school én school.settings.
+        Route::get('/school/instellingen', [SchoolScopedSettingsController::class, 'edit'])->name('school.settings.edit');
+        Route::put('/school/instellingen', [SchoolScopedSettingsController::class, 'update'])->name('school.settings.update');
+        Route::get('/school/vestigingen', [SchoolScopedLocationController::class, 'index'])->name('school.locations.index');
+        Route::get('/school/vestigingen/nieuw', [SchoolScopedLocationController::class, 'create'])->name('school.locations.create');
+        Route::post('/school/vestigingen', [SchoolScopedLocationController::class, 'store'])->name('school.locations.store');
+        Route::get('/school/vestigingen/{location}/bewerken', [SchoolScopedLocationController::class, 'edit'])->name('school.locations.edit');
+        Route::put('/school/vestigingen/{location}', [SchoolScopedLocationController::class, 'update'])->name('school.locations.update');
+
         Route::get('/school/rollen', [SchoolRoleManagementController::class, 'index'])->name('school.roles.index');
         Route::get('/school/rollen/create', [SchoolRoleManagementController::class, 'create'])->name('school.roles.create');
         Route::post('/school/rollen', [SchoolRoleManagementController::class, 'store'])->name('school.roles.store');
