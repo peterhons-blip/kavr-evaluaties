@@ -34,6 +34,16 @@ class SchoolMemberController extends Controller
             })
             ->when($roleFilter !== '', fn ($query) => $query->where('school_user.role', $roleFilter))
             ->when($statusFilter !== '', fn ($query) => $query->where('school_user.is_active', $statusFilter === 'active'))
+            ->orderByDesc('users.is_platform_admin')
+            ->orderByRaw("CASE school_user.role
+                WHEN 'school_admin' THEN 1
+                WHEN 'director' THEN 2
+                WHEN 'administration' THEN 3
+                WHEN 'coordinator' THEN 4
+                WHEN 'teacher' THEN 5
+                WHEN 'jury' THEN 6
+                WHEN 'viewer' THEN 7
+                ELSE 8 END")
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->paginate(20)
