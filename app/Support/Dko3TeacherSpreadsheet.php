@@ -114,27 +114,53 @@ final class Dko3TeacherSpreadsheet
      */
     private static function chooseTransactionalEmail(array $candidates, string $first, string $last): string
     {
+        // DKO3: een academieadres heeft voorrang, daarna Gmail.
+        // Een uniek adres van het voorkeursdomein is voldoende; bij meerdere
+        // adressen op hetzelfde domein eisen we een ondubbelzinnige naamsmatch.
+        foreach (['ka-vr.be', 'gmail.com'] as $domain) {
+            $preferred = array_values(array_filter(
+                $candidates,
+                static fn (string $candidate) => str_ends_with($candidate, '@'.$domain)
+            ));
+            if (count($preferred) === 1) {
+                return $preferred[0];
+            }
+            if (count($preferred) > 1) {
+                $matched = self::matchEmailByName($preferred, $first, $last);
+                if ($matched !== '') {
+                    return $matched;
+                }
+                // Geen veilige keuze binnen dit domein: ga niet gokken.
+                return '';
+            }
+        }
+
+        // Zonder voorkeursdomein behouden we de vorige veilige werkwijze.
         if (count($candidates) === 1) {
             return $candidates[0];
         }
 
+        return self::matchEmailByName($candidates, $first, $last);
+    }
+
+    private static function matchEmailByName(array $candidates, string $first, string $last): string
+    {
         $firstKey = self::key($first);
         $lastKey = self::key($last);
         if ($firstKey === '' || $lastKey === '') {
             return '';
         }
 
-        $scored = [];
+        $matches = [];
         foreach ($candidates as $candidate) {
             $local = explode('@', $candidate, 2)[0];
             $localKey = self::key($local);
-            $both = str_contains($localKey, $firstKey) && str_contains($localKey, $lastKey);
-            $score = $both ? 2 : 0;
-            $scored[] = ['email' => $candidate, 'score' => $score];
+            if (str_contains($localKey, $firstKey) && str_contains($localKey, $lastKey)) {
+                $matches[] = $candidate;
+            }
         }
 
-        $matches = array_values(array_filter($scored, static fn (array $item) => $item['score'] === 2));
-        return count($matches) === 1 ? $matches[0]['email'] : '';
+        return count($matches) === 1 ? $matches[0] : '';
     }
 
     private static function normalize(array $rows): array
