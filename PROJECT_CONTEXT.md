@@ -115,3 +115,13 @@ Gebruik op productie nooit een testcommando dat de echte databank wijzigt. Deze 
 - Preview-bestanden staan tijdelijk op de private lokale storage, gekoppeld aan gebruikerssessie en school, met vervaltijd; nooit uploaden naar Git.
 - Alleen voorloopnullen, schoolgebonden uniekheid en persoonsnamen importeren; geen automatische uitschakeling wegens afwezigheid in export.
 - De tests in `tests/Feature/Dko3StudentAdministrationTest.php` zijn toegevoegd. **Draai ze lokaal/CI voordat je productie bijwerkt.**
+
+## Schoolomgeving en beheer (24 november 2026)
+
+- Platformbeheer is voor het platform als geheel: scholen, globale instellingen, toezicht en ondersteuning.
+- De **eigen schoolomgeving** is de operationele werkplek van leerkrachten, administratie en directie.
+- Het schooldashboard toont uitsluitend toegestane modules en schoolgebonden tellingen. Schoolgebruikers kunnen leerlingen, personeelsleden, rollen/rechten, vestigingsplaatsen en schoolinstellingen openen volgens de bestaande schoolrollen.
+- Nieuwe routes `/school/instellingen` en `/school/vestigingen` controleren server-side `school.settings` en gebruiken uitsluitend `active_school_id`; records uit een andere academie leveren 404 op.
+- Schoolinstellingen passen alleen de schoolspecifieke loginteksten, kleuren, taal en tijdzone aan. Platformbrede instellingen en technisch systeembeheer blijven centraal.
+- Het dashboard gebruikt expliciet schoolgebonden tellingen en gekwalificeerde pivot-query's om SQL-ambiguïteit te vermijden. Regressietests: `SchoolDashboardAccessTest` en `SchoolScopedManagementTest`.
+- Voor deze aanpassingen zijn geen nieuwe migraties nodig. Voer lokaal `php artisan test` uit vóór live-uitrol.
