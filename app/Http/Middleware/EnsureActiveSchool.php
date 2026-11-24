@@ -29,6 +29,7 @@ class EnsureActiveSchool
             ->where('schools.id', $schoolId)
             ->where('schools.is_active', true)
             ->wherePivot('is_active', true)
+            ->wherePivotNull('dko3_hidden_at')
             ->exists();
 
         if (!$hasAccess) {
