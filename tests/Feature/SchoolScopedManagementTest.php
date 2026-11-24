@@ -244,7 +244,7 @@ class SchoolScopedManagementTest extends TestCase
         $this->assertDatabaseHas('users', [
             'id' => $teacher->id,
             'first_name' => 'Testvoornaam',
-            'email' => 'schoolperson@example.test',
+            'email' => 'schoolperson@example.com',
             'phone' => '012345678',
         ]);
     }
