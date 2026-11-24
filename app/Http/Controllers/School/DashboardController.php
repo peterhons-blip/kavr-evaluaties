@@ -41,8 +41,8 @@ class DashboardController extends Controller
         // Gevoelige gebruikers-/auditinformatie alleen ophalen voor beheerders.
         $recentMembers = $canViewUsers
             ? $school->users()
-                ->wherePivotNull('dko3_hidden_at')
-                ->orderByPivot('created_at', 'desc')
+                ->whereNull('school_user.dko3_hidden_at')
+                ->orderBy('school_user.created_at', 'desc')
                 ->limit(4)
                 ->get(['users.id', 'users.name', 'users.first_name', 'users.last_name', 'users.email'])
             : collect();
