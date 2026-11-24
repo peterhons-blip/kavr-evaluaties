@@ -140,3 +140,10 @@ Gebruik op productie nooit een testcommando dat de echte databank wijzigt. Deze 
 - De schoolpagina's gebruiken consequent `layouts.school`, met in de bovenbalk het **academielogo naast de actieve schoolnaam**. Het Artelynx-logo linksboven blijft de platformidentiteit.
 - Alle schoolbeheercontrollers controleren `active_school_id` en `SchoolAccess::allows()`. Een schooladmin kan geen platformbrede SMTP-/systeeminstellingen, globale accountstatussen of gegevens van andere academies wijzigen.
 - Toegevoegd: regressietests voor eigen academielogo en personeelsscope in `SchoolScopedManagementTest.php`. Geen nieuwe migratie voor deze uitbreiding. Draai `php artisan test` en `php artisan view:cache` vóór uitrol.
+
+## Personeelsbeheer: wachtwoordstatus en resetlink (november 2026)
+
+- Schoolpersoneelslijst: aparte uitgelijnde kolommen schoolrol, schoolstatus (pivot), globale accountstatus en wachtwoordstatus; wachtwoordstatus `Nog in te stellen` (`must_change_password`), `Ingesteld` (`password_set_at` aanwezig), anders `Onbekend`.
+- Schoolfilters: naam/mail, rol, schoolstatus, wachtwoordstatus, 20/50/100 rijen. Bestaande schooladmin-wijzigingen lopen via één eigen schoolkoppeling per gebruiker; andere academies blijven onaangeraakt.
+- Knop `Instellink mailen`/`Resetlink mailen` roept beveiligde, gelimiteerde POST `school.members.setup-link` aan en hergebruikt Laravel's wachtwoordbroker. Geen token of ruwe reset-URL tonen aan beheerders. Alleen `users.manage`, actieve accounts/koppelingen, schoolgebonden gebruikers; audit op `school.member.setup_link_sent`.
+- Nieuwe tests staan in `SchoolScopedManagementTest.php`; voer deze lokaal uit. Geen migratie vereist.
