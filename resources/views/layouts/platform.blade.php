@@ -568,8 +568,14 @@
 
         <div class="menu-label">BEHEER</div>
 
+        <a href="{{ route('platform.permissions.index') }}"
+           class="nav-item {{ request()->routeIs('platform.permissions.*') ? 'active' : '' }}">
+            <span class="nav-icon">☑</span>
+            <span class="nav-text">Rollen en rechten</span>
+        </a>
+
         <a href="{{ route('platform.audit.index') }}"
-           class="nav-item {{ request()->routeIs('platform.audit.*') ? 'active' : '' }}">
+           class="nav-item {{ request()->routeIs('platform.audit.index') ? 'active' : '' }}">
             <span class="nav-icon">☷</span>
             <span class="nav-text">Beheerhistoriek</span>
         </a>
@@ -623,6 +629,9 @@
                class="btn btn-secondary">
                 Wissel omgeving
             </a>
+
+            <a href="{{ route('profile.edit') }}" class="btn btn-secondary"
+               aria-label="Mijn profiel en wachtwoord aanpassen">Mijn profiel</a>
 
             <!-- GEBRUIKER -->
             <div class="user-info">
