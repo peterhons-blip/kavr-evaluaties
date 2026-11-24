@@ -4,7 +4,7 @@
 @section('content')
 <div class="page-header">
     <h1>E-maillog</h1>
-    <p>Veilige diagnose van verzendpogingen met de testmailknop. Alleen platformbeheerders hebben toegang.</p>
+    <p>Alle door Artelynx verwerkte uitgaande e-mails, inclusief wachtwoordmails, instellinks en testmails. Alleen platformbeheerders hebben toegang.</p>
 </div>
 <div class="ml-actions">
     <a href="{{ route('platform.audit.index') }}" class="btn btn-secondary">← Beheerhistoriek</a>
@@ -14,7 +14,7 @@
     <form method="GET" action="{{ route('platform.audit.mail') }}" class="ml-filter">
         <label for="ml-status">Resultaat</label>
         <select name="status" id="ml-status" onchange="this.form.submit()">
-            <option value="" @selected($status === '')>Alle testmails</option>
+            <option value="" @selected($status === '')>Alle e-mails</option>
             <option value="failed" @selected($status === 'failed')>Mislukt</option>
             <option value="success" @selected($status === 'success')>Geslaagd</option>
         </select>
@@ -23,7 +23,7 @@
     <div class="ml-table-wrap">
         <table class="ml-table">
             <thead><tr>
-                <th>Datum</th><th>Beheerder</th><th>Ontvanger</th>
+                <th>Datum</th><th>Type</th><th>Uitgevoerd door</th><th>Ontvanger</th>
                 <th>Modus</th><th>Resultaat</th><th>Diagnose / advies</th>
             </tr></thead>
             <tbody>
@@ -35,7 +35,8 @@
                     @endphp
                     <tr>
                         <td class="ml-nowrap">{{ \Illuminate\Support\Carbon::parse($event->created_at)->timezone('Europe/Brussels')->format('d/m/Y H:i:s') }}</td>
-                        <td>{{ $event->actor_name ?? 'Onbekend' }}</td>
+                        <td>{{ $event->action === 'platform.mail.test' ? 'SMTP-test' : 'Verzonden e-mail' }}</td>
+                        <td>{{ $event->actor_name ?? 'Automatisch / gebruiker' }}</td>
                         <td>{{ $details['recipient'] ?? 'Niet opgeslagen (oude test)' }}</td>
                         <td>{{ ($details['driver'] ?? 'onbekend') === 'smtp' ? 'SMTP' : 'Logmodus' }}</td>
                         <td>
@@ -56,14 +57,14 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="ml-empty">Nog geen testmails geregistreerd.</td></tr>
+                    <tr><td colspan="7" class="ml-empty">Er zijn nog geen uitgaande e-mails geregistreerd.</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-    <div class="ml-pages">{{ $events->links() }}</div>
+    <div class="ml-pages">{{ $events->links('vendor.pagination.artelynx') }}</div>
 </div>
-<p class="ml-footnote">Dit overzicht bewaart geen ruwe SMTP-responses, wachtwoorden of resetlinks. Alleen testmails verschijnen hier; bestaande wachtwoordmails en personeelsuitnodigingen worden niet als afzonderlijke poging geregistreerd.</p>
+<p class="ml-footnote">Dit overzicht bewaart geen ruwe SMTP-responses, wachtwoorden of resetlinks. Deze lijst registreert uitgaande mails vanaf deze update. Een status 'Verwerkt' betekent dat de e-mail aan het ingestelde transport is aangeboden, niet dat hij daadwerkelijk werd afgeleverd. Historische mails verschijnen niet met terugwerkende kracht.</p>
 @endsection
 @push('styles')
 <style>
