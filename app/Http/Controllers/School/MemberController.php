@@ -221,7 +221,7 @@ class MemberController extends Controller
             'phone' => ['nullable', 'string', 'max:60'],
             'role' => ['required', 'string', 'max:30'],
             'is_active' => ['required', 'boolean'],
-            'confirm_shared_profile' => ['nullable', 'accepted'],
+            'confirm_shared_profile' => ['sometimes', 'accepted'],
         ]);
 
         $role = $school->roles()->where('slug', $data['role'])->first();
