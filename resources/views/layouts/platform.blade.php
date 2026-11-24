@@ -566,6 +566,11 @@
             <span class="nav-text">Personeelsleden</span>
         </a>
 
+        <a href="{{ route('platform.students.index') }}"
+           class="nav-item {{ request()->routeIs('platform.students.*') ? 'active' : '' }}">
+            <span class="nav-icon">♙</span><span class="nav-text">Leerlingen</span>
+        </a>
+
         <div class="menu-label">BEHEER</div>
 
         <a href="{{ route('platform.permissions.index') }}"
