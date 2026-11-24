@@ -163,7 +163,7 @@ class Dko3TeacherImportTest extends TestCase
     public function test_import_preserves_existing_higher_school_role(): void
     {
         $school = $this->school('A');
-        $admin = User::factory()->create(['is_platform_admin' => true]);
+        $admin = User::factory()->create(['is_platform_admin' => true, 'is_active' => true]);
         $director = User::factory()->create(['email' => 'director@example.test']);
         $director->schools()->attach($school->id, ['role' => 'director', 'is_active' => true]);
 
