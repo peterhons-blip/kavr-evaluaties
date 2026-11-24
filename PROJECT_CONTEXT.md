@@ -133,3 +133,10 @@ Gebruik op productie nooit een testcommando dat de echte databank wijzigt. Deze 
 - Platformbeheer heeft **Aanmeldgeschiedenis** op `/platform/audit/logins`, uitsluitend voor platformadmins. Login-, logout-, mislukte login- en schoolkeuze-events staan in `login_events`, met IP, browser en timestamp; school is uitsluitend bekend wanneer expliciet gekozen.
 - Mislukte loginpogingen bewaren alleen een gemaskeerde e-mailhint en geen password of token. Behandel toegang tot IP-/aanmeldgegevens als vertrouwelijke platformbeheerdersinformatie. Retentiebeleid nog te bepalen.
 - **Nieuwe migratie noodzakelijk**: `2026_11_24_235959_create_login_events_table.php` via `php artisan migrate`. Regressietest `tests/Feature/LoginAuditTest.php` toegevoegd; voer lokaal `php artisan test` uit.
+
+## Uitgebreid schoolbeheer (24 november 2026)
+
+- Schoolbeheer is functioneel en visueel dichter bij Platformbeheer gebracht: personeelslijst met rol-/statusfilters en zoekfunctie, schoolrollen met volledige rechtenmatrix en bewerkknoppen, vestigingsplaatsen met statusoverzicht, en uitgebreide schoolinstellingen met academielogo-upload en kleurenvoorbeeld.
+- De schoolpagina's gebruiken consequent `layouts.school`, met in de bovenbalk het **academielogo naast de actieve schoolnaam**. Het Artelynx-logo linksboven blijft de platformidentiteit.
+- Alle schoolbeheercontrollers controleren `active_school_id` en `SchoolAccess::allows()`. Een schooladmin kan geen platformbrede SMTP-/systeeminstellingen, globale accountstatussen of gegevens van andere academies wijzigen.
+- Toegevoegd: regressietests voor eigen academielogo en personeelsscope in `SchoolScopedManagementTest.php`. Geen nieuwe migratie voor deze uitbreiding. Draai `php artisan test` en `php artisan view:cache` vóór uitrol.
