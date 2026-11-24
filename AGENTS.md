@@ -78,3 +78,10 @@ Onderwijsstructuur (vakken/graden/leerlingen/lesgroepen/inschrijvingen), DKO3-le
 - Schoolbeheerfuncties: personeelsleden `users.view/manage`, schoolrollen `roles.manage`, leerlingen `students.view/manage`, vestigingen en schoolinstellingen `school.settings`. De directie krijgt alleen mogelijkheden uit haar rolmatrix.
 - De eigen schoolinstellingen mogen nooit SMTP, globale platformconfiguratie, andere scholen of accountrechten van een andere school wijzigen.
 - Bekijk bij dashboardproblemen de query's in `School\\DashboardController`; zowel dashboardtests als toegangscontrole draaien na elke wijziging.
+
+## Gedeelde schoolinterface en loginregistratie
+
+- Gebruik voor elke operationele schoolpagina `@extends('layouts.school')` met `@section('content')`; vermijd eigen <html>/<body>/sidebar of oude `layouts.school-students` zodat het menu en schoollogo niet verdwijnen.
+- `school` en `school.settings.logo_path` moeten altijd uitsluitend de actieve geautoriseerde school vertegenwoordigen. Wijzig geen globale platformrechten wanneer je een schoolspecifiek scherm maakt.
+- Platformloginlog: `LoginAudit::record()` schrijft login_success, login_failed (alleen gemaskeerde e-mailhint), logout, school_selected naar `login_events`; nooit wachtwoord, token, ruwe mislukte login-e-mail of sessie-ID bewaren. Toegang uitsluitend via `platform.admin`.
+- Nieuwe migratie vanaf 24 nov 2026: `create_login_events_table`; tests: `tests/Feature/LoginAuditTest.php` en bestaande schooldashboard- en schoolrechten-tests. Bij uitrol altijd eerst migreren en testen.
