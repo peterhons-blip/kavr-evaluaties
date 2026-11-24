@@ -7,7 +7,13 @@
     <p>Een personeelslid heeft één algemene accountstatus, maar kan per school afzonderlijk actief of inactief zijn.</p>
 </div>
 @if($errors->any())
-    <div class="uf-errors"><strong>Controleer het formulier:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+    <div class="uf-errors"><strong>Controleer het formulier:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>
+        @if($errors->has('email') && old('email'))
+            <p style="margin:12px 0 0">
+                <a href="{{ route('platform.users.index', ['q' => old('email')]) }}" style="color:#8a2440;font-weight:700;text-decoration:underline">Zoek het bestaande personeelsaccount op</a>
+            </p>
+        @endif
+    </div>
 @endif
 <form action="{{ $user->exists ? route('platform.users.update',$user) : route('platform.users.store') }}" method="POST">
     @csrf
