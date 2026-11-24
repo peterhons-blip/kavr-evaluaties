@@ -137,6 +137,43 @@ class UserDirectoryFilteringTest extends TestCase
         );
     }
 
+    public function test_duplicate_personnel_email_shows_clear_dutch_error_and_search_link(): void
+    {
+        $school = $this->school('A');
+        $admin = User::factory()->create([
+            'is_platform_admin' => true,
+            'is_active' => true,
+        ]);
+        User::factory()->create([
+            'email' => 'tom.bronckaers@example.test',
+            'first_name' => 'Tom',
+            'last_name' => 'Bronckaers',
+        ]);
+
+        $this->actingAs($admin)
+            ->from(route('platform.users.create'))
+            ->post(route('platform.users.store'), [
+                'first_name' => 'Tom',
+                'last_name' => 'Bronckaers',
+                'email' => 'tom.bronckaers@example.test',
+                'is_active' => '1',
+                'is_platform_admin' => '1',
+                'memberships' => [
+                    $school->id => ['role' => 'school_admin', 'is_active' => '1'],
+                ],
+            ])
+            ->assertRedirect(route('platform.users.create'))
+            ->assertSessionHasErrors([
+                'email' => 'Dit e-mailadres is al gekoppeld aan een bestaand personeelsaccount. Zoek het personeelslid op en bewerk de bestaande account in plaats van een nieuwe aan te maken.',
+            ]);
+
+        $this->get(route('platform.users.create'))
+            ->assertOk()
+            ->assertSee('Zoek het bestaande personeelsaccount op')
+            ->assertSee('tom.bronckaers@example.test');
+        $this->assertSame(1, User::where('email', 'tom.bronckaers@example.test')->count());
+    }
+
     public function test_environment_selector_shows_only_assigned_active_schools_even_when_one(): void
     {
         $assigned = $this->school('A');
