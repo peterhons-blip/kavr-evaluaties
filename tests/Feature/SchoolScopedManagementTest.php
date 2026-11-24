@@ -116,7 +116,11 @@ class SchoolScopedManagementTest extends TestCase
         $b = $this->academy('LOGOB');
         $b->settings()->create(['slogan' => 'Andere academie']);
         $admin = $this->member($a, 'school_admin');
-        $file = \Illuminate\Http\UploadedFile::fake()->image('academie.png', 120, 80);
+        // Echte minimale PNG-fixture: onafhankelijk van de optionele GD-extensie.
+        $file = \Illuminate\Http\UploadedFile::fake()->createWithContent(
+            'academie.png',
+            base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jVZkAAAAASUVORK5CYII=')
+        );
 
         $this->actingAs($admin)->withSession(['active_school_id' => $a->id])
             ->put(route('school.settings.update'), [
@@ -147,7 +151,10 @@ class SchoolScopedManagementTest extends TestCase
         $other->update(['first_name' => 'UniekeAndereAcademie']);
         $this->actingAs($admin)->withSession(['active_school_id' => $a->id])
             ->get(route('school.members.index', ['q' => 'UniekeAndereAcademie']))
-            ->assertOk()->assertDontSee('UniekeAndereAcademie');
+            ->assertOk()
+            // De zoekterm mag in de inputwaarde terugkomen; geen gebruikersrij mag lekken.
+            ->assertSee('Geen personeelsleden gevonden.')
+            ->assertDontSee('<strong>UniekeAndereAcademie</strong>', false);
         $this->get(route('school.members.index', ['role' => 'teacher', 'status' => 'active']))
             ->assertOk();
         $this->get(route('school.roles.index'))->assertOk()->assertSee('Rechtenmatrix');
