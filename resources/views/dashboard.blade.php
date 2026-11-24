@@ -118,7 +118,9 @@
             <div class="nav-label">ALGEMEEN</div>
             <a class="nav-link active" href="{{ route('dashboard') }}" aria-current="page"><span class="nav-icon">⌂</span> Dashboard</a>
             <span class="nav-disabled"><span class="nav-icon">✧</span> Evaluaties <span style="margin-left:auto;font-size:9px">BINNENKORT</span></span>
-            <span class="nav-disabled"><span class="nav-icon">♙</span> Leerlingen</span>
+            @if ($canViewStudents)
+                <a class="nav-link" href="{{ route('school.students.index') }}"><span class="nav-icon">♙</span> Leerlingen</a>
+            @endif
             <span class="nav-disabled"><span class="nav-icon">▦</span> Lesgroepen</span>
             @if ($canViewUsers || $canManageRoles)
                 <div class="nav-label">BEHEER</div>
