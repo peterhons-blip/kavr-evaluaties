@@ -93,3 +93,10 @@ Onderwijsstructuur (vakken/graden/leerlingen/lesgroepen/inschrijvingen), DKO3-le
 - Schoolrollen: schoolgebonden matrix via `SchoolRoleCatalog::CATEGORIES`, edits uitsluitend van rollen met dezelfde `school_id`.
 - Schoolinstellingen: upload logo naar `school-logos/{school_id}` via public disk, behoud fallback, verwijder oud logo enkel na geldige opslag en met eigen school-prefix; nieuwe foto zichtbaar in schoolselectie, schoolsidebar en bovenbalk.
 - Maak schoolinstellingen nooit platformbreed. Houd tests in `SchoolScopedManagementTest.php` groen; gebruik de bestaande schoollayout met bovenaan schoollogo.
+
+## Schoolpersoneel: wachtwoordinstellingen
+
+- Behoud afzonderlijke tabelkolommen voor schoolrol, pivot-schoolstatus, globale accountstatus, wachtwoordstatus. Verwar globale status nooit met een schoolspecifieke status.
+- `must_change_password=true` => `Nog in te stellen`; anders `password_set_at` gevuld => `Ingesteld`; anders `Onbekend`. Interpreteer `Onbekend` niet automatisch als nooit aangemeld.
+- Wachtwoord instel-/resetlinks worden alleen als beveiligde mail aan de gekoppelde gebruiker verzonden via Laravel Password broker; toon of log nooit raw token/URL. Controleer actieve school, schoollidmaatschap, gebruikerstatus en `users.manage`. POST met CSRF en throttle; registreer verzending in de schoolaudit.
+- Test school-isolatie en wachtwoordstatus vanuit `SchoolScopedManagementTest.php`.
