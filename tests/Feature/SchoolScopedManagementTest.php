@@ -153,4 +153,65 @@ class SchoolScopedManagementTest extends TestCase
         $this->get(route('school.roles.index'))->assertOk()->assertSee('Rechtenmatrix');
     }
 
+    public function test_school_personnel_list_shows_password_state_and_preserves_separate_columns(): void
+    {
+        $school = $this->academy('PWSTATE');
+        $admin = $this->member($school, 'school_admin');
+        $colleague = $this->member($school, 'teacher');
+        $colleague->update(['must_change_password' => true, 'password_set_at' => null]);
+
+        $this->actingAs($admin)->withSession(['active_school_id' => $school->id])
+            ->get(route('school.members.index', ['password' => 'not_set']))
+            ->assertOk()
+            ->assertSee('Schoolstatus')
+            ->assertSee('Accountstatus')
+            ->assertSee('Wachtwoord')
+            ->assertSee('Nog in te stellen')
+            ->assertSee('Instellink mailen')
+            ->assertSee($colleague->email);
+
+        $colleague->update(['must_change_password' => false, 'password_set_at' => now()]);
+        $this->get(route('school.members.index', ['password' => 'set']))
+            ->assertOk()->assertSee('Ingesteld')->assertSee('Resetlink mailen');
+    }
+
+    public function test_school_manager_can_email_password_link_only_to_own_active_member(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $school = $this->academy('PWMAILA');
+        $otherSchool = $this->academy('PWMAILB');
+        $admin = $this->member($school, 'school_admin');
+        $colleague = $this->member($school, 'teacher');
+        $otherMember = $this->member($otherSchool, 'teacher');
+        $this->actingAs($admin)->withSession(['active_school_id' => $school->id])
+            ->post(route('school.members.setup-link', $colleague))
+            ->assertRedirect();
+        $this->assertDatabaseHas('access_audit_events', [
+            'school_id' => $school->id,
+            'subject_user_id' => $colleague->id,
+            'action' => 'school.member.setup_link_sent',
+        ]);
+        \Illuminate\Support\Facades\Notification::assertSentTo(
+            $colleague,
+            \App\Notifications\NederlandseWachtwoordReset::class
+        );
+
+        $this->post(route('school.members.setup-link', $otherMember))->assertNotFound();
+
+        $school->users()->updateExistingPivot($colleague->id, ['is_active' => false]);
+        $this->post(route('school.members.setup-link', $colleague))
+            ->assertSessionHasErrors('email');
+    }
+
+    public function test_teacher_without_manage_users_cannot_email_password_links(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $school = $this->academy('PWROLE');
+        $teacher = $this->member($school, 'teacher');
+        $colleague = $this->member($school, 'teacher');
+        $this->actingAs($teacher)->withSession(['active_school_id' => $school->id])
+            ->post(route('school.members.setup-link', $colleague))->assertForbidden();
+        \Illuminate\Support\Facades\Notification::assertNothingSent();
+    }
+
 }
