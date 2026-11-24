@@ -52,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
                         'success' => true,
                         'driver' => $driver,
                         'recipient' => implode(', ', array_unique($addresses)),
+                        'subject' => \Illuminate\Support\Str::limit(trim(preg_replace('~https?://[^\\s]+~i', '[link verwijderd]', preg_replace('/[\\r\\n\\t]+/', ' ', $subject)) ?? ''), 200, ''),
                         'category' => 'app',
                         'result' => $driver === 'log' ? 'logged_only' : 'accepted_by_server',
                     ]);
