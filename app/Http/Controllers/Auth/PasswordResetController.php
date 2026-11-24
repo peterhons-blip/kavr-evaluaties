@@ -58,7 +58,7 @@ class PasswordResetController extends Controller
         $request->validate([
             'token' => ['required','string'],
             'email' => ['required','email'],
-            'password' => ['required','confirmed','string','min:12'],
+            'password' => ['required','confirmed','string','min:8'],
         ]);
 
         $status = Password::reset(
@@ -75,6 +75,12 @@ class PasswordResetController extends Controller
                 DB::table('sessions')->where('user_id', $user->id)->delete();
                 \App\Support\AccessAudit::record('user.password_reset', null, $user);
                 event(new PasswordReset($user));
+                // Een mislukte bevestigingsmail mag een geslaagde reset niet terugdraaien.
+                try {
+                    $user->notify((new \App\Notifications\WachtwoordGewijzigd())->locale('nl'));
+                } catch (\Throwable $exception) {
+                    report($exception);
+                }
             }
         );
 
