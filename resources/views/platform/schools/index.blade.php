@@ -65,6 +65,7 @@
                     <th>School</th>
                     <th>Instellingsnummer</th>
                     <th>Vestigingen</th>
+                    <th>Publieke inloglink</th>
                     <th>Status</th>
                     <th>Acties</th>
                 </tr>
@@ -91,6 +92,21 @@
 
                         <td>
                             {{ $school->locations_count }}
+                        </td>
+
+                        <td>
+                            @if ($school->is_active)
+                                <div class="school-login-url">{{ route('school.login', $school->slug) }}</div>
+                                <div class="school-login-actions">
+                                    <a href="{{ route('school.login', $school->slug) }}" target="_blank" rel="noopener noreferrer" class="school-login-action">Openen</a>
+                                    <button type="button" class="school-login-action school-copy-link" data-url="{{ route('school.login', $school->slug) }}">Kopiëren</button>
+                                </div>
+                            @else
+                                <span class="school-login-muted">Inactief – geen publieke login</span>
+                            @endif
+                            @if ((int) $defaultLoginSchoolId === (int) $school->id)
+                                <span class="school-default-badge">Standaard voor /login</span>
+                            @endif
                         </td>
 
                         <td>
@@ -156,7 +172,7 @@
                 @empty
 
                     <tr>
-                        <td colspan="5" class="empty-state">
+                        <td colspan="6" class="empty-state">
                             Er zijn nog geen scholen toegevoegd.
                         </td>
                     </tr>
@@ -381,6 +397,13 @@
 
 
 
+    .school-login-url {max-width:310px; overflow-wrap:anywhere; font-size:12px; color:#445a70;}
+    .school-login-actions {display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;}
+    .school-login-action {border:1px solid #d7e5ea; border-radius:6px; padding:5px 9px; color:#246b75; background:#fff; cursor:pointer; font:inherit; font-size:12px; text-decoration:none;}
+    .school-login-action:hover {background:#eef8f7;}
+    .school-login-muted {font-size:12px; color:#718096;}
+    .school-default-badge {display:inline-block; margin-top:8px; padding:4px 8px; border-radius:12px; background:#e9f7ef; color:#246b52; font-size:11px; font-weight:700;}
+
     /* Smartphone */
     @media (max-width: 650px) {
         .card-header {
@@ -398,5 +421,31 @@
         }
     }
 </style>
+
+<script>
+document.querySelectorAll('.school-copy-link').forEach(function(button) {
+    button.addEventListener('click', async function() {
+        const url = button.dataset.url;
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(url);
+            } else {
+                const input = document.createElement('textarea');
+                input.value = url;
+                input.style.position = 'fixed';
+                input.style.left = '-9999px';
+                document.body.appendChild(input);
+                input.select();
+                if (!document.execCommand('copy')) throw new Error('Copy failed');
+                input.remove();
+            }
+            button.textContent = 'Gekopieerd!';
+            setTimeout(function() { button.textContent = 'Kopiëren'; }, 1800);
+        } catch (error) {
+            window.prompt('Kopieer deze inloglink:', url);
+        }
+    });
+});
+</script>
 
 @endsection
