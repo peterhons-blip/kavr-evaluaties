@@ -12,6 +12,7 @@ use App\Http\Controllers\Platform\SchoolLocationController;
 use App\Http\Controllers\Platform\SchoolSettingsController;
 use App\Http\Controllers\Platform\PlatformSettingsController;
 use App\Http\Controllers\Platform\AccessAuditController;
+use App\Http\Controllers\Platform\LoginAuditController;
 use App\Http\Controllers\Platform\UserController;
 use App\Http\Controllers\Platform\Dko3TeacherImportController;
 use App\Http\Controllers\Platform\UserBulkController;
@@ -171,6 +172,7 @@ Route::middleware(['auth', 'platform.admin'])
 
         Route::get('/audit', [AccessAuditController::class, 'index'])->name('audit.index');
         Route::get('/audit/mail', [AccessAuditController::class, 'mail'])->name('audit.mail');
+        Route::get('/audit/logins', [LoginAuditController::class, 'index'])->name('audit.logins');
 
         Route::get('/settings', [PlatformSettingsController::class, 'edit'])->name('settings.edit');
         Route::put('/settings', [PlatformSettingsController::class, 'update'])->name('settings.update');
