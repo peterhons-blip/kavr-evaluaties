@@ -43,7 +43,7 @@ class StudentController extends Controller
         return [
             'school' => $school,
             'platform' => $this->isPlatform($request),
-            'layout' => $this->isPlatform($request) ? 'layouts.platform' : 'layouts.school-students',
+            'layout' => $this->isPlatform($request) ? 'layouts.platform' : 'layouts.school',
         ];
     }
 
