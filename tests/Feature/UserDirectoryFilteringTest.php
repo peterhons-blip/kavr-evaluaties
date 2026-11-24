@@ -76,6 +76,67 @@ class UserDirectoryFilteringTest extends TestCase
             ->assertDontSee('<html', false);
     }
 
+    public function test_platform_directory_paginates_in_dutch_and_sorts_highest_role_first(): void
+    {
+        $school = $this->school('A');
+        $admin = User::factory()->create([
+            'is_platform_admin' => true, 'is_active' => true,
+            'first_name' => 'Admin', 'last_name' => 'Zebra',
+            'email' => 'admin@example.test',
+        ]);
+
+        foreach (range(1, 23) as $i) {
+            $user = User::factory()->create([
+                'first_name' => 'Leraar',
+                'last_name' => 'Teacher'.str_pad((string) $i, 2, '0', STR_PAD_LEFT),
+                'email' => 'teacher'.$i.'@example.test',
+            ]);
+            $user->schools()->attach($school->id, ['role' => 'teacher', 'is_active' => true]);
+        }
+        $director = User::factory()->create([
+            'first_name' => 'Directeur', 'last_name' => 'Zulu',
+            'email' => 'director@example.test',
+        ]);
+        $director->schools()->attach($school->id, ['role' => 'director', 'is_active' => true]);
+
+        $first = $this->actingAs($admin)->get(route('platform.users.index', ['school_id' => $school->id]));
+        $first->assertOk()->assertSee('Volgende')->assertSee('pagina 2')->assertSee('director@example.test');
+        $this->assertLessThan(
+            strpos($first->getContent(), 'teacher1@example.test'),
+            strpos($first->getContent(), 'director@example.test')
+        );
+
+        $second = $this->get(route('platform.users.index', [
+            'school_id' => $school->id, 'page' => 2,
+        ]));
+        $second->assertOk()->assertSee('Vorige')->assertSee('Resultaten');
+        $second->assertDontSee('pagination.next')->assertDontSee('Showing');
+        $second->assertDontSee('director@example.test');
+    }
+
+    public function test_school_directory_sorts_administration_above_teachers(): void
+    {
+        $school = $this->school('B');
+        $admin = User::factory()->create(['is_platform_admin' => true, 'is_active' => true]);
+        $teacher = User::factory()->create([
+            'last_name' => 'Aaa', 'first_name' => 'Teacher',
+            'email' => 'teacher-school@example.test',
+        ]);
+        $staff = User::factory()->create([
+            'last_name' => 'Zzz', 'first_name' => 'Administration',
+            'email' => 'admin-school@example.test',
+        ]);
+        $teacher->schools()->attach($school->id, ['role' => 'teacher', 'is_active' => true]);
+        $staff->schools()->attach($school->id, ['role' => 'administration', 'is_active' => true]);
+
+        $response = $this->actingAs($admin)->get(route('platform.schools.users.index', $school));
+        $response->assertOk();
+        $this->assertLessThan(
+            strpos($response->getContent(), 'teacher-school@example.test'),
+            strpos($response->getContent(), 'admin-school@example.test')
+        );
+    }
+
     public function test_environment_selector_shows_only_assigned_active_schools_even_when_one(): void
     {
         $assigned = $this->school('A');

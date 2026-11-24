@@ -28,4 +28,4 @@
         </tbody>
     </table>
 </div>
-<div style="margin-top:22px">{{ $members->links() }}</div>
+<div style="margin-top:22px">{{ $members->links('vendor.pagination.artelynx') }}</div>

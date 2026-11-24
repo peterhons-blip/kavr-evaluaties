@@ -188,7 +188,7 @@
     {{-- PAGINERING --}}
     @if ($schools->hasPages())
         <div class="pagination-wrapper">
-            {{ $schools->links() }}
+            {{ $schools->links('vendor.pagination.artelynx') }}
         </div>
     @endif
 

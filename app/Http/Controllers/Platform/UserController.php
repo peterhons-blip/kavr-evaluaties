@@ -69,6 +69,27 @@ class UserController extends Controller
             ->when($passwordFilter === 'not_set', fn ($query) => $query->where('must_change_password', true))
             ->when($passwordFilter === 'set', fn ($query) => $query->whereNotNull('password_set_at'))
             ->when($passwordFilter === 'unknown', fn ($query) => $query->whereNull('password_set_at')->where('must_change_password',false))
+            // Platformbeheerders eerst, daarna hoogste actieve schoolrol.
+            // Bij filter op school telt uitsluitend de rol in die school mee.
+            ->orderByDesc('is_platform_admin')
+            ->orderByRaw(
+                "COALESCE((SELECT MIN(CASE rank_su.role
+                    WHEN 'school_admin' THEN 1
+                    WHEN 'director' THEN 2
+                    WHEN 'administration' THEN 3
+                    WHEN 'coordinator' THEN 4
+                    WHEN 'teacher' THEN 5
+                    WHEN 'jury' THEN 6
+                    WHEN 'viewer' THEN 7
+                    ELSE 8 END)
+                    FROM school_user AS rank_su
+                    WHERE rank_su.user_id = users.id
+                      AND rank_su.is_active = 1
+                      AND rank_su.dko3_hidden_at IS NULL"
+                . ($schoolId !== null ? " AND rank_su.school_id = ?" : "")
+                . "), 99)",
+                $schoolId !== null ? [$schoolId] : []
+            )
             ->orderBy('last_name')
             ->orderBy('first_name')
             ->orderBy('id')
