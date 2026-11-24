@@ -147,3 +147,11 @@ Gebruik op productie nooit een testcommando dat de echte databank wijzigt. Deze 
 - Schoolfilters: naam/mail, rol, schoolstatus, wachtwoordstatus, 20/50/100 rijen. Bestaande schooladmin-wijzigingen lopen via één eigen schoolkoppeling per gebruiker; andere academies blijven onaangeraakt.
 - Knop `Instellink mailen`/`Resetlink mailen` roept beveiligde, gelimiteerde POST `school.members.setup-link` aan en hergebruikt Laravel's wachtwoordbroker. Geen token of ruwe reset-URL tonen aan beheerders. Alleen `users.manage`, actieve accounts/koppelingen, schoolgebonden gebruikers; audit op `school.member.setup_link_sent`.
 - Nieuwe tests staan in `SchoolScopedManagementTest.php`; voer deze lokaal uit. Geen migratie vereist.
+
+## Schoolpersoneel: volledige bewerkpagina en compact overzicht
+
+- Schoolpersoneelsbeheer heeft een aparte detailpagina `/school/gebruikers/{user}/bewerken` met voornaam, familienaam, e-mail, telefoon, eigen schoolrol en schoolactivering.
+- Gedeelde profielvelden zijn accountbreed; voor medewerkers aan meerdere scholen vergt een wijziging expliciete bevestiging. Platformadministrators moeten voor hun accountprofiel naar Platformbeheer. Eigen schoolkoppeling mag via het overzicht worden gewijzigd.
+- Wachtwoorden kunnen uitsluitend via een beveiligde reset-/instellink worden gewijzigd; geen leesbaar wachtwoord of token in schoolbeheer.
+- De drie samenvattingstegels boven het personeelsledenoverzicht zijn verwijderd op verzoek. De lijst heeft nu ook een knop 'Bewerken' per rij.
+- Toegangschecks (schoolgebonden en schoolbeheerrechten) zijn opgenomen in `SchoolScopedManagementTest.php`. Geen migratie nodig.
