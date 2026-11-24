@@ -21,6 +21,7 @@ class SchoolSelectionController extends Controller
             ->with('settings')
             ->where('schools.is_active', true)
             ->wherePivot('is_active', true)
+            ->wherePivotNull('dko3_hidden_at')
             ->orderBy('schools.name')
             ->get();
 
@@ -72,6 +73,7 @@ class SchoolSelectionController extends Controller
             ->where('schools.id', $validated['school_id'])
             ->where('schools.is_active', true)
             ->wherePivot('is_active', true)
+            ->wherePivotNull('dko3_hidden_at')
             ->firstOrFail();
 
         // Vorige schoolselectie vervangen.
