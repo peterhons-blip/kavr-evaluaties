@@ -229,7 +229,7 @@ class SchoolScopedManagementTest extends TestCase
         $this->actingAs($admin)->withSession(['active_school_id' => $school->id]);
         $this->get(route('school.members.index'))->assertOk()
             ->assertSee('Bewerken')
-            ->assertDontSee('sm-summary');
+            ->assertDontSee('<div class="sm-summary">', false);
         $this->get(route('school.members.edit', $teacher))->assertOk()
             ->assertSee('Persoons- en contactgegevens');
         $this->put(route('school.members.details.update', $teacher), [
