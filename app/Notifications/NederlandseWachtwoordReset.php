@@ -18,10 +18,10 @@ class NederlandseWachtwoordReset extends ResetPassword
         return (new MailMessage)
             ->subject('Artelynx | Wachtwoord instellen of opnieuw instellen')
             ->greeting($greeting)
-            ->line('Je ontvangt deze e-mail omdat er een aanvraag is gedaan om het wachtwoord van je Artelynx-account in te stellen of opnieuw in te stellen.')
+            ->line('Er is een aanvraag ontvangen om het wachtwoord van je Artelynx-account in te stellen of te wijzigen.')
             ->action('Wachtwoord instellen', $url)
-            ->line('Deze link is '.$minutes.' minuten geldig en kan slechts één keer gebruikt worden.')
+            ->line('Voor je veiligheid is deze persoonlijke link '.$minutes.' minuten geldig en kan hij maar één keer worden gebruikt.')
             ->line('Heb je dit niet aangevraagd? Dan hoef je niets te doen.')
-            ->salutation('Met vriendelijke groeten, '.PHP_EOL.'Het Artelynx-team');
+            ->salutation('Met vriendelijke groeten, het Artelynx-team');
     }
 }
