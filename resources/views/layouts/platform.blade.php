@@ -502,6 +502,27 @@
         }
     </style>
 
+    <style>
+
+        /* Consistent met de knoppen van de schoolomgeving */
+        .top-action-btn{
+            display:inline-flex;align-items:center;justify-content:center;gap:8px;
+            padding:10px 14px;min-height:40px;border-radius:9px;
+            border:1px solid #dbe7eb;background:#e9f3f2;
+            color:#286e69;text-decoration:none;font-size:12px;
+            font-weight:750;white-space:nowrap;
+            transition:background .2s,border-color .2s;
+        }
+        .top-action-btn:hover{background:#d7ebe8;border-color:#bcd7d3}
+        .topbar-right{gap:9px}
+        .topbar-right form{margin:0}
+        .topbar-right form .btn{min-height:40px;padding:9px 15px}
+        @media(max-width:650px){
+            .top-action-btn{flex:1}
+            .topbar-right{width:100%}
+        }
+    </style>
+
     @stack('styles')
 </head>
 
@@ -637,12 +658,12 @@
 
             <!-- OMGEVING WISSELEN -->
             <a href="{{ route('schools.select') }}"
-               class="btn btn-secondary">
-                Wissel omgeving
+               class="top-action-btn">
+                <span aria-hidden="true">⇄</span> Wissel omgeving
             </a>
 
-            <a href="{{ route('profile.edit') }}" class="btn btn-secondary"
-               aria-label="Mijn profiel en wachtwoord aanpassen">Mijn profiel</a>
+            <a href="{{ route('profile.edit') }}" class="top-action-btn"
+               aria-label="Mijn profiel en wachtwoord aanpassen"><span aria-hidden="true">♙</span> Mijn profiel</a>
 
             <!-- GEBRUIKER -->
             <div class="user-info">
