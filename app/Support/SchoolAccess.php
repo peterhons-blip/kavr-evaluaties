@@ -23,6 +23,7 @@ final class SchoolAccess
             ->where('school_user.user_id', $user->id)
             ->where('school_user.school_id', $schoolId)
             ->where('school_user.is_active', true)
+            ->whereNull('school_user.dko3_hidden_at')
             ->where('schools.is_active', true)
             ->select('school_user.role')
             ->first();
@@ -38,6 +39,18 @@ final class SchoolAccess
 
         if (! $role) {
             return false;
+        }
+
+        // Individuele afwijkingen krijgen voorrang op het rollenprofiel,
+        // maar alleen binnen een actieve koppeling met de gevraagde school.
+        $override = DB::table('school_user_permissions')
+            ->where('school_id', $schoolId)
+            ->where('user_id', $user->id)
+            ->where('permission', $permission)
+            ->first();
+
+        if ($override !== null) {
+            return (bool) $override->allowed;
         }
 
         return in_array($permission, json_decode($role->permissions, true) ?: [], true);

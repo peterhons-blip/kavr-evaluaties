@@ -25,6 +25,27 @@ final class SchoolRoleCatalog
         'reports.export' => 'Rapporten exporteren',
     ];
 
+    /**
+     * Overzicht voor de matrix: categorie -> onderdeel -> functie.
+     * Enkel de rechten in PERMISSIONS geven echt toegangscontrole.
+     */
+    public const CATEGORIES = [
+        'Organisatie' => [
+            'Personeelsleden' => ['users.view', 'users.manage'],
+            'Rollen en rechten' => ['roles.manage'],
+            'Schoolinstellingen' => ['school.settings'],
+        ],
+        'Onderwijs' => [
+            'Leerlingen' => ['students.view', 'students.manage'],
+            'Lesgroepen' => ['groups.view', 'groups.manage'],
+            'Leerdoelen' => ['goals.manage'],
+            'Evaluaties' => ['evaluations.view', 'evaluations.write', 'evaluations.publish'],
+        ],
+        'Rapportering' => [
+            'Rapporten en DKO3-export' => ['reports.view', 'reports.export'],
+        ],
+    ];
+
     public static function defaults(): array
     {
         $all = array_keys(self::PERMISSIONS);

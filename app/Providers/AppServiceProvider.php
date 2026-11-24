@@ -28,5 +28,39 @@ class AppServiceProvider extends ServiceProvider
         }
 
         \App\Support\PlatformMailConfig::apply();
+
+        // Registratie na aanvaarding door het mailtransport, niet alleen
+        // bij de expliciete SMTP-test. Bewaar nooit inhoud of resetlinks.
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Mail\Events\MessageSent::class,
+            function (\Illuminate\Mail\Events\MessageSent $event): void {
+                try {
+                    $message = $event->message;
+                    $addresses = [];
+                    foreach ([$message->getTo(), $message->getCc(), $message->getBcc()] as $group) {
+                        foreach ($group as $address) {
+                            $addresses[] = $address->getAddress();
+                        }
+                    }
+                    $subject = (string) ($message->getSubject() ?? '');
+                    if ($subject === 'Artelynx - SMTP testbericht') {
+                        // De testfunctie registreert al zijn eigen status en diagnose.
+                        return;
+                    }
+                    $driver = (string) config('mail.default');
+                    \App\Support\AccessAudit::record('platform.mail.sent', null, null, [
+                        'success' => true,
+                        'driver' => $driver,
+                        'recipient' => implode(', ', array_unique($addresses)),
+                        'category' => 'app',
+                        'result' => $driver === 'log' ? 'logged_only' : 'accepted_by_server',
+                    ]);
+                } catch (\Throwable $exception) {
+                    // E-mail is verzonden: een mislukte audit mag dat niet
+                    // als verzendingfout tonen of een tweede mail veroorzaken.
+                    report($exception);
+                }
+            }
+        );
     }
 }

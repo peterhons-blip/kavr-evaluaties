@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\SchoolSelectionController;
+use App\Http\Controllers\MyProfileController;
+use App\Http\Controllers\Platform\PermissionMatrixController;
 use App\Http\Controllers\Platform\SchoolController;
 use App\Http\Controllers\Platform\SchoolLocationController;
 use App\Http\Controllers\Platform\SchoolSettingsController;
@@ -46,6 +48,13 @@ Route::middleware('guest')->group(function () {
 
 // Dashboard: alleen toegankelijk na aanmelden
 Route::middleware('auth')->group(function () {
+    // Iedere ingelogde gebruiker kan zijn eigen profiel wijzigen,
+    // ongeacht schoolrol. Nooit platform- of schoolrechten via dit formulier.
+    Route::get('/mijn-profiel', [MyProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/mijn-profiel', [MyProfileController::class, 'update'])->name('profile.update');
+    Route::put('/mijn-profiel/wachtwoord', [MyProfileController::class, 'password'])
+        ->middleware('throttle:5,1')->name('profile.password');
+
     Route::get('/dashboard', DashboardController::class)
     ->middleware('active.school')
     ->name('dashboard');
@@ -124,6 +133,10 @@ Route::middleware(['auth', 'platform.admin'])
 
         })->name('dashboard');
 
+
+        Route::get('/rechten', [PermissionMatrixController::class, 'index'])->name('permissions.index');
+        Route::get('/rechten/{school}/gebruikers/{user}', [PermissionMatrixController::class, 'user'])->name('permissions.user');
+        Route::put('/rechten/{school}/gebruikers/{user}', [PermissionMatrixController::class, 'updateUser'])->name('permissions.user.update');
 
         Route::get('/audit', [AccessAuditController::class, 'index'])->name('audit.index');
         Route::get('/audit/mail', [AccessAuditController::class, 'mail'])->name('audit.mail');

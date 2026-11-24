@@ -138,6 +138,7 @@
             <div><div class="top-title">Schooldashboard</div><div class="top-crumb">Artelynx / {{ $school->name }}</div></div>
             <div class="top-actions">
                 <a class="change-school" href="{{ route('schools.select') }}">Wissel omgeving</a>
+                <a class="change-school" href="{{ route('profile.edit') }}">Mijn profiel</a>
                 <div class="profile">
                     <div class="profile-icon">{{ mb_strtoupper(mb_substr(auth()->user()->first_name ?: 'G',0,1)) }}</div>
                     <span><span class="profile-name">{{ auth()->user()->full_name ?: auth()->user()->name }}</span><br><span class="profile-role">Aangemeld</span></span>

@@ -15,14 +15,21 @@
     <h2>Toegestane functies</h2>
     <p class="rf-explain">Een vinkje geeft de rol toegang tot die functie. Bij leerlinggegevens blijven aanvullende controles op toegewezen lessen en groepen noodzakelijk.</p>
     @php $selected = old('permissions', $role->permissions ?? []); @endphp
-    <div class="rf-perms">
-        @foreach(\App\Support\SchoolRoleCatalog::PERMISSIONS as $key => $description)
-        <label class="rf-perm">
-            <input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(in_array($key,$selected,true))>
-            <span><strong>{{ $description }}</strong><small>{{ $key }}</small></span>
-        </label>
+    @foreach(\App\Support\SchoolRoleCatalog::CATEGORIES as $category => $modules)
+        <h3 style="margin-top:22px;background:#eef4f7;border-radius:8px;padding:12px">{{ $category }}</h3>
+        @foreach($modules as $module => $permissions)
+            <h4>{{ $module }}</h4>
+            <div class="rf-perms">
+                @foreach($permissions as $key)
+                <label class="rf-perm">
+                    <input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(in_array($key,$selected,true))>
+                    <span><strong>{{ \App\Support\SchoolRoleCatalog::PERMISSIONS[$key] }}</strong><small>{{ $key }}</small></span>
+                </label>
+                @endforeach
+            </div>
         @endforeach
-    </div>
+    @endforeach
+
 </div>
 <div class="rf-actions"><a class="btn btn-secondary" href="{{ route('platform.schools.roles.index',$school) }}">Annuleren</a><button class="btn" type="submit">Rol opslaan</button></div>
 </form>
