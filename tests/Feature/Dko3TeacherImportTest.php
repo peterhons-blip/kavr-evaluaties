@@ -89,6 +89,74 @@ class Dko3TeacherImportTest extends TestCase
             ->assertOk()->assertSee('gone@example.test');
     }
 
+    public function test_full_import_never_deactivates_or_hides_platform_administrators(): void
+    {
+        $school = $this->school('A');
+        $otherSchool = $this->school('B');
+
+        $importer = User::factory()->create([
+            'email' => 'importer@example.test',
+            'is_platform_admin' => true,
+            'is_active' => true,
+        ]);
+        $otherPlatformAdmin = User::factory()->create([
+            'email' => 'protected@example.test',
+            'is_platform_admin' => true,
+            'is_active' => true,
+        ]);
+        $ordinaryTeacher = User::factory()->create([
+            'email' => 'missing-teacher@example.test',
+            'is_platform_admin' => false,
+            'is_active' => true,
+        ]);
+
+        foreach ([$importer, $otherPlatformAdmin, $ordinaryTeacher] as $user) {
+            $user->schools()->attach($school->id, ['role' => 'teacher', 'is_active' => true]);
+        }
+        $otherPlatformAdmin->schools()->attach($otherSchool->id, [
+            'role' => 'teacher', 'is_active' => true,
+        ]);
+
+        $csv = "voornaam;familienaam;e-mailadres\nLena;Nieuw;lena@example.test\n";
+        $this->actingAs($importer)
+            ->post(route('platform.users.import.preview'), [
+                'school_id' => $school->id,
+                'mode' => 'full',
+                'file' => UploadedFile::fake()->createWithContent('dko3.csv', $csv),
+            ])
+            ->assertOk()
+            ->assertSee('missing-teacher@example.test')
+            ->assertDontSee('protected@example.test')
+            ->assertDontSee('importer@example.test');
+
+        $this->post(route('platform.users.import.commit'), [
+            'token' => session('dko3_import_token'),
+            'confirm' => '1',
+        ])->assertRedirect(route('platform.users.index', ['school_id' => $school->id]));
+
+        foreach ([$importer, $otherPlatformAdmin] as $user) {
+            $this->assertDatabaseHas('school_user', [
+                'school_id' => $school->id,
+                'user_id' => $user->id,
+                'is_active' => true,
+                'dko3_hidden_at' => null,
+            ]);
+            $this->assertTrue($user->fresh()->is_active);
+        }
+
+        $this->assertDatabaseHas('school_user', [
+            'school_id' => $school->id,
+            'user_id' => $ordinaryTeacher->id,
+            'is_active' => false,
+        ]);
+        $this->assertDatabaseHas('school_user', [
+            'school_id' => $otherSchool->id,
+            'user_id' => $otherPlatformAdmin->id,
+            'is_active' => true,
+            'dko3_hidden_at' => null,
+        ]);
+    }
+
     public function test_invalid_upload_does_not_deactivate_any_accounts(): void
     {
         $school = $this->school('A');
