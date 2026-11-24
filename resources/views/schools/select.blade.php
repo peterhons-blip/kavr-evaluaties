@@ -283,6 +283,7 @@
 
     @endif
 
+    <p style="text-align:center;margin-top:24px"><a href="{{ route('profile.edit') }}" style="color:#286e69;font-weight:700">Mijn profiel · gegevens en wachtwoord aanpassen</a></p>
     <form method="POST"
           action="{{ route('logout') }}"
           class="logout">
