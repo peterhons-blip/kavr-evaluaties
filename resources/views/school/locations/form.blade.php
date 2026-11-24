@@ -1,4 +1,4 @@
-@extends('layouts.school-students')
+@extends('layouts.school')
 @section('title', $location->exists ? 'Vestiging bewerken' : 'Vestiging toevoegen')
 @section('page-title','Vestigingsplaatsen')
 @section('content')
