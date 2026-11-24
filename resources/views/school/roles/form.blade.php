@@ -9,5 +9,5 @@
 <label class="full">Beschrijving<textarea name="description" rows="2" maxlength="1000">{{ old('description',$role->description) }}</textarea></label>
 </div><h2>Functierechten</h2><p>Toegewezen leerling- en lesgroepgegevens worden later aanvullend gecontroleerd.</p>
 @php $selected=old('permissions',$role->permissions ?? []); @endphp
-<div class="perms">@foreach(\App\Support\SchoolRoleCatalog::PERMISSIONS as $key=>$name)<label class="perm"><input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(in_array($key,$selected,true))><span><strong>{{ $name }}</strong><br><small>{{ $key }}</small></span></label>@endforeach</div>
+@foreach(\App\Support\SchoolRoleCatalog::CATEGORIES as $category=>$modules)<h3 style="background:#edf3f7;padding:10px">{{ $category }}</h3>@foreach($modules as $module=>$permissions)<h4>{{ $module }}</h4><div class="perms">@foreach($permissions as $key)<label class="perm"><input type="checkbox" name="permissions[]" value="{{ $key }}" @checked(in_array($key,$selected,true))><span><strong>{{ \App\Support\SchoolRoleCatalog::PERMISSIONS[$key] }}</strong><br><small>{{ $key }}</small></span></label>@endforeach</div>@endforeach @endforeach
 </div><div class="buttons"><a class="btn alt" href="{{ route('school.roles.index') }}">Annuleren</a><button type="submit" class="btn">Rol opslaan</button></div></form></div></body></html>
