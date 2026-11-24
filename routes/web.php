@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\SchoolSelectionController;
 use App\Http\Controllers\MyProfileController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\Platform\PermissionMatrixController;
 use App\Http\Controllers\Platform\SchoolController;
 use App\Http\Controllers\Platform\SchoolLocationController;
@@ -67,6 +68,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/school/rollen/{role}/edit', [SchoolRoleManagementController::class, 'edit'])->name('school.roles.edit');
         Route::put('/school/rollen/{role}', [SchoolRoleManagementController::class, 'update'])->name('school.roles.update');
         Route::delete('/school/rollen/{role}', [SchoolRoleManagementController::class, 'destroy'])->name('school.roles.destroy');
+
+        // Leerlingen: alleen toegang binnen de actieve school met passende rechten.
+        Route::get('/school/leerlingen', [StudentController::class, 'index'])->name('school.students.index');
+        Route::get('/school/leerlingen/nieuw', [StudentController::class, 'create'])->name('school.students.create');
+        Route::post('/school/leerlingen', [StudentController::class, 'store'])->name('school.students.store');
+        Route::get('/school/leerlingen/import', [StudentController::class, 'importForm'])->name('school.students.import');
+        Route::post('/school/leerlingen/import/voorbeeld', [StudentController::class, 'preview'])->name('school.students.preview');
+        Route::post('/school/leerlingen/import/bevestig', [StudentController::class, 'commit'])->name('school.students.commit');
+        Route::get('/school/leerlingen/{student}/bewerken', [StudentController::class, 'edit'])->name('school.students.edit');
+        Route::put('/school/leerlingen/{student}', [StudentController::class, 'update'])->name('school.students.update');
 
         Route::get('/school/gebruikers', [MemberController::class, 'index'])
             ->name('school.members.index');
@@ -133,6 +144,15 @@ Route::middleware(['auth', 'platform.admin'])
 
         })->name('dashboard');
 
+
+        Route::get('/leerlingen', [StudentController::class, 'index'])->name('students.index');
+        Route::get('/leerlingen/nieuw', [StudentController::class, 'create'])->name('students.create');
+        Route::post('/leerlingen', [StudentController::class, 'store'])->name('students.store');
+        Route::get('/leerlingen/import', [StudentController::class, 'importForm'])->name('students.import');
+        Route::post('/leerlingen/import/voorbeeld', [StudentController::class, 'preview'])->name('students.preview');
+        Route::post('/leerlingen/import/bevestig', [StudentController::class, 'commit'])->name('students.commit');
+        Route::get('/leerlingen/{student}/bewerken', [StudentController::class, 'edit'])->name('students.edit');
+        Route::put('/leerlingen/{student}', [StudentController::class, 'update'])->name('students.update');
 
         Route::get('/rechten', [PermissionMatrixController::class, 'index'])->name('permissions.index');
         Route::get('/rechten/{school}/gebruikers/{user}', [PermissionMatrixController::class, 'user'])->name('permissions.user');
