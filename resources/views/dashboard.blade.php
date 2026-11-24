@@ -122,10 +122,14 @@
                 <a class="nav-link" href="{{ route('school.students.index') }}"><span class="nav-icon">♙</span> Leerlingen</a>
             @endif
             <span class="nav-disabled"><span class="nav-icon">▦</span> Lesgroepen</span>
-            @if ($canViewUsers || $canManageRoles)
+            @if ($canViewUsers || $canManageRoles || $canManageSettings)
                 <div class="nav-label">BEHEER</div>
                 @if ($canViewUsers)
                     <a class="nav-link" href="{{ route('school.members.index') }}"><span class="nav-icon">♙</span> Personeelsleden</a>
+                @endif
+                @if ($canManageSettings)
+                    <a class="nav-link" href="{{ route('school.locations.index') }}"><span class="nav-icon">⌖</span> Vestigingsplaatsen</a>
+                    <a class="nav-link" href="{{ route('school.settings.edit') }}"><span class="nav-icon">⚙</span> Schoolinstellingen</a>
                 @endif
                 @if ($canManageRoles)
                     <a class="nav-link" href="{{ route('school.roles.index') }}"><span class="nav-icon">⚙</span> Rollen &amp; rechten</a>
@@ -238,6 +242,14 @@
                         @if ($canViewUsers)
                             <a class="feature-row" href="{{ route('school.members.index') }}">
                                 <span class="feature-icon">♙</span><span class="feature-text"><strong>Personeelsleden beheren</strong><small>Accountkoppelingen en medewerkers</small></span><span class="feature-arrow">›</span>
+                            </a>
+                        @endif
+                        @if ($canManageSettings)
+                            <a class="feature-row" href="{{ route('school.locations.index') }}">
+                                <span class="feature-icon alt">⌖</span><span class="feature-text"><strong>Vestigingsplaatsen</strong><small>Eigen schoollocaties beheren</small></span><span class="feature-arrow">›</span>
+                            </a>
+                            <a class="feature-row" href="{{ route('school.settings.edit') }}">
+                                <span class="feature-icon alt">⚙</span><span class="feature-text"><strong>Schoolinstellingen</strong><small>Schoolgebonden teksten en huisstijl</small></span><span class="feature-arrow">›</span>
                             </a>
                         @endif
                         @if ($canManageRoles)
