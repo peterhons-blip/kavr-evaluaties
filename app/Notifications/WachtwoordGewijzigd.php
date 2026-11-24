@@ -27,7 +27,6 @@ class WachtwoordGewijzigd extends Notification
             ->line('Je kunt vanaf nu met je nieuwe wachtwoord aanmelden.')
             ->action('Naar Artelynx', route('login'))
             ->line('Heb je dit niet zelf gedaan? Neem dan onmiddellijk contact op met de beheerder van je school.')
-            ->salutation('Met vriendelijke groeten,')
-            ->line('Het Artelynx-team');
+            ->salutation('Met vriendelijke groeten, het Artelynx-team');
     }
 }
