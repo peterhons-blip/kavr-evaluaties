@@ -108,7 +108,9 @@
 
 
         /* One consistent school layout across dashboard and administration */
-        .sidebar-brand{gap:12px;min-height:91px;padding:20px 18px}
+        .sidebar-brand{display:flex;justify-content:center;align-items:center;min-height:120px;padding:22px 17px;background:#fff;border-bottom:1px solid #e1e8ee}
+        .school-brand-logo{display:block;width:190px;max-width:100%;max-height:82px;height:auto;object-fit:contain}
+        .school-brand-fallback{color:#142b45;font-size:24px;font-weight:800;letter-spacing:-.7px}
         .brand-mark{width:44px;height:44px;flex:0 0 44px}
         .brand-wordmark{font-size:18px;font-weight:800;color:#fff;letter-spacing:-.6px;white-space:nowrap}
         .brand-wordmark span{color:#5dc8c6}
@@ -136,7 +138,7 @@
         .btn-secondary,.btn.alt{background:#e9f3f2;color:#286e69}
         .btn-secondary:hover,.btn.alt:hover{background:#d7ebe8}
         @media(max-width:950px){.top-actions{gap:7px}.topbar{padding:16px 20px}.top-action-btn{padding:9px 11px}}
-        @media(max-width:730px){.sidebar-brand{min-height:0}.brand-wordmark{font-size:18px}.top-actions{width:100%}.profile{display:none}.top-action-btn{flex:1}.school-identity-logo{width:38px;height:38px;flex-basis:38px}.nav-bottom{display:flex;padding:12px;flex:1}}
+        @media(max-width:730px){.sidebar-brand{min-height:70px;padding:12px 18px}.school-brand-logo{width:135px;max-height:55px}.brand-wordmark{font-size:18px}.top-actions{width:100%}.profile{display:none}.top-action-btn{flex:1}.school-identity-logo{width:38px;height:38px;flex-basis:38px}.nav-bottom{display:flex;padding:12px;flex:1}}
     </style>
     @stack('styles')
 </head>
@@ -154,8 +156,11 @@
 <div class="shell">
     <aside class="sidebar">
         <a class="sidebar-brand" href="{{ route('dashboard') }}" aria-label="Artelynx schooldashboard">
-            <img class="brand-mark" src="{{ asset('images/branding/artelynx-lynx.webp') }}" alt="">
-            <span class="brand-wordmark">Arte<span>lynx</span></span>
+            @if (file_exists(public_path('images/artelynx-logo.webp')))
+                <img class="school-brand-logo" src="{{ asset('images/artelynx-logo.webp') }}" alt="Artelynx">
+            @else
+                <span class="school-brand-fallback">Artelynx</span>
+            @endif
         </a>
         <nav class="nav" aria-label="Schoolnavigatie">
             <div class="nav-label">ALGEMEEN</div>
