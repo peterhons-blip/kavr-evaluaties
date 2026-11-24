@@ -185,6 +185,98 @@ class MemberController extends Controller
         return back()->with('success', 'Bestaande gebruiker aan deze school gekoppeld.');
     }
 
+    /**
+     * Gegevens en de schoolspecifieke koppeling van één bestaande medewerker.
+     * E-mail en naam horen bij het gedeelde account, de rol/status bij deze school.
+     */
+    public function edit(Request $request, User $user): View
+    {
+        $school = $this->authorizeSchool($request, 'users.manage');
+        $member = $school->users()->where('users.id', $user->id)
+            ->whereNull('school_user.dko3_hidden_at')->firstOrFail();
+        $roles = $school->roles()->orderBy('name')->get();
+        $otherSchoolsCount = $user->schools()
+            ->where('schools.id', '!=', $school->id)->count();
+
+        return view('school.members.edit', compact(
+            'school', 'member', 'roles', 'otherSchoolsCount'
+        ));
+    }
+
+    public function updateDetails(Request $request, User $user): RedirectResponse
+    {
+        $school = $this->authorizeSchool($request, 'users.manage');
+        $member = $school->users()->where('users.id', $user->id)
+            ->whereNull('school_user.dko3_hidden_at')->firstOrFail();
+
+        // Accountgegevens zijn gedeeld over scholen. Geen wijzigingen aan
+        // platformadminaccounts in een gewone schoolcontext.
+        abort_if($member->is_platform_admin, 403, 'Een platformaccount wijzig je in Platformbeheer.');
+
+        $data = $request->validate([
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
+            'email' => ['required', 'email', 'max:255',
+                Rule::unique('users', 'email')->ignore($member->id)],
+            'phone' => ['nullable', 'string', 'max:60'],
+            'role' => ['required', 'string', 'max:30'],
+            'is_active' => ['required', 'boolean'],
+            'confirm_shared_profile' => ['nullable', 'accepted'],
+        ]);
+
+        $role = $school->roles()->where('slug', $data['role'])->first();
+        if (! $role) {
+            throw ValidationException::withMessages(['role' => 'Deze rol bestaat niet in de actieve school.']);
+        }
+        $shared = $member->schools()->where('schools.id', '!=', $school->id)->exists();
+        $profileChanged = $member->first_name !== $data['first_name']
+            || $member->last_name !== $data['last_name']
+            || mb_strtolower($member->email) !== mb_strtolower($data['email'])
+            || (string) ($member->phone ?? '') !== (string) ($data['phone'] ?? '');
+
+        if ($shared && $profileChanged && ! $request->boolean('confirm_shared_profile')) {
+            throw ValidationException::withMessages([
+                'confirm_shared_profile' => 'Dit account wordt door meerdere academies gebruikt. Bevestig dat de gewijzigde persoonsgegevens ook daar zichtbaar worden.',
+            ]);
+        }
+
+        if ($member->is($request->user()) &&
+            (! (bool) $data['is_active'] ||
+              ! in_array('users.manage', (array) $role->permissions, true))) {
+            throw ValidationException::withMessages([
+                'role' => 'Je kunt je eigen schoolbeheertoegang niet uitschakelen.',
+            ]);
+        }
+
+        DB::transaction(function () use ($school, $member, $data, $profileChanged) {
+            // Vergrendel het account en raak geen andere school_user-records aan.
+            $locked = User::whereKey($member->id)->lockForUpdate()->firstOrFail();
+            if ($profileChanged) {
+                if (mb_strtolower($locked->email) !== mb_strtolower($data['email'])) {
+                    $locked->email_verified_at = null;
+                }
+                $locked->first_name = $data['first_name'];
+                $locked->last_name = $data['last_name'];
+                $locked->name = trim($data['first_name'].' '.$data['last_name']);
+                $locked->email = mb_strtolower(trim($data['email']));
+                $locked->phone = $data['phone'] ?? null;
+                $locked->save();
+            }
+            $school->users()->updateExistingPivot($member->id, [
+                'role' => $data['role'],
+                'is_active' => (bool) $data['is_active'],
+            ]);
+            \App\Support\AccessAudit::record('school.member.details_updated', $school, $member, [
+                'profile_changed' => $profileChanged,
+                'role' => $data['role'],
+                'school_active' => (bool) $data['is_active'],
+            ]);
+        });
+
+        return redirect()->route('school.members.edit', $member)
+            ->with('success', 'Personeelsgegevens en schoolkoppeling bijgewerkt.');
+    }
+
     public function update(Request $request, User $user): RedirectResponse
     {
         $school = $this->authorizeSchool($request, 'users.manage');
