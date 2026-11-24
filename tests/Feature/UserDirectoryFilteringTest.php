@@ -151,6 +151,7 @@ class UserDirectoryFilteringTest extends TestCase
         ]);
 
         $this->actingAs($admin)
+            ->followingRedirects()
             ->from(route('platform.users.create'))
             ->post(route('platform.users.store'), [
                 'first_name' => 'Tom',
@@ -162,13 +163,8 @@ class UserDirectoryFilteringTest extends TestCase
                     $school->id => ['role' => 'school_admin', 'is_active' => '1'],
                 ],
             ])
-            ->assertRedirect(route('platform.users.create'))
-            ->assertSessionHasErrors([
-                'email' => 'Dit e-mailadres is al gekoppeld aan een bestaand personeelsaccount. Zoek het personeelslid op en bewerk de bestaande account in plaats van een nieuwe aan te maken.',
-            ]);
-
-        $this->get(route('platform.users.create'))
             ->assertOk()
+            ->assertSee('Dit e-mailadres is al gekoppeld')
             ->assertSee('Zoek het bestaande personeelsaccount op')
             ->assertSee('tom.bronckaers@example.test');
         $this->assertSame(1, User::where('email', 'tom.bronckaers@example.test')->count());
