@@ -155,6 +155,14 @@ class Dko3TeacherImportController extends Controller
                 }
 
                 $present[] = $user->id;
+
+                // DKO3-administratie krijgt op een NIEUWE schoolkoppeling
+                // de juiste rol. Bestaande rollen blijven altijd behouden.
+                $dko3RoleNames = mb_strtolower((string) ($item['dko3_roles'] ?? ''));
+                $newSchoolRole = preg_match('/\\badministrati(?:e|ef)\\b/u', $dko3RoleNames)
+                    ? 'administration'
+                    : 'teacher';
+
                 $profile = [];
                 foreach ([
                     'dko3_roles', 'dko3_active_assignments',
@@ -183,7 +191,7 @@ class Dko3TeacherImportController extends Controller
                     DB::table('school_user')->insert([
                         'school_id' => $school->id,
                         'user_id' => $user->id,
-                        'role' => 'teacher',
+                        'role' => $newSchoolRole,
                         'is_active' => true,
                         'dko3_hidden_at' => null,
                         'dko3_managed' => true,
