@@ -70,3 +70,11 @@ Onderwijsstructuur (vakken/graden/leerlingen/lesgroepen/inschrijvingen), DKO3-le
 - Preview-token is aan de sessie, uploader en school gekoppeld en verloopt na een uur. Geen ruwe export of leerlinggegevens committen naar GitHub of loggen in audits.
 - Import voegt toe/bijwerkt namen en verwijdert/deactiveert nooit afwezige leerlingen. Manuele inactieve status blijft behouden.
 - Regressietests: `tests/Feature/Dko3StudentAdministrationTest.php` en `tests/Feature/StudentModelTest.php`. Nieuwe koppelingen met vakken en lessen mogen geen naammatching zonder ambiguïteitscontrole uitvoeren.
+
+## Schoolomgeving versus Platformbeheer
+
+- Bouw dagelijkse schoolfunctionaliteit primair in de **actieve schoolomgeving**. Platformbeheer behoudt globale scholenconfiguratie en ondersteuning; maak geen gewone docentworkflow uitsluitend onder `/platform`.
+- Beperk alle `/school/*`-routes met `auth`, `active.school`, `SchoolAccess::allows()` én een school_id-controle op elk benaderd model. Schoolgebonden gebruikers, vestigingen, leerlingen en instellingen zijn nooit globaal te doorzoeken.
+- Schoolbeheerfuncties: personeelsleden `users.view/manage`, schoolrollen `roles.manage`, leerlingen `students.view/manage`, vestigingen en schoolinstellingen `school.settings`. De directie krijgt alleen mogelijkheden uit haar rolmatrix.
+- De eigen schoolinstellingen mogen nooit SMTP, globale platformconfiguratie, andere scholen of accountrechten van een andere school wijzigen.
+- Bekijk bij dashboardproblemen de query's in `School\\DashboardController`; zowel dashboardtests als toegangscontrole draaien na elke wijziging.
