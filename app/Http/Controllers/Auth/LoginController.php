@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\School;
+use App\Models\PlatformSetting;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -17,12 +18,17 @@ class LoginController extends Controller
      */
     public function showLogin(): View
     {
-        // Algemene login blijft bereikbaar voor platformadmins,
-        // ook wanneer de standaardacademie gedeactiveerd is.
-        $school = School::with('settings')
-            ->where('code', 'KAVR')
-            ->first()
-            ?? School::with('settings')->orderBy('id')->firstOrFail();
+        // Een expliciet gekozen actieve standaardschool krijgt voorrang.
+        // Bij een gedeactiveerde standaard blijven de algemene login en
+        // platformbeheer bereikbaar met een veilige fallback.
+        $defaultSchoolId = PlatformSetting::query()->value('default_login_school_id');
+        $school = $defaultSchoolId
+            ? School::with('settings')->whereKey($defaultSchoolId)->where('is_active', true)->first()
+            : null;
+
+        $school ??= School::with('settings')->where('code', 'KAVR')->where('is_active', true)->first();
+        $school ??= School::with('settings')->where('is_active', true)->orderBy('id')->first();
+        $school ??= School::with('settings')->orderBy('id')->firstOrFail();
 
         return view('auth.login', compact('school'));
     }
