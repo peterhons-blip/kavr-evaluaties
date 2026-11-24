@@ -1,284 +1,63 @@
-# AGENTS.md – Artelynx Evaluatieplatform
+# AGENTS.md - Artelynx evaluatieplatform
 
-> **Nieuwe afspraken (november 2026):** Bekijk `docs/GEBRUIKERS_EN_RECHTEN.md`. Centrale gebruikers bestaan in `users`; schoolkoppelingen in `school_user`; per-school rolrechten in `school_roles`. Controleer met `App\\Support\\SchoolAccess::allows` bij elke schoolgebonden beheeractie. Platformadministrators krijgen niet automatisch inhoudelijke inzagerechten. Verwijder geen auditrecords en log geen wachtwoorden of resetlinks.
+**Bijgewerkt: 24 november 2026.** Deze instructies zijn leidend voor Codex/AI-ontwikkelwerk in `peterhons-blip/kavr-evaluaties`. Lees ook `PROJECT_CONTEXT.md` en `docs/GEBRUIKERS_EN_RECHTEN.md`. De laatstgenoemde documentatie kan oudere featurebranch-commando's bevatten: **werk vanuit de actuele `main`**.
 
-## 1. Projectcontext
+## Product, stack en bestaande code
 
-De officiële merknaam van de applicatie is **Artelynx** (voorheen EvolvIT). Gebruik Artelynx in alle zichtbare productteksten, branding en paginatitels. Bestaande technische namen, databanktabelnamen en repositorypaden hoeven niet hernoemd te worden.
+- Publieke productnaam: **Artelynx**; slogan *Elk talent in ontwikkeling.* Niet teruggaan naar EvolvIT of de interne repositorynaam als UI-merk.
+- Laravel 13, PHP **minimaal 8.4.1**, MySQL/MariaDB, Blade, CSS en JavaScript. Windows/XAMPP lokaal en Windows-server live.
+- Geen onnodige extra dependencies of Node-build introduceren. Gebruik bestaande componenten/lay-outs en de Artelynx-huisstijl.
+- Favicon: `public/favicon.ico`; logo doorgaans `public/images/artelynx-logo.webp`.
+- Eén globaal account per persoon in `users`; meerdere scholen via `school_user`. Schoolrollen in `school_roles`; individuele uitzonderingen in `school_user_permissions`.
+- Bestaande modules: platform-/schoolbeheer, accounts, DKO3-**personeels**import, rechtenmatrix, individueel rechtenbeheer, profiel/wachtwoord, e-mailinstellingen/-log en audit.
+- De toekomstige leerlingen-, lesgroepen-, leerdoelen-, ICJ/KCJ- en PDF-functies **niet** als geïmplementeerd voorstellen.
 
-Dit project is een webgebaseerd evaluatieplatform voor Kunstacademie Voeren-Riemst, ontworpen om later meerdere scholen te ondersteunen.
+## Autorisatie is verplicht bij elke wijziging
 
-Lees vóór belangrijke wijzigingen altijd `PROJECT_CONTEXT.md`.
+1. Gebruik `App\Support\SchoolAccess::allows($user, $school, $permission)` voor schoolgebonden functierechten; de rechtenlijst staat in `App\Support\SchoolRoleCatalog`.
+2. Vereis: actief globaal account, actieve school, actieve **en niet via DKO3 verborgen** `school_user`-koppeling, juiste schoolrol, dan individuele uitzondering (`allow`/`deny`) bovenop het rolrecht. `inherit` betekent: geen override opgeslagen.
+3. Gebruik voor het schooldashboard de bestaande `active.school`-middleware en de huidige actieve school uit de sessie; verifieer expliciet de school van elk via URL/modelbinding opgevraagd object.
+4. Platformroutes zitten achter `auth` + `platform.admin`; `is_platform_admin` geeft geen automatisch leesrecht op vertrouwelijke school-/leerlingevaluaties.
+5. `users.view`, `users.manage`, `roles.manage` zijn actief gebruikt. Rechten voor leerlingen, groepen, leerdoelen, evaluaties en rapporten zijn voorlopig deels vooruitgeplande **codes**, geen voldoende bescherming zonder concrete school- en objecttoewijzing.
+6. Voor nieuwe evaluatieroutes is een rolrecht **niet genoeg**: controleer ook de specifieke lesgroep/leerling, docent-/jurytoewijzing, school en eventuele expliciete directiebevoegdheid.
+7. Controleer bevoegdheid bij GET én bij POST/PUT/PATCH/DELETE. UI-elementen verbergen is geen toegangscontrole.
+8. Vermijd cross-school lekken bij zoeken, exporteren, downloaden, achtergrondtaken en directe `/{id}`-routes.
 
-De bestaande Excel-gebaseerde ICJ- en KCJ-evaluatiefiches worden vervangen door een centrale webapplicatie.
+## Bekende bevinding uit veiligheidsreview 24 november 2026
 
-## 2. Technologie
+`SchoolAccess` weigerde verborgen DKO3-schoolkoppelingen al, maar `SchoolSelectionController` en `EnsureActiveSchool` controleerden `dko3_hidden_at` niet. Op `main` zijn beide schoolselectieroutes en de dashboardmiddleware aangescherpt met `wherePivotNull('dko3_hidden_at')`. Er staan twee nieuwe regressietests in `tests/Feature/PermissionsAndProfileTest.php`.
 
-- Laravel 13
-- PHP 8.4 of hoger, met compatibiliteit voor PHP 8.4
-- MySQL/MariaDB
-- Laravel Blade
-- HTML, CSS en JavaScript
-- GitHub voor versiebeheer
-- Windows en XAMPP als ontwikkelomgeving
+**Deze review was statische code-inspectie, geen volledige beveiligingsaudit.** Draai de tests en controleer CI voordat je een vrijgave als geverifieerd bestempelt. Voeg bij nieuwe objecttypen altijd cross-school en objecttoewijzingstests toe.
 
-Gebruik zoveel mogelijk bestaande Laravel-functionaliteit en vermijd onnodige externe pakketten.
+## Database- en privacyregels
 
-## 3. Multischoolarchitectuur
+- Gebruik uitsluitend nieuwe Laravel-migraties voor schemawijzigingen; wijzig geen reeds uitgevoerde migraties. Gebruik foreign keys, indexen en timestamps.
+- Nooit `migrate:fresh` of `migrate:reset` tegen een bestaande dataomgeving zonder expliciete toestemming.
+- Bewaar geheimen uitsluitend in veilige configuratie; commit geen `.env`, sleutels, tokens, wachtwoorden, resetlinks, leerlinggegevens of databaseexports.
+- Auditeer gevoelige beheerhandelingen via bestaande `AccessAudit`; geen vertrouwelijke inhoud in auditvelden.
+- E-maillog registreert nieuw verzonden mails met (beperkt) onderwerp, zonder links/mailinhoud. Onderwerpen kunnen persoonsgegevens bevatten; stel geen leerlinginformatie voor in onderwerpregels.
+- Verwijder nooit stilzwijgend gebruikers, schoolkoppelingen of historische evaluaties.
+- Scheid schooljaar- en periodegegevens en bewaak historische snapshots van leerdoelen/evaluatiecriteria.
 
-**Dit is een verplichte architectuureis.**
+## Ontwikkelprocedure voor Codex
 
-De applicatie moet vanaf het begin meerdere scholen kunnen ondersteunen.
+1. Lees de drie projectdocumenten en controleer de huidige Git-branch/status.
+2. Lees eerst de betrokken routes, middleware, controllers, modellen, migraties, views en tests. Ga niet uit van oude planbestanden.
+3. Formuleer kort het doel en de impact; maak kleine, gerichte wijzigingen en behoud bestaande werking.
+4. Voeg tests toe voor toegestaan/geweigerd, actieve/inactieve/verborgen schoolkoppelingen, school A versus B, en URL-objecten van andere scholen.
+5. Controleer met PHP 8.4.1+: `composer install`, `php artisan optimize:clear`, `php artisan test`. Waar nodig `php artisan view:cache` en `php artisan route:list`.
+6. De workflow `.github/workflows/artelynx-tests.yml` wordt getriggerd op push naar `main` en PR's. Een commit is **geen** bewijs van een geslaagde workflow.
+7. Rapporteer welke bestanden gewijzigd zijn, welke tests daadwerkelijk liepen, wat niet getest kon worden, en welke handmatige stappen nodig zijn.
+8. Bij expliciete instructie mag naar `main` worden geschreven; anders geen onverwachte pushes of productie-uitrol. De gebruiker voert live `git pull` zelf uit.
+9. Na wezenlijke architectuurwijzigingen deze documenten bijwerken, zodat oude 'nog te bouwen'-teksten niet opnieuw als werkelijkheid worden gelezen.
 
-### Belangrijke regels
+## Huidige functionele planning (geen opdracht om nu uit te voeren)
 
-- Elke school krijgt een uniek `id` in de tabel `schools`.
-- Schoolgebonden gegevens moeten gekoppeld zijn aan de juiste school.
-- Een gebruiker kan bij meerdere scholen horen.
-- Gebruikers kunnen per school verschillende rollen hebben.
-- Controleer schooltoegang bij iedere schoolgebonden actie.
-- Vertrouw nooit uitsluitend op een `school_id` uit een formulier of URL.
-- Een gebruiker mag nooit gegevens van een andere school kunnen bekijken of wijzigen zonder expliciete bevoegdheid.
-- Voorzie schoolgebonden instellingen, vakken, leerdoelen en evaluaties.
+Onderwijsstructuur (vakken/graden/leerlingen/lesgroepen/inschrijvingen), DKO3-leerlingimport, competentiebibliotheek, ICJ/KCJ-evaluaties, PDF-rapporten en DKO3-export. Bepaal beoordelingsschalen en technische exportvereisten pas met bevestigde input. Behoud de verplichte multischoolisolatie.
 
-Gebruik Laravel Policies, middleware en consistente databasequery's om de toegangscontrole af te dwingen.
+## Lokale en live werkomgeving
 
-Een globale platformadministrator krijgt niet automatisch toegang tot vertrouwelijke leerlingenevaluaties.
-
-## 4. Databankregels
-
-Gebruik uitsluitend Laravel-migraties voor wijzigingen aan de databankstructuur.
-
-- Gebruik foreign keys voor relaties.
-- Voeg relevante indexen toe.
-- Gebruik duidelijke tabel- en kolomnamen.
-- Maak geen dubbele gegevens aan.
-- Voorzie timestamps.
-- Gebruik waar nodig soft deletes.
-- Verwijder nooit zomaar bestaande gegevens.
-- Gebruik nooit `migrate:fresh` op een bestaande databank zonder expliciete toestemming.
-
-Wijzig migraties die al uitgevoerd zijn niet achteraf. Maak voor aanpassingen een nieuwe migratie.
-
-## 5. Gebruikers en authenticatie
-
-Gebruik het bestaande Laravel-authenticatiesysteem.
-
-De tabel `users` bevat onder andere:
-
-- `name` (tijdelijk behouden)
-- `first_name`
-- `last_name`
-- `email`
-- `password`
-- `email_verified_at`
-- `is_active`
-- `must_change_password`
-- `last_login_at`
-
-Gebruik voortaan `first_name` en `last_name` voor de weergave van de naam.
-
-Gebruik nooit leesbare wachtwoorden in de databank.
-
-Voorzie bij verdere ontwikkeling:
-
-- Accountuitnodigingen
-- Wachtwoordinstelling bij eerste activatie
-- E-mailverificatie
-- Wachtwoordherstel
-- Accountblokkering
-- Schoolgebonden rollen en rechten
-
-De aanwezigheid van een veld of interface betekent niet dat de bijbehorende beveiliging al geïmplementeerd is.
-
-## 6. Rollen en rechten
-
-Voorziene rollen:
-
-- `platform_admin`
-- `school_admin`
-- `director`
-- `administration`
-- `teacher`
-
-Rollen binnen een school moeten gekoppeld zijn aan de combinatie van gebruiker en school.
-
-Controleer rechten altijd op de server, niet alleen door knoppen of menu's te verbergen.
-
-## 7. Onderwijsstructuur
-
-De applicatie moet ondersteunen:
-
-- Schooljaren en evaluatieperioden
-- Graden en leerjaren
-- Verschillende vakken en instrumenten
-- Meerdere leerkrachten per vak of lesgroep
-- Meerdere vakken per leerling
-- Individuele en klassikale lessen
-- Lesgroepen met leerlingen uit verschillende leerjaren
-
-Leerlingen worden gekoppeld aan vakken en lesgroepen via inschrijvingen.
-
-## 8. Evaluatiesysteem
-
-Ondersteun zowel ICJ als KCJ.
-
-### ICJ
-
-Individuele jaarplannen en evaluaties per leerling.
-
-### KCJ
-
-Klassikale jaarplannen en evaluaties per lesgroep, met mogelijkheid tot individuele feedback.
-
-Beide systemen moeten gebruikmaken van een gedeeld evaluatiemodel.
-
-Ondersteun meerdere evaluatiemomenten per periode.
-
-Evaluatiemethoden moeten configureerbaar zijn per vak of lessituatie.
-
-Mogelijke evaluatiemethoden:
-
-- Beschrijvende evaluaties
-- Competentiebeoordeling
-- Punten
-- Rubrics
-- Combinaties
-
-Behoud historische evaluatiegegevens en de gebruikte beoordelingscriteria.
-
-## 9. PDF en DKO3
-
-Voorzie toekomstige PDF-export:
-
-- Per leerling
-- Per lesgroep
-- Per evaluatieperiode
-- Per schooljaar waar nodig
-
-De output moet geschikt zijn voor de administratieve verwerking in DKO3.
-
-De exacte DKO3-vereisten moeten vóór implementatie worden bevestigd.
-
-## 10. Frontend en huisstijl
-
-Gebruik de bestaande loginpagina als visuele basis.
-
-Kleuren:
-
-- Donkerblauw: `#142b45`
-- Turquoise: `#59aaa5`
-- Goud: `#e5a65b`
-- Roze: `#c97f9a`
-- Achtergrond: `#f2f5f7`
-
-De interface moet overzichtelijk, professioneel en responsive zijn.
-
-Gebruik herbruikbare Blade-layouts en componenten om dubbele HTML- en CSS-code te vermijden.
-
-## 11. Beveiliging en privacy
-
-De applicatie verwerkt persoonsgegevens van leerlingen.
-
-Daarom:
-
-- Pas server-side validatie toe.
-- Gebruik Laravel-authenticatie en autorisatie.
-- Gebruik CSRF-bescherming.
-- Gebruik veilige databasequery's via Eloquent of de querybuilder.
-- Bescherm persoonsgegevens tegen ongeautoriseerde toegang.
-- Log geen wachtwoorden, tokens of vertrouwelijke evaluatie-inhoud.
-- Houd `.env` en andere geheimen buiten Git.
-- Gebruik geen echte leerlinggegevens in openbare testomgevingen.
-- Zorg dat exports uitsluitend beschikbaar zijn voor bevoegde gebruikers.
-- Beperk toegang tot bestanden en rapporten per school.
-- Maak veilige databankback-ups mogelijk.
-
-## 12. Codekwaliteit
-
-- Volg de Laravel-conventies.
-- Gebruik duidelijke namen voor klassen, methoden en variabelen.
-- Houd controllers overzichtelijk.
-- Gebruik services voor complexere bedrijfslogica.
-- Gebruik Form Requests voor uitgebreide validatie.
-- Gebruik Policies voor autorisatie.
-- Vermijd dubbele code.
-- Schrijf tests voor belangrijke functionaliteit.
-- Gebruik Nederlandse teksten in de gebruikersinterface.
-- Gebruik bij voorkeur Engelse namen in de programmacode.
-
-## 13. Werken met Codex
-
-Bij elke programmeeropdracht:
-
-1. Lees `PROJECT_CONTEXT.md` en dit bestand.
-2. Controleer de bestaande code voordat wijzigingen worden voorgesteld.
-3. Hergebruik bestaande functionaliteit waar mogelijk.
-4. Respecteer de multischoolarchitectuur.
-5. Maak geen ongevraagde ingrijpende wijzigingen.
-6. Verwijder geen tabellen, records of bestanden zonder toestemming.
-7. Leg belangrijke technische keuzes kort uit.
-8. Geef aan welke bestanden aangepast zijn.
-9. Controleer op syntaxfouten en voer relevante tests uit.
-10. Meld duidelijk welke stappen nog handmatig nodig zijn.
-
-Voer geen migraties uit op productie zonder expliciete opdracht.
-
-## 14. Ontwikkelwerkwijze
-
-De ontwikkelaar wil de code begrijpen en zelf kunnen volgen.
-
-Werk daarom in kleine, controleerbare stappen.
-
-Geef bij belangrijke wijzigingen uitleg over:
-
-- Wat er gewijzigd wordt.
-- Waarom de wijziging nodig is.
-- Welke bestanden betrokken zijn.
-- Hoe de functionaliteit getest kan worden.
-
-Vermijd onnodige complexiteit.
-
-## 15. GitHub en omgevingen
-
-Repository:
-
-`https://github.com/peterhons-blip/kavr-evaluaties`
-
-De ontwikkeling vindt plaats op meerdere Windows-laptops.
-
-- Gebruik Git voor broncode.
-- Gebruik migraties voor databankstructuur.
-- Gebruik seeders voor reproduceerbare testgegevens.
-- Commit geen `.env`, wachtwoorden of echte leerlinggegevens.
-- Respecteer bestaande wijzigingen van andere ontwikkelaars.
-- Push niet automatisch naar productie.
-
-De productieomgeving moet compatibel zijn met de gebruikte Laravel- en PHP-versies.
-
-## 16. Huidige ontwikkelfase
-
-Reeds aanwezig:
-
-- Laravel-installatie
-- MySQL-verbinding
-- LoginController
-- Loginpagina
-- Eenvoudig dashboard
-- Basisgebruikersmodel
-- Schooljaren
-- Evaluatieperioden
-- Extra gebruikersvelden
-
-Nog niet geïmplementeerd:
-
-- Multischooldatabankstructuur
-- Gebruikersrollen
-- Accountuitnodigingen
-- Verplichte wachtwoordwijziging
-- Volledige e-mailverificatie
-- Leerlingen en lesgroepen
-- Evaluatiemodellen
-- PDF-export
-
-**Eerstvolgende prioriteit: implementeer de multischoolbasis voordat nieuwe schoolgebonden onderdelen worden ontwikkeld.**
+- Lokaal doorgaans `C:\xampp\htdocs\kavr-evaluaties`, `http://localhost:8001`, DB `kavr_evaluaties_dev`.
+- PHP op PATH kan nog `C:\xampp\php\php.exe` (8.2) zijn; kies expliciet PHP 8.4+ voordat Composer of Artisan draait.
+- Broncode via GitHub `main`, databanken en `.env` zijn omgevingsspecifiek.
+- Geen productietests die bestaande databankrecords verwijderen of wijzigen.
