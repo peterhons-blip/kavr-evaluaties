@@ -161,8 +161,8 @@
             <h2 class="section-title">Jouw school in één oogopslag</h2>
             <section class="stats" aria-label="Schooloverzicht">
                 <div class="stat"><div class="stat-icon">⌖</div><div class="stat-num">{{ $school->locations_count }}</div><div class="stat-label">Vestigingsplaatsen</div><div class="stat-desc">Gekoppeld aan jouw school</div></div>
-                <div class="stat"><div class="stat-icon lilac">♙</div><div class="stat-num">{{ $canViewUsers ? $school->users_count : '—' }}</div><div class="stat-label">Gebruikers</div><div class="stat-desc">{{ $canViewUsers ? 'Accounts gekoppeld aan deze school' : 'Alleen zichtbaar voor beheerders' }}</div></div>
-                <div class="stat"><div class="stat-icon gold">✧</div><div class="stat-num">{{ $school->roles_count }}</div><div class="stat-label">Schoolrollen</div><div class="stat-desc">Eigen rollen en functies</div></div>
+                <div class="stat"><div class="stat-icon lilac">♙</div><div class="stat-num">{{ $canViewStudents ? $school->students_count : '—' }}</div><div class="stat-label">Actieve leerlingen</div><div class="stat-desc">{{ $canViewStudents ? 'Leerlingen in deze academie' : 'Alleen zichtbaar met leerlingenrechten' }}</div></div>
+                <div class="stat"><div class="stat-icon gold">♧</div><div class="stat-num">{{ $canViewUsers ? $school->users_count : '—' }}</div><div class="stat-label">Personeelsleden</div><div class="stat-desc">{{ $canViewUsers ? 'Gebruikers van deze academie' : 'Alleen zichtbaar voor beheerders' }}</div></div>
             </section>
 
             <div class="intro-band">
@@ -230,6 +230,11 @@
                         <div class="panel-head">
                             <div><h2>Snel naar</h2><p class="panel-sub">Jouw beschikbare functies</p></div>
                         </div>
+                        @if ($canViewStudents)
+                            <a class="feature-row" href="{{ route('school.students.index') }}">
+                                <span class="feature-icon">♙</span><span class="feature-text"><strong>Leerlingen</strong><small>Zoeken en leerlingendossiers bekijken{{ $canManageStudents ? ', toevoegen of importeren' : '' }}</small></span><span class="feature-arrow">›</span>
+                            </a>
+                        @endif
                         @if ($canViewUsers)
                             <a class="feature-row" href="{{ route('school.members.index') }}">
                                 <span class="feature-icon">♙</span><span class="feature-text"><strong>Personeelsleden beheren</strong><small>Accountkoppelingen en medewerkers</small></span><span class="feature-arrow">›</span>
