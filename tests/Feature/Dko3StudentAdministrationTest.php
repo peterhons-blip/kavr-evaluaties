@@ -40,7 +40,7 @@ class Dko3StudentAdministrationTest extends TestCase
     private function sampleCsv(): UploadedFile
     {
         return UploadedFile::fake()->createWithContent('alleleerlingen.csv',
-            "stamnummer;naam;voornaam\n002012331;Ahzaz;Aalyah\n002012330;Ahzaz;Lina\n");
+            "stamnummer;naam;voornaam\n000123001;Voorbeeld;Alex\n000123002;Voorbeeld;Robin\n");
     }
 
     public function test_school_manager_can_preview_and_commit_csv_without_deactivating_missing_students(): void
@@ -58,7 +58,7 @@ class Dko3StudentAdministrationTest extends TestCase
 
         $this->actingAs($admin)->withSession(['active_school_id' => $school->id])
             ->post(route('school.students.preview'), ['file' => $this->sampleCsv()])
-            ->assertOk()->assertSee('2')->assertSee('002012331');
+            ->assertOk()->assertSee('2')->assertSee('000123001');
 
         $token = session('student_import_token');
         $this->assertNotEmpty($token);
@@ -67,8 +67,8 @@ class Dko3StudentAdministrationTest extends TestCase
             ->assertRedirect(route('school.students.index'));
 
         $this->assertDatabaseHas('students', [
-            'school_id' => $school->id, 'dko3_stamnummer' => '002012331',
-            'first_name' => 'Aalyah', 'last_name' => 'Ahzaz',
+            'school_id' => $school->id, 'dko3_stamnummer' => '000123001',
+            'first_name' => 'Alex', 'last_name' => 'Voorbeeld',
         ]);
         $this->assertTrue($other->fresh()->is_active);
         $this->assertSame(3, Student::where('school_id', $school->id)->count());
@@ -136,7 +136,7 @@ class Dko3StudentAdministrationTest extends TestCase
             '<row r="1"><c r="A1" t="inlineStr"><is><t>stamnummer</t></is></c>'.
             '<c r="B1" t="inlineStr"><is><t>naam</t></is></c>'.
             '<c r="C1" t="inlineStr"><is><t>voornaam</t></is></c></row>'.
-            '<row r="2"><c r="A2" t="inlineStr"><is><t>002012331</t></is></c>'.
+            '<row r="2"><c r="A2" t="inlineStr"><is><t>000123001</t></is></c>'.
             '<c r="B2" t="inlineStr"><is><t>Voorbeeld</t></is></c>'.
             '<c r="C2" t="inlineStr"><is><t>Leerling</t></is></c></row>'.
             '</sheetData></worksheet>');
@@ -144,7 +144,7 @@ class Dko3StudentAdministrationTest extends TestCase
         try {
             $result = Dko3StudentSpreadsheet::read($path, 'xlsx');
             $this->assertSame(0, $result['total_errors']);
-            $this->assertSame('002012331', $result['rows'][0]['dko3_stamnummer']);
+            $this->assertSame('000123001', $result['rows'][0]['dko3_stamnummer']);
             $this->assertSame('Leerling', $result['rows'][0]['first_name']);
         } finally {
             @unlink($path);
