@@ -127,4 +127,44 @@ class PermissionsAndProfileTest extends TestCase
         $this->assertTrue(Hash::check('newpassword123', $staff->fresh()->password));
         Notification::assertSentTo($staff, \App\Notifications\WachtwoordGewijzigd::class);
     }
+    public function test_dko3_hidden_school_membership_cannot_select_or_access_school_dashboard(): void
+    {
+        $school = $this->school('HIDDEN');
+        $user = User::factory()->create(['is_active' => true]);
+        $user->schools()->attach($school->id, ['role' => 'teacher', 'is_active' => true]);
+        $user->schools()->updateExistingPivot($school->id, ['dko3_hidden_at' => now()]);
+
+        $this->assertFalse(SchoolAccess::allows($user, $school, 'groups.view'));
+
+        $this->actingAs($user)
+            ->get(route('schools.select'))
+            ->assertForbidden();
+
+        $this->post(route('schools.select.store'), ['school_id' => $school->id])
+            ->assertNotFound();
+
+        $this->withSession(['active_school_id' => $school->id])
+            ->get(route('dashboard'))
+            ->assertRedirect(route('schools.select'));
+    }
+
+    public function test_dko3_hidden_membership_does_not_block_other_active_school(): void
+    {
+        $hidden = $this->school('HIDDEN');
+        $active = $this->school('ACTIVE');
+        $user = User::factory()->create(['is_active' => true]);
+        $user->schools()->attach($hidden->id, ['role' => 'teacher', 'is_active' => true]);
+        $user->schools()->attach($active->id, ['role' => 'teacher', 'is_active' => true]);
+        $user->schools()->updateExistingPivot($hidden->id, ['dko3_hidden_at' => now()]);
+
+        $this->actingAs($user)->get(route('schools.select'))
+            ->assertOk()
+            ->assertSee('Academie ACTIVE')
+            ->assertDontSee('Academie HIDDEN');
+
+        $this->post(route('schools.select.store'), ['school_id' => $active->id])
+            ->assertRedirect(route('dashboard'));
+        $this->get(route('dashboard'))->assertOk();
+    }
+
 }
