@@ -124,6 +124,19 @@ class Dko3EducationStructureAndImportTest extends TestCase
         ]);
     }
 
+    public function test_student_location_filter_is_scoped_to_own_academy(): void
+    {
+        $a=$this->school('LOC-A');
+        $b=$this->school('LOC-B');
+        $admin=$this->manager($a);
+        $foreignLocation=\App\Models\SchoolLocation::create([
+            'school_id'=>$b->id,'name'=>'Kanne','is_active'=>true,
+        ]);
+        $this->actingAs($admin)->withSession(['active_school_id'=>$a->id])
+            ->get(route('school.students.index', ['location_id'=>$foreignLocation->id]))
+            ->assertNotFound();
+    }
+
     public function test_another_schools_program_cannot_be_changed(): void
     {
         $a=$this->school('SCOPE-A');
