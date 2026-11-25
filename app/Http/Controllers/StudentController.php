@@ -69,7 +69,7 @@ class StudentController extends Controller
         $search = trim($query['q'] ?? '');
         $status = $query['status'] ?? 'all';
         $schoolYearFilter = $query['school_year'] ?? '';
-        $students = Student::query()->with(['schoolYears' => fn ($q) => $q->orderByDesc('school_year')])->where('school_id', $school->id)
+        $students = Student::query()->with(['schoolYears' => fn ($q) => $q->orderByDesc('school_year')->with('subjects.assignments.location')])->where('school_id', $school->id)
             ->when($search !== '', function ($q) use ($search) {
                 $term = '%'.addcslashes($search, '%_\\').'%';
                 $q->where(function ($nested) use ($term) {
