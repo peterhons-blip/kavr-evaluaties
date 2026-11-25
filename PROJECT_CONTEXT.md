@@ -179,3 +179,41 @@ Drie door de opdrachtgever aangeleverde (niet in Git opnemen) XLSX-exports gecon
 4. Voor schooljaarafsluiting, opleidingsgraad/-leerjaar, officiële lesgroepidentiteit, vakleerkracht-relaties en historische docenttoewijzingen zijn aanvullende modellen nodig. `student_subject_enrollments` heeft voorlopig `unique(student_school_year_id,education_subject_id)`; dat is mogelijk te restrictief voor meerdere leerkrachten/groepen voor hetzelfde vak. Herzie schema met afzonderlijke lesgroep-/lerarenkoppeling voordat vakkenimport productierijp is. Deel niet blind vakregels in via vak+graad+locatie: dit identificeert geen echte klas.
 5. Elke stap: preflight op bestandsformaat, schooljaar, duplicaten en conflicts; preview van nieuw/bijwerken/ongewijzigd/niet te matchen; transactie + expliciete bevestiging; geen automatische verwijdering of deactivering bij afwezigheid in een deelbestand; idempotente herimport; audit van aantallen zonder persoonsgegevens.
 6. Zowel /school als /platform ondersteunen dezelfde importstappen met schoolscoping; platformselectie expliciet. Zorg dat onduidelijke matches niet stilzwijgend gekozen worden en maak een rapport met te controleren regels.
+
+
+## Officiële onderwijsstructuur KA-VR — bron-PDF 2021-2022 (25 november 2026)
+
+Bron: door opdrachtgever aangeleverd document `KAVR  structuur 3 domeinen.pdf` (15 pagina's, **aanbod 2021-2022**). Dit document is belangrijk als historisch/inhoudelijk referentiekader voor de evaluatiemodule. **Niet automatisch aannemen dat het volledige aanbod in schooljaar 2026-2027 ongewijzigd is**; leg actuele opleidingen, uren, opties en vestigingen naast DKO3.
+
+### Kernregel evaluatietype (expliciet bevestigd door opdrachtgever)
+- **Instrument (INS) = ICJ, individuele competentiegerichte evaluatiefiche.**
+- **Alle andere vakken = KCJ, klassikale competentiegerichte evaluatiefiche.** Dit betreft de afspraak voor KA-VR in deze ontwikkelfase, ook voor klassikaal Muziekleer, Groepsmusiceren, Muzikale en culturele vorming, Woordatelier, Storytelling, Dramastudio, Theater, Regie, Creatief Schrijven en Beeldatelier. Niet veralgemenen naar alle toekomstige academies zonder schoolspecifieke configuratiemogelijkheid.
+- In database `education_subjects.evaluation_type` toegevoegd via migratie `2026_11_25_230000_add_evaluation_type_to_education_subjects.php` (default `kcj`). Op onderwerp-aanmaak/wijziging classificeert `DkoEvaluationType::forSubjectName` vaknamen die met 'Instrument' beginnen als `icj`; anders `kcj`. Let op: bestaande subjectrecords uit eerdere imports zijn na migratie standaard KCJ: controleer bestaande instrumentvakken en maak later een controle-/reclassificatiemogelijkheid die historische resultaten ongemoeid laat.
+- ICJ/KCJ zijn typen **evaluatie**. Het bepaalt niet of een vak als les individueel of in groep georganiseerd wordt; die rooster-/lesgroepsstructuur staat apart. Instrument kan door één of meer leerkrachten gegeven worden. Bouw dus één evaluatiekern met twee verschillende invul-/weergavevormen en passende autorisatie.
+
+### Domein Muziek (bron pagina's 1-8)
+- Graad 1 (2 leerjaren): Kids-Academie (KA1 6 jaar; KA2 7 jaar), 1 uur; kleine groepjes kunnen gecombineerde graadsklassen vormen.
+- Graad 2: jongeren **4** leerjaren, volwassenen **3**; elk leerjaar Instrument (INS, 1u) en Muziekleer (ML, 2u); de brochure noemt jongeren vanaf 8 jaar, volwassenen vanaf 15.
+- Graad 3 (3 leerjaren), optie **Klassiek** of **Jazz-Pop-Rock**: Instrument, Groepsmusiceren (instrumentaal/vocaal/begeleidingspraktijk), Muzikale en culturele vorming (MCV). Keuzevakken vanaf bepaalde jaren: Muziektheorie (MT), Singer-songwriter (SSW); alternatieve leercontext voor groepsmusiceren onder voorwaarden.
+- Graad 4 (3 leerjaren), studierichtingen **Vertolkend muzikant** en **Creërend muzikant**, opties Klassiek/Jazz-Pop-Rock. Instrument (of in creërend Compositie), Groepsmusiceren en keuzevakken Muziektheorie, Singer-songwriter, Compositie of Instrument; precieze keuze afhankelijk van optie en studierichting.
+- **Specialisatie Muziek**: kortlopende studierichting na graad 4, 2 leerjaren, selectieve toelating; kan onder voorwaarden samengaan met 4e graad. Keuzevakken en alternatieve leercontext mogen niet als automatisch verplichte vakken worden geïnterpreteerd.
+- Pagina 8: alternatieve leercontext in socioculturele vereniging; voorwaarden volgens academiereglement.
+
+### Domein Theater / Woordkunst-drama (bron pagina's 9-13)
+- Graad 2: 4 leerjaren, optie Woordkunst-drama, vak Woordatelier (WA).
+- Graad 3: 3 leerjaren, optie Verteltheater, Storytelling (ST) en Dramastudio (DS).
+- Graad 4: 3 leerjaren, studierichting **Vertolkend acteur**, optie Speltheater: Kunst- en cultuuratelier (KCA) plus Theater (TT) of Verteltheater Stemregie; Stemregie volgens bron enkel Voeren.
+- Graad 4: studierichting **Theaterregisseur**, unieke optie Regie: Kunst- en cultuuratelier plus Regie; volgens bron enkel Voeren.
+- Kortlopende studierichting **Schrijver**: 3 leerjaren C.1/C.2/C.3 Creatief Schrijven, volgens bron vanaf 15 jaar, enkel Zichen.
+
+### Domein Beeld (bron pagina's 14-15)
+- Graad 1: 2 leerjaren, Beeldatelier (6-7 jaar in brochure).
+- Graad 2: 4 leerjaren, Beeldatelier (8-11 jaar).
+- Graad 3: **6** leerjaren, Beeldatelier (12-17 jaar). Een 'graad' kan dus per domein verschillende aantallen leerjaren hebben.
+
+### Noodzakelijke ontwerpeffecten / vervolg
+1. Bouw schoolgebonden hiërarchie `domein → studierichting/opleiding → optie → graad → leerjaar → vakaanbod` en aparte jaarlijkse leerlinginschrijving; denk aan jongeren/volwassenen, kortlopende studierichting en specialisatie, keuzevakken en alternatieve leercontext. Niet elk traject doorloopt dezelfde graden.
+2. Behoud onderscheid *vakcatalogus* versus *vakaanbod per schooljaar/graad/optie* versus *leerlingvakinschrijving* versus *lesgroep/docenttoewijzing*. KCJ hoort bij een lesgroep/klassikale beoordeling; ICJ bij leerling-instrumentvak, met schooljaar en leerkracht.
+3. Bewaar tekstcodes zoals `2.1`, `3.3`, `4.1`, `C.1` en de speciale `S.1` als **tekst**, geen decimale getallen. Jaarprogressie verschilt per domein en jongeren/volwassenen.
+4. Importeer vakken uit `werklijst_allevakken` pas nadat de leerlingkoppeling, leerjaarcodes, vaknormalisatie en meerdere docenten correct zijn gemodelleerd. Laat 2021-2022-bron geen onbekende actuele DKO3-waarden vervangen.
+5. Schoollijsten in Platformbeheer staan voortaan gesorteerd: actieve scholen eerst, inactieve achteraan en expliciet als inactief gelabeld. Toegepast op onderwijsaanbod, leerlingen en personeelsselectie.
