@@ -38,13 +38,7 @@ class UserController extends Controller
         // Combineer school en rol op DEZELFDE koppeling, zodat rollen van
         // een tweede school geen foutieve matches opleveren.
         $users = User::query()
-            ->with(['schools' => fn ($q) => $q->wherePivotNull('dko3_hidden_at')->select('schools.id', 'schools.name')])
-            ->where(function ($query) {
-                // Verborgen DKO3-uitstromers verschijnen niet, ook niet bij filter Inactief.
-                // Niet-gekoppelde handmatige accounts blijven wel vindbaar.
-                $query->whereDoesntHave('schools')
-                    ->orWhereHas('schools', fn ($member) => $member->whereNull('school_user.dko3_hidden_at'));
-            })
+            ->with(['schools' => fn ($q) => $q->select('schools.id', 'schools.name')])
             ->when($search !== '', function ($query) use ($search) {
                 $term = '%' . addcslashes($search, '%_\\\\') . '%';
                 $query->where(function ($q) use ($term) {
@@ -56,7 +50,6 @@ class UserController extends Controller
             })
             ->when($schoolId !== null || $roleFilter !== '', function ($query) use ($schoolId, $roleFilter) {
                 $query->whereHas('schools', function ($membership) use ($schoolId, $roleFilter) {
-                    $membership->whereNull('school_user.dko3_hidden_at');
                     if ($schoolId !== null) {
                         $membership->where('schools.id', $schoolId);
                     }
