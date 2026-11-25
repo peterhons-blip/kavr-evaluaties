@@ -38,7 +38,7 @@ class School extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'school_user')
-            ->withPivot(['role', 'is_active'])
+            ->withPivot(['role', 'is_active', 'dko3_hidden_at'])
             ->withTimestamps();
     }
 
