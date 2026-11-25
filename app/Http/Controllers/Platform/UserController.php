@@ -24,6 +24,7 @@ class UserController extends Controller
             'school_id' => ['nullable', 'integer', 'exists:schools,id'],
             'role' => ['nullable', 'string', 'max:30'],
             'status' => ['nullable', Rule::in(['active', 'inactive'])],
+            'school_status' => ['nullable', Rule::in(['active', 'inactive'])],
             'password' => ['nullable', Rule::in(['not_set', 'set', 'unknown'])],
             'per_page' => ['nullable', Rule::in(['20','50','100'])],
         ]);
@@ -32,6 +33,7 @@ class UserController extends Controller
         $schoolId = isset($filters['school_id']) ? (int) $filters['school_id'] : null;
         $roleFilter = $filters['role'] ?? '';
         $statusFilter = $filters['status'] ?? '';
+        $schoolStatusFilter = $filters['school_status'] ?? '';
         $passwordFilter = $filters['password'] ?? '';
         $perPage = (int)($filters['per_page'] ?? 20);
 
@@ -48,13 +50,16 @@ class UserController extends Controller
                         ->orWhere('email', 'like', $term);
                 });
             })
-            ->when($schoolId !== null || $roleFilter !== '', function ($query) use ($schoolId, $roleFilter) {
-                $query->whereHas('schools', function ($membership) use ($schoolId, $roleFilter) {
+            ->when($schoolId !== null || $roleFilter !== '' || $schoolStatusFilter !== '', function ($query) use ($schoolId, $roleFilter, $schoolStatusFilter) {
+                $query->whereHas('schools', function ($membership) use ($schoolId, $roleFilter, $schoolStatusFilter) {
                     if ($schoolId !== null) {
                         $membership->where('schools.id', $schoolId);
                     }
                     if ($roleFilter !== '') {
                         $membership->where('school_user.role', $roleFilter);
+                    }
+                    if ($schoolStatusFilter !== '') {
+                        $membership->where('school_user.is_active', $schoolStatusFilter === 'active');
                     }
                 });
             })
@@ -99,7 +104,7 @@ class UserController extends Controller
         }
 
         return view('platform.users.index', compact(
-            'users', 'search', 'schoolId', 'roleFilter', 'statusFilter', 'passwordFilter', 'perPage', 'schools', 'roles'
+            'users', 'search', 'schoolId', 'roleFilter', 'statusFilter', 'schoolStatusFilter', 'passwordFilter', 'perPage', 'schools', 'roles'
         ));
     }
 
