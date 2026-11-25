@@ -33,9 +33,11 @@
                             <div class="um-membership">
                                 <strong>{{ $school->name }}</strong>
                                 <span>{{ $displayRole?->name ?? $school->pivot->role }}</span>
-                                @unless($school->pivot->is_active)
+                                @if($school->pivot->dko3_hidden_at)
+                                    <em>Niet meer in DKO3 (gearchiveerd)</em>
+                                @elseif(! $school->pivot->is_active)
                                     <em>Schoolkoppeling inactief</em>
-                                @endunless
+                                @endif
                             </div>
                         @empty
                             <span class="um-muted">Geen schoolkoppelingen</span>
