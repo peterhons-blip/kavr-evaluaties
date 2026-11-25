@@ -10,7 +10,7 @@
     <label>DKO3-stamnummer<input name="dko3_stamnummer" required maxlength="32" inputmode="numeric" value="{{ old('dko3_stamnummer', $student->dko3_stamnummer) }}"><small>Als tekst opgeslagen; voorloopnullen blijven behouden.</small></label>
     <label>Voornaam<input name="first_name" required maxlength="150" value="{{ old('first_name', $student->first_name) }}"></label>
     <label>Familienaam<input name="last_name" required maxlength="150" value="{{ old('last_name', $student->last_name) }}"></label>
-    <label>Status<select name="is_active"><option value="1" @selected((string)old('is_active', $student->exists ? (int)$student->is_active : 1)==='1')>Actief</option><option value="0" @selected((string)old('is_active', $student->exists ? (int)$student->is_active : 1)==='0')>Inactief</option></select></label>
+    <label>Dossierstatus<select name="is_active"><option value="1" @selected((string)old('is_active', $student->exists ? (int)$student->is_active : 1)==='1')>Actief dossier</option><option value="0" @selected((string)old('is_active', $student->exists ? (int)$student->is_active : 1)==='0')>Inactief dossier</option></select><small>Geen loginstatus. Inschrijvingen horen afzonderlijk bij schooljaren.</small></label>
 </div>
 <div class="sf-actions"><a class="btn btn-secondary" href="{{ route($platform ? 'platform.students.index' : 'school.students.index', $platform ? ['school_id' => $school->id] : []) }}">Annuleren</a><button class="btn" type="submit">Opslaan</button></div>
 </form></div>
