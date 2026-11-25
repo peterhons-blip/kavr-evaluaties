@@ -28,6 +28,11 @@
 </div>
 @endforeach
 </div>
+<div class="card di-panel">
+<h2>Vestigingsplaatsen uit het DKO3-bestand</h2>
+<p>De vakkenexport vermeldt acht leslocaties: Voeren, Zichen, Zichen (Jeugdhuis), GBS De Klinker Riemst, Val-Meer (De Bond), Herderen, Kanne en Vlijtingen.</p>
+<p>De import probeert deze namen uitsluitend binnen de geselecteerde academie te koppelen aan <strong>Vestigingsplaatsen</strong>. Als een vestigingsplaats nog niet bestaat of een andere benaming heeft, wordt dat in het voorbeeld gemeld en worden geen gegevens opgeslagen. Maak of corrigeer de vestiging eerst in Schoolbeheer. Leerlingdossiers zelf krijgen geen vaste vestigingsplaats: die volgt uit hun vakinschrijvingen.</p>
+</div>
 <div class="card di-panel"><h2>Veilige import</h2><p>Beide imports zijn afzonderlijk opnieuw uitvoerbaar. Afwezigheid in een export verwijdert of deactiveert niemand. Er worden geen wijzigingen doorgevoerd zonder voorbeeldscherm en bevestiging. De vakkenimport maakt bij onbekende of dubbelzinnige koppelingen geen gok.</p>
 <a class="btn btn-secondary" href="{{ route($platform ? 'platform.education.index' : 'school.education.index', $platform ? ['school_id'=>$school->id] : []) }}">Terug naar domeinen en vakken</a></div>
 @endsection
