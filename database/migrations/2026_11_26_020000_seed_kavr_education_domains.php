@@ -17,8 +17,8 @@ return new class extends Migration
         foreach ($schools as $school) {
             foreach ([
                 ['name' => 'Muziek', 'code' => 'Mu'],
-                ['name' => 'Beeldende en audiovisuele kunsten', 'code' => 'Be'],
-                ['name' => 'Woordkunst-drama', 'code' => 'Wo'],
+                ['name' => 'Beeld', 'code' => 'Be'],
+                ['name' => 'Woord', 'code' => 'Wo'],
             ] as $domain) {
                 // Zoek eerst op officiële code of naam om bestaande data niet te dupliceren.
                 $existing = DB::table('education_domains')
