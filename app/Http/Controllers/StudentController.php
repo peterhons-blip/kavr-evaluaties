@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\School;
 use App\Models\Student;
 use App\Models\StudentSchoolYear;
+use App\Models\SchoolLocation;
 use App\Support\AccessAudit;
 use App\Support\Dko3StudentSpreadsheet;
 use App\Support\SchoolAccess;
@@ -65,10 +66,13 @@ class StudentController extends Controller
             'q' => ['nullable', 'string', 'max:120'],
             'status' => ['nullable', Rule::in(['active', 'inactive', 'all'])],
             'school_year' => ['nullable', 'regex:/^20[0-9]{2}-20[0-9]{2}$/'],
+            'location_id' => ['nullable', 'integer'],
         ]);
         $search = trim($query['q'] ?? '');
         $status = $query['status'] ?? 'all';
         $schoolYearFilter = $query['school_year'] ?? '';
+        $locationId = $query['location_id'] ?? null;
+        if ($locationId !== null) SchoolLocation::where('school_id', $school->id)->findOrFail($locationId);
         $students = Student::query()->with(['schoolYears' => fn ($q) => $q->orderByDesc('school_year')->with('subjects.assignments.location')])->where('school_id', $school->id)
             ->when($search !== '', function ($q) use ($search) {
                 $term = '%'.addcslashes($search, '%_\\').'%';
@@ -79,6 +83,9 @@ class StudentController extends Controller
                 });
             })
             ->when($status !== 'all', fn ($q) => $q->where('is_active', $status === 'active'))
+            ->when($locationId !== null, fn ($q) => $q->whereHas('schoolYears', fn ($year) => $year
+                ->when($schoolYearFilter !== '', fn ($y) => $y->where('school_year', $schoolYearFilter))
+                ->whereHas('subjects.assignments', fn ($assignment) => $assignment->where('school_location_id', $locationId))))
             ->when($schoolYearFilter !== '', fn ($q) => $q->whereHas('schoolYears', fn ($enrollment) => $enrollment->where('school_year', $schoolYearFilter)))
             ->orderBy('last_name')->orderBy('first_name')->orderBy('id')
             ->paginate(25)->withQueryString();
@@ -91,6 +98,8 @@ class StudentController extends Controller
             'search' => $search,
             'status' => $status,
             'schoolYearFilter' => $schoolYearFilter,
+            'locationId' => $locationId,
+            'locations' => SchoolLocation::where('school_id', $school->id)->orderBy('name')->get(),
             'schoolYears' => StudentSchoolYear::query()->where('school_id', $school->id)->distinct()->orderByDesc('school_year')->pluck('school_year'),
             'canManage' => $canManage,
         ]);
