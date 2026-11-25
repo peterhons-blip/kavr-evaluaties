@@ -6,6 +6,8 @@ use App\Models\EducationDomain;
 use App\Models\EducationProgram;
 use App\Models\EducationOption;
 use App\Models\EducationGradeYear;
+use App\Models\EducationSubject;
+use App\Models\EducationSubjectOffering;
 use App\Models\School;
 use App\Support\AccessAudit;
 use App\Support\SchoolAccess;
@@ -48,8 +50,9 @@ class EducationProgramController extends Controller
             'school' => $school, 'platform' => $platform,
             'schools' => $platform ? School::orderByDesc('is_active')->orderBy('name')->get() : collect(),
             'domains' => EducationDomain::where('school_id', $school->id)->orderBy('name')->get(),
-            'programs' => EducationProgram::where('school_id', $school->id)->with(['domain','options','gradeYears.option'])
+            'programs' => EducationProgram::where('school_id', $school->id)->with(['domain','options','gradeYears.option','gradeYears.offerings.subject'])
                 ->orderBy('name')->get(),
+            'subjects' => EducationSubject::where('school_id', $school->id)->orderBy('name')->get(),
             'canManage' => $platform || SchoolAccess::allows($request->user(), $school, 'groups.manage')
                 || SchoolAccess::allows($request->user(), $school, 'school.settings'),
         ]);
@@ -131,6 +134,54 @@ class EducationProgramController extends Controller
         $record=EducationGradeYear::create($data+['school_id'=>$school->id,'is_active'=>true]);
         AccessAudit::record('education.grade_year.created',$school,null,['grade_year_id'=>$record->id]);
         return $this->done($r,$school,'Graad/leerjaar toegevoegd.');
+    }
+
+    public function storeOffering(Request $r): RedirectResponse
+    {
+        $school=$this->school($r,true);
+        $data=$r->validate([
+            'education_grade_year_id'=>['required','integer'],
+            'education_subject_id'=>['required','integer'],
+            'school_year'=>['required','regex:/^20[0-9]{2}-20[0-9]{2}$/'],
+            'hours_per_week'=>['nullable','numeric','min:0.5','max:40'],
+            'is_elective'=>['nullable','boolean'],
+            'allow_alternative_context'=>['nullable','boolean'],
+        ]);
+        [$start,$end]=array_map('intval',explode('-',$data['school_year']));
+        if($end!==$start+1) throw ValidationException::withMessages(['school_year'=>'Ongeldig schooljaar.']);
+        $grade=EducationGradeYear::where('school_id',$school->id)->findOrFail($data['education_grade_year_id']);
+        $subject=EducationSubject::where('school_id',$school->id)->findOrFail($data['education_subject_id']);
+        $program=$grade->program;
+        if ((int)$program->education_domain_id !== (int)$subject->education_domain_id) {
+            throw ValidationException::withMessages(['education_subject_id'=>'Het vak behoort niet tot hetzelfde domein als de opleiding.']);
+        }
+        $offering=EducationSubjectOffering::firstOrCreate([
+            'education_grade_year_id'=>$grade->id,
+            'education_subject_id'=>$subject->id,
+            'school_year'=>$data['school_year'],
+        ],[
+            'school_id'=>$school->id,'hours_per_week'=>$data['hours_per_week']??null,
+            'is_elective'=>$r->boolean('is_elective'),
+            'allow_alternative_context'=>$r->boolean('allow_alternative_context'),
+            'is_active'=>true,
+        ]);
+        AccessAudit::record('education.offering.saved',$school,null,['offering_id'=>$offering->id]);
+        return $this->done($r,$school,'Vak toegevoegd aan het leerjaarprogramma.');
+    }
+
+    public function updateOffering(Request $r, EducationSubjectOffering $offering): RedirectResponse
+    {
+        $school=$this->school($r,true);
+        abort_unless((int)$offering->school_id===$school->id,404);
+        $data=$r->validate([
+            'hours_per_week'=>['nullable','numeric','min:0.5','max:40'],
+            'is_active'=>['required','boolean'],
+            'is_elective'=>['required','boolean'],
+            'allow_alternative_context'=>['required','boolean'],
+        ]);
+        $offering->update($data);
+        AccessAudit::record('education.offering.updated',$school,null,['offering_id'=>$offering->id]);
+        return $this->done($r,$school,'Vakprogramma bijgewerkt.');
     }
 
     public function updateGradeYear(Request $r, EducationGradeYear $gradeYear): RedirectResponse
