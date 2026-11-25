@@ -8,7 +8,7 @@
     <div><strong>{{ $stats['total'] }}</strong><span>Leerkrachten in bestand</span></div>
     <div><strong>{{ $stats['new'] }}</strong><span>Nieuwe accounts</span></div>
     <div><strong>{{ $stats['existing'] }}</strong><span>Bestaande accounts</span></div>
-    <div class="danger"><strong>{{ $stats['deactivate'] }}</strong><span>Te verbergen en deactiveren</span></div>
+    <div class="danger"><strong>{{ $stats['deactivate'] }}</strong><span>Te archiveren en deactiveren</span></div>
 </div>
 <div class="card di-card">
     <h2>Nieuwe en bestaande personeelsleden</h2>
@@ -18,7 +18,7 @@
 </div>
 <div class="card di-card">
     <h2>Niet meer in DKO3: {{ $stats['deactivate'] }}</h2>
-    <p style="font-size:12px;color:#728198">Deze leerkrachten verdwijnen uitsluitend uit de gewone personeelslijsten van {{ $school->name }}. Hun andere schoolkoppelingen blijven bewaard.</p>
+    <p style="font-size:12px;color:#728198">Deze leerkrachten blijven zichtbaar bij Personeelsleden als 'Niet meer in DKO3 (gearchiveerd)' en hun schooltoegang wordt uitgeschakeld. Hun andere schoolkoppelingen blijven bewaard.</p>
     @if($missing->isNotEmpty())
     <div style="overflow-x:auto"><table class="di-table"><thead><tr><th>E-mailadres</th></tr></thead><tbody>
         @foreach($missing->take(50) as $person)<tr><td>{{ $person->email }}</td></tr>@endforeach
