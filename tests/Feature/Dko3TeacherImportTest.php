@@ -98,7 +98,7 @@ class Dko3TeacherImportTest extends TestCase
             ->assertOk()->assertDontSee('gone@example.test');
 
         $this->actingAs($gone)->withSession(['active_school_id' => $a->id])
-            ->get(route('dashboard'))->assertForbidden();
+            ->get(route('dashboard'))->assertRedirect(route('schools.select'));
         $this->actingAs($admin);
 
         $this->get(route('platform.users.index',['school_id'=>$b->id]))
