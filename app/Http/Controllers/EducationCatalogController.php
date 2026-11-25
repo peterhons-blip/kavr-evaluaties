@@ -96,6 +96,7 @@ class EducationCatalogController extends Controller
             'name' => ['required', 'string', 'max:200'],
             'code' => ['nullable', 'string', 'max:60'],
             'discipline' => ['nullable', 'string', 'max:120'],
+            'evaluation_type' => ['nullable', Rule::in(['icj', 'kcj'])],
         ]);
         $domain = EducationDomain::where('school_id', $school->id)
             ->whereKey($data['education_domain_id'])->firstOrFail();
@@ -109,10 +110,10 @@ class EducationCatalogController extends Controller
         if ($exists) {
             throw ValidationException::withMessages(['name' => 'Dit vak bestaat al in dit domein.']);
         }
-        $subject = EducationSubject::create($data + [
+        $subject = EducationSubject::create(array_merge($data, [
             'school_id' => $school->id, 'is_active' => true,
-            'evaluation_type' => DkoEvaluationType::forSubjectName($data['name']),
-        ]);
+            'evaluation_type' => $data['evaluation_type'] ?? DkoEvaluationType::forSubjectName($data['name']),
+        ]));
         AccessAudit::record('education.subject.created', $school, null, ['subject_id' => $subject->id]);
         return $this->redirectTo($request, $school)->with('success', 'Vak toegevoegd.');
     }
@@ -138,7 +139,9 @@ class EducationCatalogController extends Controller
         if ($exists) {
             throw ValidationException::withMessages(['name' => 'Dit vak bestaat al in dit domein.']);
         }
-        $subject->update($data + ['evaluation_type' => DkoEvaluationType::forSubjectName($data['name'])]);
+        $subject->update(array_merge($data, [
+            'evaluation_type' => $data['evaluation_type'] ?? $subject->evaluation_type,
+        ]));
         AccessAudit::record('education.subject.updated', $school, null, ['subject_id' => $subject->id]);
         return $this->redirectTo($request, $school)->with('success', 'Vak bijgewerkt.');
     }
