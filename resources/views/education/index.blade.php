@@ -44,7 +44,7 @@
 </div>
 
 <div class="card ec-panel">
-    <div class="ec-header"><h2>Vakken en instrumenten</h2><p>Vakken zijn gekoppeld aan precies één domein binnen dezelfde academie. Een instrument of specialisatie kan afzonderlijk vermeld worden. Dit is nog niet de inschrijving van een leerling.</p></div>
+    <div class="ec-header"><h2>Vakken en instrumenten</h2><p>Vakken zijn gekoppeld aan één domein. Volgens de KA-VR-afspraak krijgt Instrument een individuele evaluatiefiche (ICJ); alle andere vakken een klassikale fiche (KCJ). Een instrument/specialisatie kan afzonderlijk vermeld worden.</p></div>
     @if($canManage)
     <form class="ec-add" method="POST" action="{{ route($platform ? 'platform.education.subjects.store' : 'school.education.subjects.store', $platform ? ['school_id'=>$school->id] : []) }}">@csrf
        <label>Domein<select name="education_domain_id" required><option value="">Kies domein</option>@foreach($domains->where('is_active',true) as $domain)<option value="{{ $domain->id }}">{{ $domain->name }}</option>@endforeach</select></label>
@@ -70,7 +70,7 @@
                 <button class="btn btn-secondary" type="submit">Opslaan</button>
             </form>
         </td>@endif
-    </tr>@empty<tr><td colspan="{{ $canManage ? 5 : 4 }}">Nog geen vakken toegevoegd.</td></tr>@endforelse
+    </tr>@empty<tr><td colspan="{{ $canManage ? 6 : 5 }}">Nog geen vakken toegevoegd.</td></tr>@endforelse
     </tbody></table></div>
     <div class="ec-pages">{{ $subjects->links('vendor.pagination.artelynx') }}</div>
 </div>
