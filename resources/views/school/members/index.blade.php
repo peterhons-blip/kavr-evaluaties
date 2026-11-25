@@ -38,16 +38,17 @@
           @php
              $passwordState = $member->must_change_password ? 'not_set' : ($member->password_set_at ? 'set' : 'unknown');
              $isLinkedActive = (bool) $member->pivot->is_active;
-             $isAllowedToSend = (bool) $member->is_active && $isLinkedActive;
+             $isFormerDko3 = $member->pivot->dko3_hidden_at !== null;
+             $isAllowedToSend = (bool) $member->is_active && $isLinkedActive && ! $isFormerDko3;
           @endphp
           <tr>
             <td>
                 <div class="sm-person">
                     <span class="sm-avatar">{{ mb_strtoupper(mb_substr($member->first_name ?: $member->name ?: 'G',0,1)) }}</span>
-                    <div><strong>{{ $member->full_name ?: $member->name }}</strong><small>{{ $member->email }}</small></div>
+                    <div><strong>{{ $member->full_name ?: $member->name }}</strong><small>{{ $member->email }}</small>@if($isFormerDko3)<small class="sm-exited">Niet meer in DKO3 (gearchiveerd)</small>@endif</div>
                 </div>
             </td>
-            @if($canManage)
+            @if($canManage && ! $isFormerDko3)
               <td>
                 <select name="role" form="sm-edit-{{ $member->id }}" aria-label="Schoolrol van {{ $member->full_name ?: $member->name }}">
                     @foreach($roles as $role)<option value="{{ $role->slug }}" @selected($member->pivot->role===$role->slug)>{{ $role->name }}</option>@endforeach
@@ -78,8 +79,12 @@
               <td>
                   <div class="sm-actions">
                     <form method="POST" action="{{ route('school.members.update',$member) }}" id="sm-edit-{{ $member->id }}">@csrf @method('PUT')</form>
+                    @unless($isFormerDko3)
                     <a class="btn btn-secondary" href="{{ route('school.members.edit',$member) }}">Bewerken</a>
                     <button class="btn btn-secondary" type="submit" form="sm-edit-{{ $member->id }}">Opslaan</button>
+                    @else
+                    <span class="sm-pill sm-off" title="Wordt bij een volgende DKO3-import opnieuw geactiveerd als de medewerker terug in het bestand staat.">Gearchiveerd</span>
+                    @endunless
                     <form method="POST" action="{{ route('school.members.setup-link',$member) }}" onsubmit="return confirm('Een beveiligde wachtwoordlink naar het e-mailadres van dit personeelslid sturen?');">
                         @csrf
                         <button class="sm-link" type="submit" @disabled(! $isAllowedToSend) title="{{ $isAllowedToSend ? 'Verstuur een beveiligde wachtwoordinstel- of resetlink' : 'Account of schoolkoppeling is inactief' }}">
@@ -123,7 +128,7 @@
 .sm-table select{height:40px;min-width:120px;max-width:190px;border:1px solid #d1dfe6;border-radius:8px;padding:0 9px;background:#fff;color:#142b45;font:inherit;font-size:12px}
 .sm-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.sm-actions form{margin:0}
 .sm-link{background:#fff;border:1px solid #bfdad6;color:#237a73;padding:10px 12px;border-radius:8px;font:inherit;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}.sm-link:hover{background:#eaf7f4}.sm-link:disabled{cursor:not-allowed;opacity:.45}
-.sm-date{display:block;margin-top:6px;font-size:10px;color:#718096;white-space:nowrap}.sm-pending{background:#fff4e8;color:#966224}.sm-unknown{background:#eff1f5;color:#667488}.sm-pill{display:inline-block;border-radius:16px;padding:5px 9px;font-size:10px;font-weight:700;white-space:nowrap}.sm-on{color:#267450;background:#e8f7ef}.sm-off{color:#a64949;background:#fff0f0}.sm-empty{text-align:center;color:#718096;padding:28px!important}.sm-pages{margin-top:16px}
+.sm-exited{color:#9a5d2e!important;font-weight:700}.sm-date{display:block;margin-top:6px;font-size:10px;color:#718096;white-space:nowrap}.sm-pending{background:#fff4e8;color:#966224}.sm-unknown{background:#eff1f5;color:#667488}.sm-pill{display:inline-block;border-radius:16px;padding:5px 9px;font-size:10px;font-weight:700;white-space:nowrap}.sm-on{color:#267450;background:#e8f7ef}.sm-off{color:#a64949;background:#fff0f0}.sm-empty{text-align:center;color:#718096;padding:28px!important}.sm-pages{margin-top:16px}
 .sm-add{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:end}.sm-add label{min-width:0}.sm-add button{justify-self:start}.sm-add small{font-weight:400}.sm-help{margin-top:16px}.sm-alert{border-radius:9px;padding:15px;margin-bottom:16px}.sm-success{background:#eaf7ef;color:#267450}.sm-error{background:#fff0f0;color:#a64949}.sm-error p{margin:4px 0}
 @media(max-width:850px){.sm-summary{grid-template-columns:1fr}.sm-add{grid-template-columns:1fr}}
 </style>
