@@ -16,18 +16,30 @@
         @if($platform)<label>Academie<select name="school_id" onchange="this.form.submit()">@foreach($schools as $choice)<option value="{{ $choice->id }}" @selected($choice->id === $school->id)>{{ $choice->name }}{{ $choice->is_active ? '' : ' (inactief)' }}</option>@endforeach</select></label>@endif
         <label>Zoeken<input type="search" name="q" value="{{ $search }}" placeholder="Naam, voornaam of stamnummer"></label>
         <label>Schooljaar<select name="school_year"><option value="">Alle schooljaren</option>@foreach($schoolYears as $year)<option value="{{ $year }}" @selected($schoolYearFilter===$year)>{{ $year }}</option>@endforeach</select></label>
+        <label>Vestigingsplaats<select name="location_id"><option value="">Alle vestigingen</option>@foreach($locations as $location)<option value="{{ $location->id }}" @selected((string)$locationId===(string)$location->id)>{{ $location->name }}</option>@endforeach</select></label>
         <label>Dossierstatus<select name="status"><option value="all" @selected($status==='all')>Alle leerlingdossiers</option><option value="active" @selected($status==='active')>Dossier actief</option><option value="inactive" @selected($status==='inactive')>Dossier inactief</option></select></label>
         <button class="btn" type="submit">Zoeken</button>
     </form>
     <div class="st-scroll"><table class="st-table">
-        <thead><tr><th>Stamnummer</th><th>Familienaam</th><th>Voornaam</th><th>Status</th><th>Schooljaren</th>@if($canManage)<th>Acties</th>@endif</tr></thead>
+        <thead><tr><th>Stamnummer</th><th>Familienaam</th><th>Voornaam</th><th>Status</th><th>Schooljaren</th><th>Vestigingsplaatsen (per vak)</th>@if($canManage)<th>Acties</th>@endif</tr></thead>
         <tbody>@forelse($students as $student)<tr>
             <td><strong>{{ $student->dko3_stamnummer }}</strong></td>
             <td>{{ $student->last_name }}</td><td>{{ $student->first_name }}</td>
             <td><span class="st-pill {{ $student->is_active ? 'st-on' : 'st-off' }}">{{ $student->is_active ? 'Dossier actief' : 'Dossier inactief' }}</span></td>
             <td>@forelse($student->schoolYears as $year)<span class="st-year">{{ $year->school_year }} ({{ $year->status === 'enrolled' ? 'ingeschreven' : 'afgesloten' }})</span>@empty<span class="st-muted">Nog niet gekoppeld</span>@endforelse</td>
+            <td>
+                @php
+                    $locationNames = $student->schoolYears
+                        ->filter(fn ($year) => ! $schoolYearFilter || $year->school_year === $schoolYearFilter)
+                        ->flatMap(fn ($year) => $year->subjects)
+                        ->flatMap(fn ($enrollment) => $enrollment->assignments)
+                        ->map(fn ($assignment) => $assignment->location?->name)
+                        ->filter()->unique()->sort()->values();
+                @endphp
+                @forelse($locationNames as $locationName)<span class="st-year">{{ $locationName }}</span>@empty<span class="st-muted">Nog geen vaklocatie</span>@endforelse
+            </td>
             @if($canManage)<td><a class="btn btn-secondary" href="{{ route($platform ? 'platform.students.edit' : 'school.students.edit', ($platform ? ['school_id' => $school->id] : []) + ['student' => $student->id]) }}">Bewerken</a></td>@endif
-        </tr>@empty<tr><td colspan="{{ $canManage ? 6 : 5 }}" class="st-empty">Geen leerlingen gevonden. Importeer een DKO3-export of pas je filters aan.</td></tr>@endforelse</tbody>
+        </tr>@empty<tr><td colspan="{{ $canManage ? 7 : 6 }}" class="st-empty">Geen leerlingen gevonden. Importeer een DKO3-export of pas je filters aan.</td></tr>@endforelse</tbody>
     </table></div>
     <div class="st-pages">{{ $students->links('vendor.pagination.artelynx') }}</div>
 </div>
