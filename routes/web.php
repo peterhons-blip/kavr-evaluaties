@@ -7,6 +7,7 @@ use App\Http\Controllers\SchoolSelectionController;
 use App\Http\Controllers\MyProfileController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\EducationCatalogController;
+use App\Http\Controllers\Dko3EducationImportController;
 use App\Http\Controllers\Platform\PermissionMatrixController;
 use App\Http\Controllers\Platform\SchoolController;
 use App\Http\Controllers\Platform\SchoolLocationController;
@@ -88,6 +89,10 @@ Route::middleware('auth')->group(function () {
         Route::put('/school/onderwijsaanbod/domeinen/{domain}', [EducationCatalogController::class, 'updateDomain'])->name('school.education.domains.update');
         Route::post('/school/onderwijsaanbod/vakken', [EducationCatalogController::class, 'storeSubject'])->name('school.education.subjects.store');
         Route::put('/school/onderwijsaanbod/vakken/{subject}', [EducationCatalogController::class, 'updateSubject'])->name('school.education.subjects.update');
+
+        Route::get('/school/onderwijsaanbod/import', [Dko3EducationImportController::class, 'form'])->name('school.education.imports');
+        Route::post('/school/onderwijsaanbod/import/voorbeeld', [Dko3EducationImportController::class, 'preview'])->name('school.education.imports.preview');
+        Route::post('/school/onderwijsaanbod/import/bevestig', [Dko3EducationImportController::class, 'commit'])->name('school.education.imports.commit');
 
         // Leerlingen: alleen toegang binnen de actieve school met passende rechten.
         Route::get('/school/leerlingen', [StudentController::class, 'index'])->name('school.students.index');
@@ -178,6 +183,10 @@ Route::middleware(['auth', 'platform.admin'])
         Route::put('/onderwijsaanbod/domeinen/{domain}', [EducationCatalogController::class, 'updateDomain'])->name('education.domains.update');
         Route::post('/onderwijsaanbod/vakken', [EducationCatalogController::class, 'storeSubject'])->name('education.subjects.store');
         Route::put('/onderwijsaanbod/vakken/{subject}', [EducationCatalogController::class, 'updateSubject'])->name('education.subjects.update');
+
+        Route::get('/onderwijsaanbod/import', [Dko3EducationImportController::class, 'form'])->name('education.imports');
+        Route::post('/onderwijsaanbod/import/voorbeeld', [Dko3EducationImportController::class, 'preview'])->name('education.imports.preview');
+        Route::post('/onderwijsaanbod/import/bevestig', [Dko3EducationImportController::class, 'commit'])->name('education.imports.commit');
 
         Route::get('/leerlingen', [StudentController::class, 'index'])->name('students.index');
         Route::get('/leerlingen/nieuw', [StudentController::class, 'create'])->name('students.create');
