@@ -10,7 +10,7 @@
                 <th>Personeelslid</th>
                 <th>School / rol</th>
                 <th>Platform</th>
-                <th>Account</th>
+                <th>Toegang / account</th>
                 <th>Wachtwoord</th>
                 <th>Acties</th>
             </tr>
@@ -51,9 +51,32 @@
                         @endif
                     </td>
                     <td>
-                        <span class="um-tag {{ $user->is_active ? 'um-on' : 'um-off' }}">
-                            {{ $user->is_active ? 'Actief' : 'Inactief' }}
-                        </span>
+                        @php
+                            // Een actieve globale user kan een inactieve schoolkoppeling hebben.
+                            // Toon bij een schoolfilter de feitelijke toegang tot die school.
+                            $selectedMembership = $schoolId !== null
+                                ? $user->schools->first(fn ($school) => (int) $school->id === (int) $schoolId)
+                                : null;
+                            $selectedSchoolAccess = $selectedMembership
+                                && $selectedMembership->pivot->is_active
+                                && ! $selectedMembership->pivot->dko3_hidden_at;
+                            $hasActiveSchool = $user->schools->contains(fn ($school) =>
+                                (bool) $school->pivot->is_active && ! $school->pivot->dko3_hidden_at
+                            );
+                        @endphp
+                        @if(! $user->is_active)
+                            <span class="um-tag um-off">Account inactief</span>
+                        @elseif($selectedMembership && ! $selectedSchoolAccess)
+                            <span class="um-tag um-off">Geen schooltoegang</span>
+                            <small class="um-muted">Account bestaat nog</small>
+                        @elseif($selectedMembership)
+                            <span class="um-tag um-on">Schooltoegang actief</span>
+                        @elseif(! $hasActiveSchool && ! $user->is_platform_admin && $user->schools->isNotEmpty())
+                            <span class="um-tag um-off">Geen actieve schooltoegang</span>
+                            <small class="um-muted">Account bestaat nog</small>
+                        @else
+                            <span class="um-tag um-on">Account actief</span>
+                        @endif
                     </td>
                     <td>
                         @if($user->must_change_password)
