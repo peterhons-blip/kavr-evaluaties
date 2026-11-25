@@ -6,6 +6,7 @@ use App\Models\EducationDomain;
 use App\Models\EducationSubject;
 use App\Models\School;
 use App\Support\AccessAudit;
+use App\Support\DkoEvaluationType;
 use App\Support\SchoolAccess;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -108,7 +109,10 @@ class EducationCatalogController extends Controller
         if ($exists) {
             throw ValidationException::withMessages(['name' => 'Dit vak bestaat al in dit domein.']);
         }
-        $subject = EducationSubject::create($data + ['school_id' => $school->id, 'is_active' => true]);
+        $subject = EducationSubject::create($data + [
+            'school_id' => $school->id, 'is_active' => true,
+            'evaluation_type' => DkoEvaluationType::forSubjectName($data['name']),
+        ]);
         AccessAudit::record('education.subject.created', $school, null, ['subject_id' => $subject->id]);
         return $this->redirectTo($request, $school)->with('success', 'Vak toegevoegd.');
     }
@@ -134,7 +138,7 @@ class EducationCatalogController extends Controller
         if ($exists) {
             throw ValidationException::withMessages(['name' => 'Dit vak bestaat al in dit domein.']);
         }
-        $subject->update($data);
+        $subject->update($data + ['evaluation_type' => DkoEvaluationType::forSubjectName($data['name'])]);
         AccessAudit::record('education.subject.updated', $school, null, ['subject_id' => $subject->id]);
         return $this->redirectTo($request, $school)->with('success', 'Vak bijgewerkt.');
     }
