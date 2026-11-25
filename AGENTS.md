@@ -114,3 +114,11 @@ Onderwijsstructuur (vakken/graden/leerlingen/lesgroepen/inschrijvingen), DKO3-le
 - `students.is_active` betekent dossierstatus, niet ingeschreven of inloggerechtigd. Leerlingen hebben geen eigen gebruikersaccount. Inschrijvingen zijn jaarspecifiek via `student_school_years`; vaktoewijzingen via `student_subject_enrollments`. Ook bij opnieuw importeren oude jaren en handmatig afgesloten jaarinschrijvingen behouden.
 - Jaar uit leerlingidentiteitsimport opslaan via schooljaarselectie; CSV/XLSX van domeinen/opleidingen en vakken per leerling eerst inspecteren voordat parser/mapping wordt gebouwd. Geen automatische verdwijning/deactivering omdat een rij niet in een deelbestand zit. Gebruik stamnummer, niet ambiguïteitsgevoelige naam.
 - Nieuwe school-/platformbeheerpagina's hebben dezelfde UI; alle queries en mutaties schoolscopen. Test migraties, catalogusautorisatie en jaarlijkse import met `EducationCatalogTest` en `Dko3StudentAdministrationTest`.
+
+## KA-VR-PDF als referentie voor later
+
+De gebruiker leverde `KAVR  structuur 3 domeinen.pdf` aan (15 pagina's, aanbod 2021-2022). De volledige domein-, graad-, optie- en vakbeschrijving staat in `PROJECT_CONTEXT.md` onder 'Officiële onderwijsstructuur KA-VR'. **Verplicht meenemen** vóór bouw van lesgroepen, studieprogramma, ICJ/KCJ, DKO3-vakimport of evaluaties.
+
+Expliciete KA-VR-afspraak: **Instrument = ICJ; alle andere vakken = KCJ**. Nieuwe catalogusvelden `education_subjects.evaluation_type` default `kcj`, classifier `App\\Support\\DkoEvaluationType`. Verifieer bestaande Instrument-records na migratie en map niet blind op naam bij import. Deze historische 2021-2022-brochure dient als inhoudelijke referentie en mag niet automatisch het actuele 2026-2027-aanbod overschrijven. Onderwijsaanbod moet graden, leerjaren, opties, studierichtingen, jongeren/volwassenen, specialisatie en kortlopende trajecten kunnen modelleren.
+
+Bij academiekeuzelijsten in Platformbeheer: actief bovenaan, inactief onderaan met expliciet '(inactief)'.
