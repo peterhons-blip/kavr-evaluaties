@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\School;
 use App\Models\Student;
+use App\Models\StudentSchoolYear;
 use App\Support\AccessAudit;
 use App\Support\Dko3StudentSpreadsheet;
 use App\Support\SchoolAccess;
@@ -66,7 +67,7 @@ class StudentController extends Controller
         ]);
         $search = trim($query['q'] ?? '');
         $status = $query['status'] ?? 'active';
-        $students = Student::query()->where('school_id', $school->id)
+        $students = Student::query()->with(['schoolYears' => fn ($q) => $q->orderByDesc('school_year')])->where('school_id', $school->id)
             ->when($search !== '', function ($q) use ($search) {
                 $term = '%'.addcslashes($search, '%_\\').'%';
                 $q->where(function ($nested) use ($term) {
@@ -148,7 +149,16 @@ class StudentController extends Controller
         $school = $this->school($request, 'students.manage');
         $data = $request->validate([
             'file' => ['required', 'file', 'max:5120', 'mimes:xlsx,csv,txt'],
+            // Optioneel voor oudere API-importclients; de interactieve import vraagt het expliciet.
+            'school_year' => ['nullable', 'regex:/^20[0-9]{2}-20[0-9]{2}$/'],
         ]);
+        $schoolYear = $data['school_year'] ?? null;
+        if ($schoolYear) {
+            [$start, $end] = array_map('intval', explode('-', $schoolYear));
+            if ($end !== $start + 1) {
+                throw ValidationException::withMessages(['school_year' => 'Gebruik een geldig opeenvolgend schooljaar, bijvoorbeeld 2026-2027.']);
+            }
+        }
         $file = $data['file'];
         $extension = mb_strtolower($file->getClientOriginalExtension());
         if (! in_array($extension, ['xlsx','csv'], true)) {
@@ -184,9 +194,10 @@ class StudentController extends Controller
             'user_id' => $request->user()->id,
             'created_at' => now()->timestamp,
             'rows' => $rows,
+            'school_year' => $schoolYear,
         ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
         $request->session()->put('student_import_token', $token);
-        return view('students.preview', $this->base($request, $school) + compact('rows', 'stats', 'token'));
+        return view('students.preview', $this->base($request, $school) + compact('rows', 'stats', 'token', 'schoolYear'));
     }
 
     public function commit(Request $request): RedirectResponse
@@ -211,7 +222,8 @@ class StudentController extends Controller
         $rows = $snapshot['rows'] ?? [];
         if (!is_array($rows) || count($rows) === 0 || count($rows) > 20000) abort(422);
 
-        $result = DB::transaction(function () use ($school, $rows) {
+        $schoolYear = $snapshot['school_year'] ?? null;
+        $result = DB::transaction(function () use ($school, $rows, $schoolYear) {
             DB::table('schools')->where('id', $school->id)->lockForUpdate()->first();
             $created = 0;
             $updated = 0;
@@ -224,14 +236,22 @@ class StudentController extends Controller
                     $student->update(['first_name' => $row['first_name'], 'last_name' => $row['last_name']]);
                     $updated++;
                 } else {
-                    $school->students()->create($row + ['is_active' => true]);
+                    $student = $school->students()->create($row + ['is_active' => true]);
                     $created++;
+                }
+                if ($schoolYear) {
+                    // Alleen inschrijvingshistoriek bijwerken voor het gekozen jaar.
+                    // Handmatig afgesloten jaarinschrijvingen worden niet automatisch heropend.
+                    StudentSchoolYear::firstOrCreate(
+                        ['student_id' => $student->id, 'school_year' => $schoolYear],
+                        ['school_id' => $school->id, 'status' => 'enrolled']
+                    );
                 }
             }
             // Geen namen/stamnummers opslaan in beheerhistoriek.
             AccessAudit::record('dko3.students.imported', $school, null, [
                 'created' => $created, 'updated' => $updated, 'total' => count($rows),
-                'mode' => 'add_or_update',
+                'mode' => 'add_or_update', 'school_year' => $schoolYear,
             ]);
             return compact('created', 'updated');
         });
