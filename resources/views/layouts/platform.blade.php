@@ -592,6 +592,11 @@
             <span class="nav-icon">♙</span><span class="nav-text">Leerlingen</span>
         </a>
 
+        <a href="{{ route('platform.education.index') }}"
+           class="nav-item {{ request()->routeIs('platform.education.*') ? 'active' : '' }}">
+            <span class="nav-icon">♫</span><span class="nav-text">Domeinen en vakken</span>
+        </a>
+
         <div class="menu-label">BEHEER</div>
 
         <a href="{{ route('platform.permissions.index') }}"
