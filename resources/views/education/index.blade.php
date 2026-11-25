@@ -57,6 +57,7 @@
        <label>Vak<input name="name" required maxlength="200" placeholder="Bijv. Instrument: klassiek"></label>
        <label>Instrument / specialisatie<input name="discipline" maxlength="120" placeholder="Bijv. Piano"></label>
        <label>DKO3-code <small>(optioneel)</small><input name="code" maxlength="60" placeholder="Officiële code indien bekend"></label>
+       <label>Evaluatiefiche<select name="evaluation_type"><option value="kcj">KCJ — klassikaal</option><option value="icj">ICJ — instrument (individueel)</option></select></label>
        <button class="btn" type="submit" @disabled($domains->where('is_active',true)->isEmpty())>+ Vak toevoegen</button>
     </form>
     @endif
@@ -72,6 +73,7 @@
                 <input name="name" value="{{ $subject->name }}" required maxlength="200" aria-label="Vaknaam">
                 <input name="discipline" value="{{ $subject->discipline }}" maxlength="120" aria-label="Specialisatie" placeholder="Instrument">
                 <input name="code" value="{{ $subject->code }}" maxlength="60" aria-label="Code" placeholder="Code">
+                <select name="evaluation_type" aria-label="Evaluatiefiche"><option value="kcj" @selected($subject->evaluation_type==='kcj')>KCJ</option><option value="icj" @selected($subject->evaluation_type==='icj')>ICJ</option></select>
                 <select name="is_active" aria-label="Vakstatus"><option value="1" @selected($subject->is_active)>Actief</option><option value="0" @selected(! $subject->is_active)>Inactief</option></select>
                 <button class="btn btn-secondary" type="submit">Opslaan</button>
             </form>
