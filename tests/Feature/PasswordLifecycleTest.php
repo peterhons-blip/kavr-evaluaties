@@ -14,6 +14,21 @@ class PasswordLifecycleTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_password_setup_and_reset_links_expire_after_24_hours(): void
+    {
+        $this->assertSame(1440, config('auth.passwords.users.expire'));
+
+        $user = User::factory()->create(['is_active' => true]);
+        $token = Password::createToken($user);
+
+        $this->assertTrue(Password::tokenExists($user, $token));
+        $this->travel(23)->hours();
+        $this->assertTrue(Password::tokenExists($user, $token));
+
+        $this->travel(2)->hours();
+        $this->assertFalse(Password::tokenExists($user, $token));
+    }
+
     public function test_a_valid_setup_link_sets_a_strong_password(): void
     {
         $user = User::factory()->create([
