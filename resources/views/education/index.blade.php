@@ -9,6 +9,12 @@
 @if(session('success'))<div class="ec-message">{{ session('success') }}</div>@endif
 @if($errors->any())<div class="ec-errors"><strong>Controleer de ingevoerde gegevens:</strong>@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
 
+<div class="ec-links">
+    <a class="btn btn-secondary" href="{{ route($platform ? 'platform.education.programs' : 'school.education.programs', $platform ? ['school_id'=>$school->id] : []) }}">Opleidingen, opties en leerjaren</a>
+    @if($canManage)
+    <a class="btn" href="{{ route($platform ? 'platform.education.imports' : 'school.education.imports', $platform ? ['school_id'=>$school->id] : []) }}">↓ DKO3-inschrijvingen importeren</a>
+    @endif
+</div>
 @if($platform)
 <form method="GET" action="{{ route('platform.education.index') }}" class="card ec-school-switch">
     <label>Academie<select name="school_id" onchange="this.form.submit()">
@@ -81,7 +87,7 @@
 </div>
 @endsection
 @push('styles')<style>
-.ec-panel{margin:0 0 21px}.ec-school-switch{margin-bottom:20px;display:flex;align-items:end;gap:15px}.ec-school-switch label{min-width:260px}
+.ec-links{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.ec-panel{margin:0 0 21px}.ec-school-switch{margin-bottom:20px;display:flex;align-items:end;gap:15px}.ec-school-switch label{min-width:260px}
 .ec-header{margin-bottom:20px}.ec-panel h2{font-size:18px;margin:0 0 7px}.ec-header p,.ec-panel>p{font-size:12px;line-height:1.8;color:#718096;margin:0 0 16px}
 .ec-add{display:flex;align-items:end;gap:11px;flex-wrap:wrap;background:#f6fafb;border:1px solid #e5edf2;padding:16px;border-radius:10px;margin-bottom:16px}
 .ec-add label,.ec-school-switch label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:750;color:#52677e;flex:1;min-width:150px}.ec-add small{font-weight:400}
