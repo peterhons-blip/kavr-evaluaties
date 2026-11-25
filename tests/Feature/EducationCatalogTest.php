@@ -106,4 +106,17 @@ class EducationCatalogTest extends TestCase
         ])->assertNotFound();
         $this->assertDatabaseCount('education_subjects', 0);
     }
+    public function test_active_academies_are_listed_before_inactive_academies(): void
+    {
+        $inactive = $this->school('AAA-INACTIVE');
+        $inactive->update(['is_active' => false]);
+        $active = $this->school('ZZZ-ACTIVE');
+        $admin = User::factory()->create(['is_active' => true, 'is_platform_admin' => true]);
+
+        $this->actingAs($admin)->get(route('platform.education.index', [
+            'school_id' => $active->id,
+        ]))->assertOk()
+            ->assertSeeInOrder([$active->name, $inactive->name.' (inactief)']);
+    }
+
 }
