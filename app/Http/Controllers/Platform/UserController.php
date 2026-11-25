@@ -100,7 +100,7 @@ class UserController extends Controller
             ->get(['school_id', 'slug', 'name']);
 
         if ($request->ajax()) {
-            return view('platform.users.partials.results', compact('users', 'roleFilter', 'roles'));
+            return view('platform.users.partials.results', compact('users', 'roleFilter', 'roles', 'schoolId'));
         }
 
         return view('platform.users.index', compact(
