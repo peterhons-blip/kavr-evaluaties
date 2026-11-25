@@ -56,6 +56,15 @@ final class Dko3StudentSpreadsheet
         return ['rows' => $rows, 'errors' => array_slice($errors, 0, 30), 'total_errors' => count($errors)];
     }
 
+    /**
+     * Hergebruik dezelfde veilige XLSX/CSV-lezer voor de domein- en vakexports.
+     * De gespecialiseerde importservice controleert vervolgens de kolommen.
+     */
+    public static function rawRows(string $path, string $extension): array
+    {
+        return strtolower($extension) === 'csv' ? self::csv($path) : self::xlsx($path);
+    }
+
     private static function csv(string $path): array
     {
         $file = fopen($path, 'rb');
