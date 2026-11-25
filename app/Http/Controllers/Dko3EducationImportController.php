@@ -171,8 +171,11 @@ class Dko3EducationImportController extends Controller
                     str_starts_with($entry['issues'][0], 'Dubbele leerlingnaam') &&
                     count($entry['ids']['student_candidates'] ?? []) > 1
                 ));
+        $displayRows = collect($resolved)->take(30)
+            ->concat(collect($resolved)->filter(fn ($entry) => count($entry['issues']) > 0))
+            ->unique(fn ($entry) => $entry['source']['line'])->values()->all();
         return view('education.preview', $this->base($request,$school) + [
-            'token'=>$token,'rows'=>$resolved,'errors'=>$issues,'blocked'=>$blocked,
+            'token'=>$token,'rows'=>$displayRows,'errors'=>$issues,'blocked'=>$blocked,
             'canResolve'=>$canResolve,
             'schoolYear'=>$year,'type'=>$type,'total'=>count($parsed['rows']),
         ]);
