@@ -76,7 +76,7 @@ class Dko3EducationImportController extends Controller
      * Niet matchen op een gedeeltelijke naam. In het echte DKO3-vakkenbestand
      * ontbreken stamnummers; dubbelzinnige namen blijven dus onopgelost.
      */
-    private function resolve(School $school, string $year, string $type, array $rows): array
+    private function resolve(School $school, string $year, string $type, array $rows, array $overrides = []): array
     {
         $errors = [];
         $resolved = [];
@@ -102,7 +102,19 @@ class Dko3EducationImportController extends Controller
                 if ($domain) $mapped['domain_id'] = $domain->id;
             } else {
                 $matches = $byName->get(self::normalized($row['student']), collect());
-                if ($matches->count() !== 1) $issues[] = $matches->count() === 0 ? 'Leerling niet gevonden' : 'Dubbele leerlingnaam: handmatige controle vereist';
+                $choice = isset($overrides[$row['line']]) ? (int)$overrides[$row['line']] : null;
+                $chosen = $choice ? $matches->first(fn ($candidate) => (int)$candidate->id === $choice) : null;
+                $student = $matches->count() === 1 ? $matches->first() : $chosen;
+                if (! $student) $issues[] = $matches->count() === 0
+                    ? 'Leerling niet gevonden'
+                    : 'Dubbele leerlingnaam: kies het juiste stamnummer';
+                $mapped['student_candidates'] = $matches->count() > 1
+                    ? $matches->map(fn ($candidate) => [
+                        'id'=>$candidate->id,
+                        'number'=>$candidate->dko3_stamnummer,
+                        'name'=>$candidate->full_name,
+                    ])->values()->all()
+                    : [];
                 $subjectMatches = $subjects->filter(fn ($s) =>
                     self::normalized($s->name) === self::normalized($row['subject']));
                 if ($subjectMatches->count() !== 1) $issues[] = 'Vak niet eenduidig gekoppeld aan domein: '.$row['subject'];
@@ -111,7 +123,7 @@ class Dko3EducationImportController extends Controller
                 $teacherMatches = $teachers->filter(fn ($u) =>
                     self::normalized($u->last_name.', '.$u->first_name) === self::normalized($row['teacher']));
                 if ($teacherMatches->count() !== 1) $issues[] = 'Leerkracht niet eenduidig gevonden: '.$row['teacher'];
-                if ($matches->count() === 1) $mapped['student_id'] = $matches->first()->id;
+                if ($student) $mapped['student_id'] = $student->id;
                 if ($subjectMatches->count() === 1) $mapped['subject_id'] = $subjectMatches->first()->id;
                 if ($locMatches->count() === 1) $mapped['location_id'] = $locMatches->first()->id;
                 if ($teacherMatches->count() === 1) $mapped['teacher_id'] = $teacherMatches->first()->id;
@@ -152,8 +164,16 @@ class Dko3EducationImportController extends Controller
             'school_year'=>$year,'type'=>$type,'rows'=>$parsed['rows'],
         ],JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR));
         $request->session()->put('education_import_token',$token);
+        $canResolve = $type === 'subjects' && $blocked > 0 &&
+            collect($resolved)->every(fn ($entry) =>
+                ! $entry['issues'] || (
+                    count($entry['issues']) === 1 &&
+                    str_starts_with($entry['issues'][0], 'Dubbele leerlingnaam') &&
+                    count($entry['ids']['student_candidates'] ?? []) > 1
+                ));
         return view('education.preview', $this->base($request,$school) + [
             'token'=>$token,'rows'=>$resolved,'errors'=>$issues,'blocked'=>$blocked,
+            'canResolve'=>$canResolve,
             'schoolYear'=>$year,'type'=>$type,'total'=>count($parsed['rows']),
         ]);
     }
@@ -161,7 +181,12 @@ class Dko3EducationImportController extends Controller
     public function commit(Request $request): RedirectResponse
     {
         $school=$this->school($request);
-        $data=$request->validate(['token'=>['required','string','size:48'],'confirm'=>['required','accepted']]);
+        $data=$request->validate([
+            'token'=>['required','string','size:48'],
+            'confirm'=>['required','accepted'],
+            'student_overrides'=>['nullable','array'],
+            'student_overrides.*'=>['required','integer','min:1'],
+        ]);
         abort_unless(hash_equals((string)$request->session()->get('education_import_token',''),$data['token']),419);
         $path='education-imports/'.$data['token'].'.json';
         $disk=Storage::disk('local');
@@ -175,7 +200,7 @@ class Dko3EducationImportController extends Controller
         abort_unless(in_array($type,['domains','subjects'],true),422);
         $rows=$snapshot['rows']??[];
         abort_unless(is_array($rows) && count($rows)>0 && count($rows)<=20000,422);
-        [$resolved,$issues,$blocked]=$this->resolve($school,$year,$type,$rows);
+        [$resolved,$issues,$blocked]=$this->resolve($school,$year,$type,$rows,$data['student_overrides']??[]);
         if ($blocked) {
             throw ValidationException::withMessages([
                 'file'=>'Import gestopt: '.$blocked.' rijen hebben ontbrekende of dubbelzinnige koppelingen. Los dit op en upload opnieuw.',
