@@ -86,7 +86,10 @@ class Dko3TeacherImportTest extends TestCase
         // niet verwijderen of verbergen uit de beheeradministratie.
         $this->get(route('platform.users.index', ['school_id'=>$a->id, 'school_status'=>'inactive']))
             ->assertOk()->assertSee('gone@example.test')
-            ->assertSee('Niet meer in DKO3 (gearchiveerd)');
+            ->assertSee('Niet meer in DKO3 (gearchiveerd)')
+            ->assertSee('Geen schooltoegang');
+        $this->get(route('platform.users.index', ['school_id'=>$a->id, 'school_status'=>'inactive']), ['X-Requested-With'=>'XMLHttpRequest'])
+            ->assertOk()->assertSee('Geen schooltoegang');
         $this->get(route('platform.users.index', ['school_id'=>$a->id, 'school_status'=>'active']))
             ->assertOk()->assertDontSee('gone@example.test');
 
