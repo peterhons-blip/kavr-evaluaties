@@ -29,6 +29,50 @@ class PasswordLifecycleTest extends TestCase
         $this->assertFalse(Password::tokenExists($user, $token));
     }
 
+    public function test_expired_password_link_shows_friendly_dutch_recovery_page(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        $token = Password::createToken($user);
+        $this->travel(25)->hours();
+
+        $this->get(route('password.reset', [
+            'token' => $token,
+            'email' => $user->email,
+        ]))->assertOk()
+            ->assertSee('Deze wachtwoordlink is verlopen')
+            ->assertSee('Nieuwe wachtwoordlink aanvragen')
+            ->assertDontSee('passwords.token')
+            ->assertDontSee('Wachtwoord opslaan');
+    }
+
+    public function test_invalid_password_token_never_displays_internal_translation_key(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+
+        $this->post(route('password.update'), [
+            'token' => 'invalid-token',
+            'email' => $user->email,
+            'password' => 'VeryStrongPassword!2026',
+            'password_confirmation' => 'VeryStrongPassword!2026',
+        ])->assertSessionHasErrors('token');
+
+        $this->get(route('password.reset', [
+            'token' => 'invalid-token',
+            'email' => $user->email,
+        ]))->assertOk()->assertSee('Nieuwe wachtwoordlink aanvragen')
+          ->assertDontSee('passwords.token');
+    }
+
+    public function test_valid_password_link_still_opens_the_password_form(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        $token = Password::createToken($user);
+        $this->get(route('password.reset', [
+            'token' => $token,
+            'email' => $user->email,
+        ]))->assertOk()->assertSee('Wachtwoord opslaan');
+    }
+
     public function test_a_valid_setup_link_sets_a_strong_password(): void
     {
         $user = User::factory()->create([
