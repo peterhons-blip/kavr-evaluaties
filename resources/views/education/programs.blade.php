@@ -33,6 +33,17 @@
 <label>Graad (optioneel)<input name="grade" maxlength="20" placeholder="3"></label>
 <label>Leerjaarvolgnummer<input name="study_year" type="number" min="1" max="9" placeholder="2"></label>
 <button class="btn">+ Leerjaar toevoegen</button></form></div>
+<div class="card ep-panel"><h2>4. Vakken koppelen aan een leerjaarprogramma</h2>
+<p>Voeg een vak toe aan een concreet leerjaar in een schooljaar, met optioneel lesuren, keuzevakstatus en alternatieve leercontext. Dit is het onderwijsaanbod, niet de inschrijving van een leerling.</p>
+<form class="ep-form" method="POST" action="{{ route($platform ? 'platform.education.offerings.store' : 'school.education.offerings.store', $platform ? ['school_id'=>$school->id] : []) }}">@csrf
+<label>Graad / leerjaar<select name="education_grade_year_id" required><option value="">Kies leerjaar</option>@foreach($programs as $program)@foreach($program->gradeYears as $year)<option value="{{ $year->id }}">{{ $program->name }} / {{ $year->option?->name ?: 'Algemeen' }} / {{ $year->code }}</option>@endforeach @endforeach</select></label>
+<label>Vak<select name="education_subject_id" required><option value="">Kies vak</option>@foreach($subjects as $subject)<option value="{{ $subject->id }}">{{ $subject->domain?->name ?? '' }} · {{ $subject->name }}</option>@endforeach</select></label>
+<label>Schooljaar<input name="school_year" value="{{ old('school_year','2026-2027') }}" pattern="20[0-9]{2}-20[0-9]{2}" required></label>
+<label>Lesuren per week<input name="hours_per_week" type="number" step="0.5" min="0.5" max="40" placeholder="1"></label>
+<label class="ep-checkbox"><input type="checkbox" name="is_elective" value="1"> Keuzevak</label>
+<label class="ep-checkbox"><input type="checkbox" name="allow_alternative_context" value="1"> Alternatieve leercontext mogelijk</label>
+<button class="btn">+ Vak aan programma toevoegen</button></form>
+</div>
 @endif
 <div class="card ep-panel"><h2>Bestaande onderwijsstructuur</h2>
 @if($programs->isEmpty())<p>Nog geen opleidingen of studierichtingen voor deze academie. Begin bij stap 1.</p>@endif
@@ -62,9 +73,26 @@
 <button class="btn btn-secondary">Opslaan</button></form>
 @else <p>{{ $year->code }} — {{ $year->option?->name ?: 'Algemeen' }} ({{ $year->is_active ? 'Actief' : 'Inactief' }})</p>@endif
 @empty<p class="ep-empty">Nog geen leerjaren gekoppeld.</p>@endforelse
+<div class="ep-subheading">Vakaanbod per leerjaar en schooljaar</div>
+@foreach($program->gradeYears as $year)
+    @foreach($year->offerings as $offering)
+    @if($canManage)
+    <form class="ep-inline ep-child" method="POST" action="{{ route($platform ? 'platform.education.offerings.update' : 'school.education.offerings.update', ($platform ? ['school_id'=>$school->id] : []) + ['offering'=>$offering->id]) }}">@csrf @method('PUT')
+      <span><strong>{{ $year->code }} / {{ $offering->school_year }}</strong> · {{ $offering->subject?->name }} ({{ strtoupper($offering->subject?->evaluation_type ?? 'kcj') }})</span>
+      <input name="hours_per_week" type="number" min="0.5" max="40" step="0.5" value="{{ $offering->hours_per_week }}" placeholder="Lesuren">
+      <select name="is_elective"><option value="0" @selected(! $offering->is_elective)>Verplicht</option><option value="1" @selected($offering->is_elective)>Keuzevak</option></select>
+      <select name="allow_alternative_context"><option value="0" @selected(! $offering->allow_alternative_context)>In academie</option><option value="1" @selected($offering->allow_alternative_context)>Alternatieve context toegestaan</option></select>
+      <select name="is_active"><option value="1" @selected($offering->is_active)>Actief</option><option value="0" @selected(! $offering->is_active)>Inactief</option></select>
+      <button class="btn btn-secondary">Opslaan</button>
+    </form>
+    @else
+    <p>{{ $year->code }} · {{ $offering->school_year }} · {{ $offering->subject?->name }} ({{ strtoupper($offering->subject?->evaluation_type ?? 'kcj') }})</p>
+    @endif
+    @endforeach
+@endforeach
 </div>
 @endforeach
 </div>
 @endsection
-@push('styles')<style>.ep-links{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap}.ep-panel,.ep-switch{margin-bottom:17px}.ep-panel h2{font-size:18px;margin:0 0 12px}.ep-panel p{font-size:12px;color:#718096;line-height:1.6}.ep-switch{display:flex;align-items:end;gap:12px}.ep-form{display:flex;align-items:end;flex-wrap:wrap;gap:9px}.ep-form label,.ep-switch label{display:flex;flex:1;min-width:145px;flex-direction:column;font-size:11px;font-weight:700;gap:6px;color:#4c6276}.ep-form input,.ep-form select,.ep-switch select,.ep-inline input,.ep-inline select{height:40px;border:1px solid #d8e4eb;border-radius:8px;font:inherit;font-size:12px;padding:0 9px;background:#fff;min-width:0}.ep-form label input,.ep-form label select{width:100%}.ep-program{border:1px solid #e6edf2;border-radius:10px;padding:14px;margin:15px 0}.ep-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:11px}.ep-title span,.ep-status,.ep-empty{font-size:11px;color:#718096}.ep-inline{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:9px 0}.ep-inline input,.ep-inline select{max-width:220px}.ep-inline span{font-size:12px}.ep-child{margin-left:15px}.ep-subheading{font-size:11px;font-weight:800;color:#52677e;margin:14px 0 7px}.ep-notice,.ep-errors{border-radius:8px;background:#eaf6ef;padding:13px;margin-bottom:14px;color:#286746;font-size:12px}.ep-errors{background:#fff0f0;color:#a43540}</style>@endpush
+@push('styles')<style>.ep-links{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap}.ep-panel,.ep-switch{margin-bottom:17px}.ep-panel h2{font-size:18px;margin:0 0 12px}.ep-panel p{font-size:12px;color:#718096;line-height:1.6}.ep-switch{display:flex;align-items:end;gap:12px}.ep-form{display:flex;align-items:end;flex-wrap:wrap;gap:9px}.ep-checkbox{flex:0 0 auto!important;flex-direction:row!important;align-items:center;gap:8px!important}.ep-checkbox input{height:auto!important}.ep-form label,.ep-switch label{display:flex;flex:1;min-width:145px;flex-direction:column;font-size:11px;font-weight:700;gap:6px;color:#4c6276}.ep-form input,.ep-form select,.ep-switch select,.ep-inline input,.ep-inline select{height:40px;border:1px solid #d8e4eb;border-radius:8px;font:inherit;font-size:12px;padding:0 9px;background:#fff;min-width:0}.ep-form label input,.ep-form label select{width:100%}.ep-program{border:1px solid #e6edf2;border-radius:10px;padding:14px;margin:15px 0}.ep-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:11px}.ep-title span,.ep-status,.ep-empty{font-size:11px;color:#718096}.ep-inline{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:9px 0}.ep-inline input,.ep-inline select{max-width:220px}.ep-inline span{font-size:12px}.ep-child{margin-left:15px}.ep-subheading{font-size:11px;font-weight:800;color:#52677e;margin:14px 0 7px}.ep-notice,.ep-errors{border-radius:8px;background:#eaf6ef;padding:13px;margin-bottom:14px;color:#286746;font-size:12px}.ep-errors{background:#fff0f0;color:#a43540}</style>@endpush
 @push('scripts')<script>(function(){const pr=document.getElementById('ep-year-program'),op=document.getElementById('ep-year-option');if(!pr||!op)return;function filter(){const id=pr.value;Array.from(op.options).forEach((o,i)=>{if(i===0)return;o.hidden=o.dataset.program!==id;o.disabled=o.hidden});if(op.selectedOptions[0]?.disabled)op.value='';}pr.addEventListener('change',filter);filter();})();</script>@endpush
