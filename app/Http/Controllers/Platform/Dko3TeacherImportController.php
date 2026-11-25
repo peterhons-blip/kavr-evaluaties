@@ -232,6 +232,6 @@ class Dko3TeacherImportController extends Controller
         $request->session()->forget('dko3_import_token');
 
         return redirect()->route('platform.users.index',['school_id'=>$school->id])
-            ->with('success', "DKO3-import voltooid: {$report['created']} nieuw, {$report['updated']} bijgewerkt, {$report['deactivated']} niet meer aanwezig (gedeactiveerd en verborgen).");
+            ->with('success', "DKO3-import voltooid: {$report['created']} nieuw, {$report['updated']} bijgewerkt, {$report['deactivated']} niet meer aanwezig (schoolkoppeling gedeactiveerd en als DKO3-uitstroom gemarkeerd).");
     }
 }
