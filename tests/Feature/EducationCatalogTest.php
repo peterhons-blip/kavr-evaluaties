@@ -55,6 +55,17 @@ class EducationCatalogTest extends TestCase
             'school_id'=>$a->id, 'education_domain_id'=>$domain->id,
             'name'=>'Instrument: klassiek','discipline'=>'Piano',
         ]);
+        $this->assertDatabaseHas('education_subjects', [
+            'school_id' => $a->id, 'evaluation_type' => 'icj',
+            'discipline' => 'Piano',
+        ]);
+        $this->post(route('school.education.subjects.store'), [
+            'education_domain_id' => $domain->id, 'name' => 'Groepsmusiceren',
+        ])->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('education_subjects', [
+            'school_id' => $a->id, 'name' => 'Groepsmusiceren',
+            'evaluation_type' => 'kcj',
+        ]);
         $this->assertDatabaseCount('education_domains', 1);
         $this->assertDatabaseMissing('education_domains', ['school_id'=>$b->id]);
     }
