@@ -71,6 +71,15 @@
             </select>
         </label>
 
+        <label class="um-field">
+            <span>Schoolstatus</span>
+            <select name="school_status" id="um-school-status">
+                <option value="">Alle schoolstatussen</option>
+                <option value="active" @selected($schoolStatusFilter === 'active')>Actief</option>
+                <option value="inactive" @selected($schoolStatusFilter === 'inactive')>Inactief (ook niet meer in DKO3)</option>
+            </select>
+        </label>
+
         <label class="um-field um-field-password">
             <span>Wachtwoord</span>
             <select name="password" id="um-password">
