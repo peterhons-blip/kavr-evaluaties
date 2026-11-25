@@ -96,6 +96,8 @@ Route::middleware('auth')->group(function () {
         Route::put('/school/onderwijsaanbod/opleidingen/{program}', [EducationProgramController::class, 'updateProgram'])->name('school.education.programs.update');
         Route::post('/school/onderwijsaanbod/opties', [EducationProgramController::class, 'storeOption'])->name('school.education.options.store');
         Route::put('/school/onderwijsaanbod/opties/{option}', [EducationProgramController::class, 'updateOption'])->name('school.education.options.update');
+        Route::post('/school/onderwijsaanbod/vakprogramma', [EducationProgramController::class, 'storeOffering'])->name('school.education.offerings.store');
+        Route::put('/school/onderwijsaanbod/vakprogramma/{offering}', [EducationProgramController::class, 'updateOffering'])->name('school.education.offerings.update');
         Route::post('/school/onderwijsaanbod/leerjaren', [EducationProgramController::class, 'storeGradeYear'])->name('school.education.years.store');
         Route::put('/school/onderwijsaanbod/leerjaren/{gradeYear}', [EducationProgramController::class, 'updateGradeYear'])->name('school.education.years.update');
 
@@ -198,6 +200,8 @@ Route::middleware(['auth', 'platform.admin'])
         Route::put('/onderwijsaanbod/opleidingen/{program}', [EducationProgramController::class, 'updateProgram'])->name('education.programs.update');
         Route::post('/onderwijsaanbod/opties', [EducationProgramController::class, 'storeOption'])->name('education.options.store');
         Route::put('/onderwijsaanbod/opties/{option}', [EducationProgramController::class, 'updateOption'])->name('education.options.update');
+        Route::post('/onderwijsaanbod/vakprogramma', [EducationProgramController::class, 'storeOffering'])->name('education.offerings.store');
+        Route::put('/onderwijsaanbod/vakprogramma/{offering}', [EducationProgramController::class, 'updateOffering'])->name('education.offerings.update');
         Route::post('/onderwijsaanbod/leerjaren', [EducationProgramController::class, 'storeGradeYear'])->name('education.years.store');
         Route::put('/onderwijsaanbod/leerjaren/{gradeYear}', [EducationProgramController::class, 'updateGradeYear'])->name('education.years.update');
 
