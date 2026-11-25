@@ -30,7 +30,7 @@ class StudentController extends Controller
             abort_unless($request->user()?->is_active && $request->user()->isPlatformAdmin(), 403);
             $schoolId = $request->input('school_id');
             if (!$schoolId && $request->routeIs('platform.students.index')) {
-                return School::orderBy('name')->firstOrFail();
+                return School::orderByDesc('is_active')->orderBy('name')->firstOrFail();
             }
             return School::findOrFail($schoolId);
         }
@@ -87,7 +87,7 @@ class StudentController extends Controller
             || SchoolAccess::allows($request->user(), $school, 'students.manage');
         return view('students.index', $this->base($request, $school) + [
             'students' => $students,
-            'schools' => $this->isPlatform($request) ? School::orderBy('name')->get() : collect(),
+            'schools' => $this->isPlatform($request) ? School::orderByDesc('is_active')->orderBy('name')->get() : collect(),
             'search' => $search,
             'status' => $status,
             'schoolYearFilter' => $schoolYearFilter,
