@@ -67,7 +67,7 @@ class StudentController extends Controller
             'school_year' => ['nullable', 'regex:/^20[0-9]{2}-20[0-9]{2}$/'],
         ]);
         $search = trim($query['q'] ?? '');
-        $status = $query['status'] ?? 'active';
+        $status = $query['status'] ?? 'all';
         $schoolYearFilter = $query['school_year'] ?? '';
         $students = Student::query()->with(['schoolYears' => fn ($q) => $q->orderByDesc('school_year')])->where('school_id', $school->id)
             ->when($search !== '', function ($q) use ($search) {
