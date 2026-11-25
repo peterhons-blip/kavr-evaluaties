@@ -19,13 +19,14 @@
         <button class="btn" type="submit">Zoeken</button>
     </form>
     <div class="st-scroll"><table class="st-table">
-        <thead><tr><th>Stamnummer</th><th>Familienaam</th><th>Voornaam</th><th>Status</th>@if($canManage)<th>Acties</th>@endif</tr></thead>
+        <thead><tr><th>Stamnummer</th><th>Familienaam</th><th>Voornaam</th><th>Status</th><th>Schooljaren</th>@if($canManage)<th>Acties</th>@endif</tr></thead>
         <tbody>@forelse($students as $student)<tr>
             <td><strong>{{ $student->dko3_stamnummer }}</strong></td>
             <td>{{ $student->last_name }}</td><td>{{ $student->first_name }}</td>
-            <td><span class="st-pill {{ $student->is_active ? 'st-on' : 'st-off' }}">{{ $student->is_active ? 'Actief' : 'Inactief' }}</span></td>
+            <td><span class="st-pill {{ $student->is_active ? 'st-on' : 'st-off' }}">{{ $student->is_active ? 'Dossier actief' : 'Dossier inactief' }}</span></td>
+            <td>@forelse($student->schoolYears as $year)<span class="st-year">{{ $year->school_year }} ({{ $year->status === 'enrolled' ? 'ingeschreven' : 'afgesloten' }})</span>@empty<span class="st-muted">Nog niet gekoppeld</span>@endforelse</td>
             @if($canManage)<td><a class="btn btn-secondary" href="{{ route($platform ? 'platform.students.edit' : 'school.students.edit', ($platform ? ['school_id' => $school->id] : []) + ['student' => $student->id]) }}">Bewerken</a></td>@endif
-        </tr>@empty<tr><td colspan="{{ $canManage ? 5 : 4 }}" class="st-empty">Geen leerlingen gevonden. Importeer een DKO3-export of pas je filters aan.</td></tr>@endforelse</tbody>
+        </tr>@empty<tr><td colspan="{{ $canManage ? 6 : 5 }}" class="st-empty">Geen leerlingen gevonden. Importeer een DKO3-export of pas je filters aan.</td></tr>@endforelse</tbody>
     </table></div>
     <div class="st-pages">{{ $students->links('vendor.pagination.artelynx') }}</div>
 </div>
@@ -38,6 +39,6 @@
 .st-filters label{display:flex;flex:1;min-width:170px;flex-direction:column;gap:6px;color:#475d73;font-size:11px;font-weight:700}
 .st-filters input,.st-filters select{height:41px;border:1px solid #cddbe4;border-radius:8px;padding:0 12px;font:inherit;color:#142b45;background:white}
 .st-scroll{overflow-x:auto}.st-table{border-collapse:collapse;width:100%}.st-table th,.st-table td{padding:13px 11px;border-bottom:1px solid #edf1f5;text-align:left;font-size:12px}.st-table th{color:#718096;font-size:10px;text-transform:uppercase}.st-table tr:hover td{background:#f9fbfc}
-.st-pill{display:inline-block;font-size:10px;font-weight:800;border-radius:15px;padding:5px 9px}.st-on{background:#e6f4ed;color:#277653}.st-off{background:#fcecec;color:#ac4848}.st-empty{text-align:center;padding:30px!important;color:#718096}.st-pages{margin-top:19px}
+.st-year{display:inline-block;margin:2px 4px 2px 0;font-size:10px;padding:4px 8px;background:#edf3f6;border-radius:9px}.st-muted{color:#718096}.st-pill{display:inline-block;font-size:10px;font-weight:800;border-radius:15px;padding:5px 9px}.st-on{background:#e6f4ed;color:#277653}.st-off{background:#fcecec;color:#ac4848}.st-empty{text-align:center;padding:30px!important;color:#718096}.st-pages{margin-top:19px}
 </style>
 @endpush
