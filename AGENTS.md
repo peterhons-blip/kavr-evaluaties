@@ -122,3 +122,7 @@ De gebruiker leverde `KAVR  structuur 3 domeinen.pdf` aan (15 pagina's, aanbod 2
 Expliciete KA-VR-afspraak: **Instrument = ICJ; alle andere vakken = KCJ**. Nieuwe catalogusvelden `education_subjects.evaluation_type` default `kcj`, classifier `App\\Support\\DkoEvaluationType`. Verifieer bestaande Instrument-records na migratie en map niet blind op naam bij import. Deze historische 2021-2022-brochure dient als inhoudelijke referentie en mag niet automatisch het actuele 2026-2027-aanbod overschrijven. Onderwijsaanbod moet graden, leerjaren, opties, studierichtingen, jongeren/volwassenen, specialisatie en kortlopende trajecten kunnen modelleren.
 
 Bij academiekeuzelijsten in Platformbeheer: actief bovenaan, inactief onderaan met expliciet '(inactief)'.
+
+## Lesvestigingen uit DKO3
+
+De leerlingen- en domeininschrijvingsbestanden bevatten geen lesvestigingen; alleen `werklijst_allevakken` heeft de kolom `vestigingsplaats` (8 waarden). Koppel per leerlingvakinschrijving via `student_subject_assignments.school_location_id`, niet op de leerling zelf. Matching in DKO3-vakkenimport exact en schoolgebonden; niet automatisch ontbrekende fysieke locaties creëren. Leerlingenoverzicht in Schoolbeheer/Platformbeheer toont en filtert per schooljaar de lesvestigingen. Zie `PROJECT_CONTEXT.md` voor exacte bronwaarden.
