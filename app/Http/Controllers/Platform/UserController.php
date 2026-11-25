@@ -94,7 +94,7 @@ class UserController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        $schools = School::orderBy('name')->get(['id', 'name']);
+        $schools = School::orderByDesc('is_active')->orderBy('name')->get(['id', 'name', 'is_active']);
         $roles = DB::table('school_roles')
             ->orderBy('name')
             ->get(['school_id', 'slug', 'name']);
