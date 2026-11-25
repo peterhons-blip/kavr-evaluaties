@@ -12,7 +12,7 @@
 @if($platform)
 <form method="GET" action="{{ route('platform.education.index') }}" class="card ec-school-switch">
     <label>Academie<select name="school_id" onchange="this.form.submit()">
-    @foreach($schools as $choice)<option value="{{ $choice->id }}" @selected((int)$choice->id===(int)$school->id)>{{ $choice->name }}</option>@endforeach
+    @foreach($schools as $choice)<option value="{{ $choice->id }}" @selected((int)$choice->id===(int)$school->id)>{{ $choice->name }}{{ $choice->is_active ? '' : ' (inactief)' }}</option>@endforeach
     </select></label><button class="btn" type="submit">Open academie</button>
 </form>
 @endif
