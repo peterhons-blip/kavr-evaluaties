@@ -58,6 +58,7 @@
     @forelse($subjects as $subject)<tr>
         <td>{{ $subject->domain?->name }}</td><td><strong>{{ $subject->name }}</strong><small>{{ $subject->code ?: '' }}</small></td>
         <td>{{ $subject->discipline ?: '—' }}</td>
+        <td><span class="ec-pill {{ $subject->evaluation_type === 'icj' ? 'ec-on' : '' }}">{{ strtoupper($subject->evaluation_type ?? 'kcj') }}</span></td>
         <td><span class="ec-pill {{ $subject->is_active ? 'ec-on' : 'ec-off' }}">{{ $subject->is_active ? 'Actief' : 'Inactief' }}</span></td>
         @if($canManage)<td>
             <form class="ec-inline" method="POST" action="{{ route($platform ? 'platform.education.subjects.update' : 'school.education.subjects.update', ($platform ? ['school_id'=>$school->id] : []) + ['subject'=>$subject->id]) }}">@csrf @method('PUT')
