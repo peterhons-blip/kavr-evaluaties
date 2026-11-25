@@ -8,6 +8,7 @@ use App\Http\Controllers\MyProfileController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\EducationCatalogController;
 use App\Http\Controllers\Dko3EducationImportController;
+use App\Http\Controllers\EducationProgramController;
 use App\Http\Controllers\Platform\PermissionMatrixController;
 use App\Http\Controllers\Platform\SchoolController;
 use App\Http\Controllers\Platform\SchoolLocationController;
@@ -89,6 +90,14 @@ Route::middleware('auth')->group(function () {
         Route::put('/school/onderwijsaanbod/domeinen/{domain}', [EducationCatalogController::class, 'updateDomain'])->name('school.education.domains.update');
         Route::post('/school/onderwijsaanbod/vakken', [EducationCatalogController::class, 'storeSubject'])->name('school.education.subjects.store');
         Route::put('/school/onderwijsaanbod/vakken/{subject}', [EducationCatalogController::class, 'updateSubject'])->name('school.education.subjects.update');
+
+        Route::get('/school/onderwijsaanbod/opleidingen', [EducationProgramController::class, 'index'])->name('school.education.programs');
+        Route::post('/school/onderwijsaanbod/opleidingen', [EducationProgramController::class, 'storeProgram'])->name('school.education.programs.store');
+        Route::put('/school/onderwijsaanbod/opleidingen/{program}', [EducationProgramController::class, 'updateProgram'])->name('school.education.programs.update');
+        Route::post('/school/onderwijsaanbod/opties', [EducationProgramController::class, 'storeOption'])->name('school.education.options.store');
+        Route::put('/school/onderwijsaanbod/opties/{option}', [EducationProgramController::class, 'updateOption'])->name('school.education.options.update');
+        Route::post('/school/onderwijsaanbod/leerjaren', [EducationProgramController::class, 'storeGradeYear'])->name('school.education.years.store');
+        Route::put('/school/onderwijsaanbod/leerjaren/{gradeYear}', [EducationProgramController::class, 'updateGradeYear'])->name('school.education.years.update');
 
         Route::get('/school/onderwijsaanbod/import', [Dko3EducationImportController::class, 'form'])->name('school.education.imports');
         Route::post('/school/onderwijsaanbod/import/voorbeeld', [Dko3EducationImportController::class, 'preview'])->name('school.education.imports.preview');
@@ -183,6 +192,14 @@ Route::middleware(['auth', 'platform.admin'])
         Route::put('/onderwijsaanbod/domeinen/{domain}', [EducationCatalogController::class, 'updateDomain'])->name('education.domains.update');
         Route::post('/onderwijsaanbod/vakken', [EducationCatalogController::class, 'storeSubject'])->name('education.subjects.store');
         Route::put('/onderwijsaanbod/vakken/{subject}', [EducationCatalogController::class, 'updateSubject'])->name('education.subjects.update');
+
+        Route::get('/onderwijsaanbod/opleidingen', [EducationProgramController::class, 'index'])->name('education.programs');
+        Route::post('/onderwijsaanbod/opleidingen', [EducationProgramController::class, 'storeProgram'])->name('education.programs.store');
+        Route::put('/onderwijsaanbod/opleidingen/{program}', [EducationProgramController::class, 'updateProgram'])->name('education.programs.update');
+        Route::post('/onderwijsaanbod/opties', [EducationProgramController::class, 'storeOption'])->name('education.options.store');
+        Route::put('/onderwijsaanbod/opties/{option}', [EducationProgramController::class, 'updateOption'])->name('education.options.update');
+        Route::post('/onderwijsaanbod/leerjaren', [EducationProgramController::class, 'storeGradeYear'])->name('education.years.store');
+        Route::put('/onderwijsaanbod/leerjaren/{gradeYear}', [EducationProgramController::class, 'updateGradeYear'])->name('education.years.update');
 
         Route::get('/onderwijsaanbod/import', [Dko3EducationImportController::class, 'form'])->name('education.imports');
         Route::post('/onderwijsaanbod/import/voorbeeld', [Dko3EducationImportController::class, 'preview'])->name('education.imports.preview');
