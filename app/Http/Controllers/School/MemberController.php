@@ -54,8 +54,10 @@ class MemberController extends Controller
         if ($roleFilter && ! $roles->contains('slug', $roleFilter)) {
             abort(422, 'Ongeldige schoolrol.');
         }
+        // Behoud historische DKO3-koppelingen in het beheeroverzicht.
+        // De toegangscontrole blijft deze gebruikers elders uitsluiten.
         $members = $school->users()
-            ->whereNull('school_user.dko3_hidden_at')
+            ->addSelect('school_user.dko3_hidden_at as dko3_hidden_at')
             ->when($search !== '', function ($query) use ($search) {
                 $like = '%'.addcslashes($search, '%_\\\\').'%';
                 $query->where(function ($nested) use ($like) {
@@ -74,8 +76,8 @@ class MemberController extends Controller
             ->paginate($perPage)->withQueryString();
         $canManage = SchoolAccess::allows($request->user(), $school, 'users.manage');
         $counts = [
-            'total' => $school->users()->whereNull('school_user.dko3_hidden_at')->count(),
-            'active' => $school->users()->whereNull('school_user.dko3_hidden_at')->where('school_user.is_active', true)->count(),
+            'total' => $school->users()->count(),
+            'active' => $school->users()->where('school_user.is_active', true)->count(),
         ];
         return view('school.members.index', compact(
             'school','members','roles','canManage','search','roleFilter','status','passwordFilter','perPage','counts'
