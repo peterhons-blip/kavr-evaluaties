@@ -57,8 +57,10 @@ class Dko3StudentAdministrationTest extends TestCase
         ]);
 
         $this->actingAs($admin)->withSession(['active_school_id' => $school->id])
-            ->post(route('school.students.preview'), ['file' => $this->sampleCsv()])
-            ->assertOk()->assertSee('2')->assertSee('000123001');
+            ->post(route('school.students.preview'), [
+                'file' => $this->sampleCsv(), 'school_year' => '2026-2027',
+            ])->assertOk()->assertSee('2')->assertSee('000123001')
+              ->assertSee('2026-2027');
 
         $token = session('student_import_token');
         $this->assertNotEmpty($token);
@@ -72,6 +74,13 @@ class Dko3StudentAdministrationTest extends TestCase
         ]);
         $this->assertTrue($other->fresh()->is_active);
         $this->assertSame(3, Student::where('school_id', $school->id)->count());
+        $this->assertDatabaseHas('student_school_years', [
+            'school_id' => $school->id,
+            'school_year' => '2026-2027',
+            'status' => 'enrolled',
+        ]);
+        $this->assertSame(2, \App\Models\StudentSchoolYear::where('school_id', $school->id)
+            ->where('school_year', '2026-2027')->count());
 
         // Re-import does not create duplicates.
         $this->post(route('school.students.preview'), ['file' => $this->sampleCsv()])->assertOk();
