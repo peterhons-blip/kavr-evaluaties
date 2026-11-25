@@ -25,7 +25,7 @@ class EducationCatalogController extends Controller
         if ($this->platform($request)) {
             abort_unless($request->user()?->is_active && $request->user()->isPlatformAdmin(), 403);
             $schoolId = $request->input('school_id');
-            $school = $schoolId ? School::findOrFail($schoolId) : School::orderBy('name')->firstOrFail();
+            $school = $schoolId ? School::findOrFail($schoolId) : School::orderByDesc('is_active')->orderBy('name')->firstOrFail();
             return [$school, true];
         }
 
@@ -56,7 +56,7 @@ class EducationCatalogController extends Controller
         return view('education.index', [
             'school' => $school, 'platform' => $platform,
             'layout' => $platform ? 'layouts.platform' : 'layouts.school',
-            'schools' => $platform ? School::orderBy('name')->get() : collect(),
+            'schools' => $platform ? School::orderByDesc('is_active')->orderBy('name')->get() : collect(),
             'domains' => $domains, 'subjects' => $subjects, 'canManage' => $canManage,
         ]);
     }
