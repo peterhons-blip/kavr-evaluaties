@@ -47,9 +47,16 @@ class PasswordResetController extends Controller
 
     public function resetForm(string $token, Request $request): View
     {
+        $email = (string) $request->query('email', '');
+        // Toon een verlopen of al gebruikte link meteen, zonder een wachtwoordformulier.
+        // Geen onderscheid maken tussen een onbekend account en een ongeldig token.
+        $user = $email !== '' ? User::where('email', $email)->first() : null;
+        $invalidLink = ! $user || ! Password::tokenExists($user, $token);
+
         return view('auth.reset-password', [
             'token' => $token,
-            'email' => $request->query('email', ''),
+            'email' => $email,
+            'invalidLink' => $invalidLink,
         ]);
     }
 
@@ -84,8 +91,20 @@ class PasswordResetController extends Controller
             }
         );
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('status', 'Je wachtwoord is ingesteld. Je kunt nu aanmelden als je account actief is.')
-            : back()->withErrors(['email' => __($status)])->onlyInput('email');
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')
+                ->with('status', 'Je wachtwoord is ingesteld. Je kunt nu aanmelden als je account actief is.');
+        }
+
+        if (in_array($status, [Password::INVALID_TOKEN, Password::INVALID_USER], true)) {
+            return back()->withErrors([
+                'token' => 'Deze wachtwoordlink is verlopen, ongeldig of al gebruikt. Vraag hieronder een nieuwe link aan.',
+            ])->onlyInput('email');
+        }
+
+        // Geef nooit onvertaalde interne statussleutels aan eindgebruikers.
+        return back()->withErrors([
+            'email' => 'Je wachtwoord kon niet worden gewijzigd. Probeer opnieuw of vraag een nieuwe link aan.',
+        ])->onlyInput('email');
     }
 }
