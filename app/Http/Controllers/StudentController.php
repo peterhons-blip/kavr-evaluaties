@@ -64,9 +64,11 @@ class StudentController extends Controller
         $query = $request->validate([
             'q' => ['nullable', 'string', 'max:120'],
             'status' => ['nullable', Rule::in(['active', 'inactive', 'all'])],
+            'school_year' => ['nullable', 'regex:/^20[0-9]{2}-20[0-9]{2}$/'],
         ]);
         $search = trim($query['q'] ?? '');
         $status = $query['status'] ?? 'active';
+        $schoolYearFilter = $query['school_year'] ?? '';
         $students = Student::query()->with(['schoolYears' => fn ($q) => $q->orderByDesc('school_year')])->where('school_id', $school->id)
             ->when($search !== '', function ($q) use ($search) {
                 $term = '%'.addcslashes($search, '%_\\').'%';
@@ -77,6 +79,7 @@ class StudentController extends Controller
                 });
             })
             ->when($status !== 'all', fn ($q) => $q->where('is_active', $status === 'active'))
+            ->when($schoolYearFilter !== '', fn ($q) => $q->whereHas('schoolYears', fn ($enrollment) => $enrollment->where('school_year', $schoolYearFilter)))
             ->orderBy('last_name')->orderBy('first_name')->orderBy('id')
             ->paginate(25)->withQueryString();
 
@@ -87,6 +90,8 @@ class StudentController extends Controller
             'schools' => $this->isPlatform($request) ? School::orderBy('name')->get() : collect(),
             'search' => $search,
             'status' => $status,
+            'schoolYearFilter' => $schoolYearFilter,
+            'schoolYears' => StudentSchoolYear::query()->where('school_id', $school->id)->distinct()->orderByDesc('school_year')->pluck('school_year'),
             'canManage' => $canManage,
         ]);
     }
