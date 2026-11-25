@@ -107,3 +107,10 @@ Onderwijsstructuur (vakken/graden/leerlingen/lesgroepen/inschrijvingen), DKO3-le
 - Naam, e-mail en telefoon zijn globale accountvelden; bij personeel met meerdere scholen vereist wijzigen bevestiging zodat de beheerder de impact op andere schoolomgevingen begrijpt. Wijzig andere schoollidmaatschappen niet.
 - Accounts met `is_platform_admin` zijn in de eigen schoolinterface niet wijzigbaar qua profielvelden: laat hiervoor Platformbeheer gebruiken. Wachtwoorden alleen via gethrottlede mailreset.
 - De personeelspagina toont geen drie statistiektegels meer. Houd de kolomindeling en uitgebreide filters behouden.
+
+## Onderwijsaanbod (25 november 2026)
+
+- Vanaf 25-11-2026 bestaan `education_domains`, `education_subjects`, `student_school_years`, `student_subject_enrollments` via nieuwe migratie. Domeinen en vakken schoolgebonden; wijzig een domein/vak van een andere school nooit via ID. Routes en views voor platform én actieve school: `education.index`, `education.domains.store/update`, `education.subjects.store/update`.
+- `students.is_active` betekent dossierstatus, niet ingeschreven of inloggerechtigd. Leerlingen hebben geen eigen gebruikersaccount. Inschrijvingen zijn jaarspecifiek via `student_school_years`; vaktoewijzingen via `student_subject_enrollments`. Ook bij opnieuw importeren oude jaren en handmatig afgesloten jaarinschrijvingen behouden.
+- Jaar uit leerlingidentiteitsimport opslaan via schooljaarselectie; CSV/XLSX van domeinen/opleidingen en vakken per leerling eerst inspecteren voordat parser/mapping wordt gebouwd. Geen automatische verdwijning/deactivering omdat een rij niet in een deelbestand zit. Gebruik stamnummer, niet ambiguïteitsgevoelige naam.
+- Nieuwe school-/platformbeheerpagina's hebben dezelfde UI; alle queries en mutaties schoolscopen. Test migraties, catalogusautorisatie en jaarlijkse import met `EducationCatalogTest` en `Dko3StudentAdministrationTest`.
