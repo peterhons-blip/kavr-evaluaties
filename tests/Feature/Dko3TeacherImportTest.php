@@ -93,6 +93,9 @@ class Dko3TeacherImportTest extends TestCase
         $this->get(route('platform.users.index', ['school_id'=>$a->id, 'school_status'=>'active']))
             ->assertOk()->assertDontSee('gone@example.test');
 
+        // Platformadmin heeft niet automatisch een actieve schoolkoppeling.
+        // Maak die expliciet om het schoolgebonden overzicht te kunnen testen.
+        $admin->schools()->attach($a->id, ['role' => 'school_admin', 'is_active' => true]);
         $this->actingAs($admin)->withSession(['active_school_id' => $a->id])
             ->get(route('school.members.index', ['status' => 'inactive']))
             ->assertOk()->assertSee('gone@example.test')
