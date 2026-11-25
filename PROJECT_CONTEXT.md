@@ -217,3 +217,12 @@ Bron: door opdrachtgever aangeleverd document `KAVR  structuur 3 domeinen.pdf` (
 3. Bewaar tekstcodes zoals `2.1`, `3.3`, `4.1`, `C.1` en de speciale `S.1` als **tekst**, geen decimale getallen. Jaarprogressie verschilt per domein en jongeren/volwassenen.
 4. Importeer vakken uit `werklijst_allevakken` pas nadat de leerlingkoppeling, leerjaarcodes, vaknormalisatie en meerdere docenten correct zijn gemodelleerd. Laat 2021-2022-bron geen onbekende actuele DKO3-waarden vervangen.
 5. Schoollijsten in Platformbeheer staan voortaan gesorteerd: actieve scholen eerst, inactieve achteraan en expliciet als inactief gelabeld. Toegepast op onderwijsaanbod, leerlingen en personeelsselectie.
+
+## Vestigingsplaatsen gekoppeld aan DKO3-vakinschrijvingen (26 november 2026)
+
+- De export `alleleerlingen_2026-2027` heeft geen vestigingsplaats. Ook `alle_inschrijvingen_2026-2027` bevat alleen domein en persoonsadres (straat, postcode, gemeente), **geen lesvestiging**. Alleen `werklijst_allevakken` bevat de kolom `vestigingsplaats`.
+- Waarden uit het laatst aangeleverde vakkenbestand (1119 rijen): Voeren 408, Zichen 280, Zichen (Jeugdhuis) 170, GBS De Klinker Riemst 111, Val-Meer (De Bond) 107, Herderen 23, Kanne 11 en Vlijtingen 9.
+- **Geen primaire vestigingsplaats op `students`**. Een leerling kan binnen één jaar verschillende vakken op verschillende vestigingen volgen. De genormaliseerde locatiekoppeling zit in `student_subject_assignments.school_location_id` naast de individuele vakinschrijving, betrokken leerkracht en leerjaarcode.
+- De DKO3-vakkenimport koppelt de locatie uitsluitend aan `school_locations` van de geselecteerde school (exact genormaliseerde naam). Geen fuzzy matches en geen automatisch aangemaakte dubbellocaties: ontbrekende/ambigue vestigingen blokkeren de import met rijmelding en moeten eerst worden gecontroleerd of gecorrigeerd in Vestigingsplaatsen.
+- In het gedeelde leerlingenoverzicht (Schoolbeheer én Platformbeheer) worden de lesvestigingen nu per leerling getoond, samen met een schooljaarfilter en een schoolgebonden vestigingsplaatsfilter. De locaties worden via jaar -> vakinschrijving -> toewijzing opgevraagd; nooit via adres of domeininschrijving.
+- Let op: wanneer een school twee naamvarianten voor dezelfde echte locatie gebruikt, maak dan op termijn expliciete DKO3-vestigingsaliassen (met handmatige goedkeuring), niet een extra fysieke vestiging zonder controle.
