@@ -205,9 +205,8 @@ class Dko3EducationImportController extends Controller
         abort_unless(is_array($rows) && count($rows)>0 && count($rows)<=20000,422);
         [$resolved,$issues,$blocked]=$this->resolve($school,$year,$type,$rows,$data['student_overrides']??[]);
         if ($blocked) {
-            throw ValidationException::withMessages([
-                'file'=>'Import gestopt: '.$blocked.' rijen hebben ontbrekende of dubbelzinnige koppelingen. Los dit op en upload opnieuw.',
-            ]);
+            return redirect()->route($this->route($request,'imports'), $this->params($request,$school))
+                ->withErrors(['file'=>'Import gestopt: '.$blocked.' rijen zijn nog niet eenduidig gekoppeld. Controleer de export en probeer opnieuw.']);
         }
         $count=DB::transaction(function () use ($school,$year,$type,$resolved) {
             DB::table('schools')->where('id',$school->id)->lockForUpdate()->first();
