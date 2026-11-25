@@ -12,4 +12,5 @@ class StudentSchoolYear extends Model
     public function school(): BelongsTo { return $this->belongsTo(School::class); }
     public function student(): BelongsTo { return $this->belongsTo(Student::class); }
     public function subjects(): HasMany { return $this->hasMany(StudentSubjectEnrollment::class, 'student_school_year_id'); }
+    public function domainEnrollments(): HasMany { return $this->hasMany(StudentDomainEnrollment::class,'student_school_year_id'); }
 }
