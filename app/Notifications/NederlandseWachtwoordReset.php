@@ -12,7 +12,7 @@ class NederlandseWachtwoordReset extends ResetPassword
         $url = $this->resetUrl($notifiable);
         $minutes = (int) config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 1440);
         $duration = $minutes % 1440 === 0
-            ? ($minutes / 1440).' '.($minutes === 1440 ? 'dag' : 'dagen')
+            ? ($minutes / 60).' uur'
             : ($minutes % 60 === 0 ? ($minutes / 60).' uur' : $minutes.' minuten');
 
         $firstName = trim((string) ($notifiable->first_name ?? ''));
