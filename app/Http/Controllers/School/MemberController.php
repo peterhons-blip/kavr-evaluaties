@@ -57,7 +57,6 @@ class MemberController extends Controller
         // Behoud historische DKO3-koppelingen in het beheeroverzicht.
         // De toegangscontrole blijft deze gebruikers elders uitsluiten.
         $members = $school->users()
-            ->addSelect('school_user.dko3_hidden_at as dko3_hidden_at')
             ->when($search !== '', function ($query) use ($search) {
                 $like = '%'.addcslashes($search, '%_\\\\').'%';
                 $query->where(function ($nested) use ($like) {
