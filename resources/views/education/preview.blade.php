@@ -5,7 +5,7 @@
 <div class="page-header"><h1>Controleer {{ $type === 'domains' ? 'domeininschrijvingen' : 'vakinschrijvingen' }}</h1>
 <p>{{ $school->name }} · {{ $schoolYear }} · {{ $total }} regels. Nog niets gewijzigd.</p></div>
 @if($errors)<div class="dp-error"><strong>{{ $blocked }} regels vragen aandacht.</strong>
-<p>De import is geblokkeerd zolang koppelingen niet eenduidig zijn. Controleer de onderstaande regels, maak ontbrekende vakken/vestigingen of personeelsleden eerst aan of corrigeer de Excel-export.</p>
+<p>@if($canResolve)Kies bij de dubbelzinnige leerlingnamen het juiste stamnummer. Pas na jouw keuze kan de import worden uitgevoerd.@else De import is geblokkeerd zolang koppelingen niet eenduidig zijn. Maak ontbrekende vakken, vestigingen of personeelsleden eerst aan of corrigeer het Excel-bestand.@endif</p>
 @foreach($errors as $error)<p>{{ $error }}</p>@endforeach
 @if($blocked > count($errors))<p>En nog {{ $blocked - count($errors) }} andere regels met problemen.</p>@endif
 </div>@else
@@ -17,13 +17,25 @@
 <tr><td>{{ $row['source']['line'] }}</td><td>{{ $type === 'domains' ? $row['source']['number'] : $row['source']['student'] }}</td>
 <td>{{ $type === 'domains' ? $row['source']['domain'] : $row['source']['subject'] }}</td>
 @if($type==='subjects')<td>{{ $row['source']['grade'] }}</td><td>{{ $row['source']['location'] }}</td><td>{{ $row['source']['teacher'] }}</td>@endif
-<td>{{ $row['issues'] ? implode('; ', $row['issues']) : 'OK' }}</td></tr>
+<td>
+@if($canResolve && count($row['ids']['student_candidates'] ?? []) > 1)
+<label>Selecteer stamnummer
+<select form="education-commit" name="student_overrides[{{ $row['source']['line'] }}]" required>
+<option value="">Kies leerling</option>
+@foreach($row['ids']['student_candidates'] as $candidate)
+<option value="{{ $candidate['id'] }}">{{ $candidate['number'] }} — {{ $candidate['name'] }}</option>
+@endforeach
+</select></label>
+@else
+{{ $row['issues'] ? implode('; ', $row['issues']) : 'OK' }}
+@endif
+</td></tr>
 @endforeach
 </tbody></table></div>
 </div>
 <div class="dp-actions"><a class="btn btn-secondary" href="{{ route($platform ? 'platform.education.imports' : 'school.education.imports', $platform ? ['school_id'=>$school->id] : []) }}">Terug / corrigeren</a>
-@if($blocked === 0)<form method="POST" action="{{ route($platform ? 'platform.education.imports.commit' : 'school.education.imports.commit', $platform ? ['school_id'=>$school->id] : []) }}">@csrf
+@if($blocked === 0 || $canResolve)<form id="education-commit" method="POST" action="{{ route($platform ? 'platform.education.imports.commit' : 'school.education.imports.commit', $platform ? ['school_id'=>$school->id] : []) }}">@csrf
 <input type="hidden" name="token" value="{{ $token }}"><label><input type="checkbox" name="confirm" value="1" required> Ik bevestig deze import voor {{ $schoolYear }}.</label><button class="btn" type="submit">Definitief importeren</button></form>@endif
 </div>
 @endsection
-@push('styles')<style>.dp-error,.dp-ok{padding:16px;background:#fff0f0;border:1px solid #ecc6cb;border-radius:10px;margin-bottom:18px;font-size:12px;line-height:1.6}.dp-ok{background:#eaf7ef;border-color:#c4e8d4}.dp-error p{margin:5px 0}.dp-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{font-size:12px;padding:10px;border-bottom:1px solid #e9eef2;text-align:left}th{color:#64778d}.dp-actions{display:flex;justify-content:flex-end;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}.dp-actions form{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.dp-actions label{font-size:12px}</style>@endpush
+@push('styles')<style>.dp-error,.dp-ok{padding:16px;background:#fff0f0;border:1px solid #ecc6cb;border-radius:10px;margin-bottom:18px;font-size:12px;line-height:1.6}.dp-ok{background:#eaf7ef;border-color:#c4e8d4}.dp-error p{margin:5px 0}.dp-scroll{overflow-x:auto}.dp-scroll select{display:block;max-width:230px;padding:8px;border:1px solid #d2dfe8;border-radius:7px;background:#fff}.dp-scroll label{font-size:11px;color:#566e82}table{width:100%;border-collapse:collapse}th,td{font-size:12px;padding:10px;border-bottom:1px solid #e9eef2;text-align:left}th{color:#64778d}.dp-actions{display:flex;justify-content:flex-end;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}.dp-actions form{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.dp-actions label{font-size:12px}</style>@endpush
