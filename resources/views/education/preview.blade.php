@@ -13,7 +13,7 @@
 @endif
 <div class="card"><h2>Voorbeeld - eerste 30 regels en alle regels met aandachtspunten</h2>
 <div class="dp-scroll"><table><thead><tr><th>Rij</th><th>Leerling</th><th>{{ $type === 'domains' ? 'Domein' : 'Vak' }}</th>@if($type === 'subjects')<th>Graad</th><th>Vestiging</th><th>Leerkracht</th>@endif<th>Controle</th></tr></thead><tbody>
-@foreach(array_slice($rows, 0, 40) as $row)
+@foreach($rows as $row)
 <tr><td>{{ $row['source']['line'] }}</td><td>{{ $type === 'domains' ? $row['source']['number'] : $row['source']['student'] }}</td>
 <td>{{ $type === 'domains' ? $row['source']['domain'] : $row['source']['subject'] }}</td>
 @if($type==='subjects')<td>{{ $row['source']['grade'] }}</td><td>{{ $row['source']['location'] }}</td><td>{{ $row['source']['teacher'] }}</td>@endif
