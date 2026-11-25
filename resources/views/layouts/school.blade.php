@@ -175,6 +175,10 @@
             @if ($schoolCanViewStudents)
                 <a class="nav-link {{ request()->routeIs('school.students.*') ? 'active' : '' }}" href="{{ route('school.students.index') }}"><span class="nav-icon">♙</span> Leerlingen</a>
             @endif
+            @if (\App\Support\SchoolAccess::allows(auth()->user(), $school, 'groups.view')
+                || \App\Support\SchoolAccess::allows(auth()->user(), $school, 'school.settings'))
+                <a class="nav-link {{ request()->routeIs('school.education.*') ? 'active' : '' }}" href="{{ route('school.education.index') }}"><span class="nav-icon">♫</span> Domeinen en vakken</a>
+            @endif
             <span class="nav-disabled"><span class="nav-icon">▦</span> Lesgroepen</span>
             @if ($schoolCanViewUsers || $schoolCanManageRoles || $schoolCanManageSettings)
                 <div class="nav-label">BEHEER</div>
