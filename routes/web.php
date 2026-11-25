@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\SchoolSelectionController;
 use App\Http\Controllers\MyProfileController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\EducationCatalogController;
 use App\Http\Controllers\Platform\PermissionMatrixController;
 use App\Http\Controllers\Platform\SchoolController;
 use App\Http\Controllers\Platform\SchoolLocationController;
@@ -80,6 +81,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/school/rollen/{role}/edit', [SchoolRoleManagementController::class, 'edit'])->name('school.roles.edit');
         Route::put('/school/rollen/{role}', [SchoolRoleManagementController::class, 'update'])->name('school.roles.update');
         Route::delete('/school/rollen/{role}', [SchoolRoleManagementController::class, 'destroy'])->name('school.roles.destroy');
+
+        // DKO-onderwijsaanbod: domeinen en vakken binnen de actieve school.
+        Route::get('/school/onderwijsaanbod', [EducationCatalogController::class, 'index'])->name('school.education.index');
+        Route::post('/school/onderwijsaanbod/domeinen', [EducationCatalogController::class, 'storeDomain'])->name('school.education.domains.store');
+        Route::put('/school/onderwijsaanbod/domeinen/{domain}', [EducationCatalogController::class, 'updateDomain'])->name('school.education.domains.update');
+        Route::post('/school/onderwijsaanbod/vakken', [EducationCatalogController::class, 'storeSubject'])->name('school.education.subjects.store');
+        Route::put('/school/onderwijsaanbod/vakken/{subject}', [EducationCatalogController::class, 'updateSubject'])->name('school.education.subjects.update');
 
         // Leerlingen: alleen toegang binnen de actieve school met passende rechten.
         Route::get('/school/leerlingen', [StudentController::class, 'index'])->name('school.students.index');
@@ -163,6 +171,13 @@ Route::middleware(['auth', 'platform.admin'])
 
         })->name('dashboard');
 
+
+        // Platformbeheer: hetzelfde schoolgebonden onderwijsaanbod met academiekeuze.
+        Route::get('/onderwijsaanbod', [EducationCatalogController::class, 'index'])->name('education.index');
+        Route::post('/onderwijsaanbod/domeinen', [EducationCatalogController::class, 'storeDomain'])->name('education.domains.store');
+        Route::put('/onderwijsaanbod/domeinen/{domain}', [EducationCatalogController::class, 'updateDomain'])->name('education.domains.update');
+        Route::post('/onderwijsaanbod/vakken', [EducationCatalogController::class, 'storeSubject'])->name('education.subjects.store');
+        Route::put('/onderwijsaanbod/vakken/{subject}', [EducationCatalogController::class, 'updateSubject'])->name('education.subjects.update');
 
         Route::get('/leerlingen', [StudentController::class, 'index'])->name('students.index');
         Route::get('/leerlingen/nieuw', [StudentController::class, 'create'])->name('students.create');
