@@ -3,6 +3,7 @@
 @section('page-title','Leerlingen')
 @section('content')
 <div class="page-header"><h1>Controleer de DKO3-leerlingenimport</h1><p>Alleen voor <strong>{{ $school->name }}</strong>. Er zijn nog geen databankwijzigingen uitgevoerd.</p></div>
+<div class="sp-warning"><strong>Schooljaar:</strong> {{ $schoolYear ?: 'Niet opgegeven' }}. De import registreert voor elke leerling een inschrijving voor dit jaar, maar sluit bestaande inschrijvingen in andere schooljaren niet af.</div>
 <div class="sp-stats">
 <div><strong>{{ $stats['total'] }}</strong><span>Leerlingen in bestand</span></div>
 <div><strong>{{ $stats['new'] }}</strong><span>Nieuw toe te voegen</span></div>
