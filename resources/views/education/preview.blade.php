@@ -11,7 +11,7 @@
 </div>@else
 <div class="dp-ok">Alle {{ $total }} regels konden eenduidig gekoppeld worden. Je kunt de import bevestigen.</div>
 @endif
-<div class="card"><h2>Voorbeeld - eerste 40 regels</h2>
+<div class="card"><h2>Voorbeeld - eerste 30 regels en alle regels met aandachtspunten</h2>
 <div class="dp-scroll"><table><thead><tr><th>Rij</th><th>Leerling</th><th>{{ $type === 'domains' ? 'Domein' : 'Vak' }}</th>@if($type === 'subjects')<th>Graad</th><th>Vestiging</th><th>Leerkracht</th>@endif<th>Controle</th></tr></thead><tbody>
 @foreach(array_slice($rows, 0, 40) as $row)
 <tr><td>{{ $row['source']['line'] }}</td><td>{{ $type === 'domains' ? $row['source']['number'] : $row['source']['student'] }}</td>
