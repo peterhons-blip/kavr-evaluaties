@@ -44,7 +44,7 @@
                 <option value="">Alle scholen</option>
                 @foreach($schools as $school)
                     <option value="{{ $school->id }}" @selected($schoolId === (int) $school->id)>
-                        {{ $school->name }}
+                        {{ $school->name }}{{ $school->is_active ? '' : ' (inactief)' }}
                     </option>
                 @endforeach
             </select>
