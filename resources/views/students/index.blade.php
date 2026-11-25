@@ -13,7 +13,7 @@
         </div>@endif
     </div>
     <form method="GET" class="st-filters" action="{{ route($platform ? 'platform.students.index' : 'school.students.index') }}">
-        @if($platform)<label>Academie<select name="school_id" onchange="this.form.submit()">@foreach($schools as $choice)<option value="{{ $choice->id }}" @selected($choice->id === $school->id)>{{ $choice->name }}</option>@endforeach</select></label>@endif
+        @if($platform)<label>Academie<select name="school_id" onchange="this.form.submit()">@foreach($schools as $choice)<option value="{{ $choice->id }}" @selected($choice->id === $school->id)>{{ $choice->name }}{{ $choice->is_active ? '' : ' (inactief)' }}</option>@endforeach</select></label>@endif
         <label>Zoeken<input type="search" name="q" value="{{ $search }}" placeholder="Naam, voornaam of stamnummer"></label>
         <label>Schooljaar<select name="school_year"><option value="">Alle schooljaren</option>@foreach($schoolYears as $year)<option value="{{ $year }}" @selected($schoolYearFilter===$year)>{{ $year }}</option>@endforeach</select></label>
         <label>Dossierstatus<select name="status"><option value="all" @selected($status==='all')>Alle leerlingdossiers</option><option value="active" @selected($status==='active')>Dossier actief</option><option value="inactive" @selected($status==='inactive')>Dossier inactief</option></select></label>
