@@ -54,7 +54,7 @@
        <button class="btn" type="submit" @disabled($domains->where('is_active',true)->isEmpty())>+ Vak toevoegen</button>
     </form>
     @endif
-    <div class="ec-scroll"><table class="ec-table"><thead><tr><th>Domein</th><th>Vak</th><th>Specialisatie</th><th>Status</th>@if($canManage)<th>Beheer</th>@endif</tr></thead><tbody>
+    <div class="ec-scroll"><table class="ec-table"><thead><tr><th>Domein</th><th>Vak</th><th>Specialisatie</th><th>Evaluatie</th><th>Status</th>@if($canManage)<th>Beheer</th>@endif</tr></thead><tbody>
     @forelse($subjects as $subject)<tr>
         <td>{{ $subject->domain?->name }}</td><td><strong>{{ $subject->name }}</strong><small>{{ $subject->code ?: '' }}</small></td>
         <td>{{ $subject->discipline ?: '—' }}</td>
