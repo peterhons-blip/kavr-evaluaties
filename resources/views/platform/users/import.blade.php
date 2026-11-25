@@ -27,7 +27,7 @@
             <label style="display:block;margin:10px 0;font-size:13px">
                 <input type="radio" name="mode" value="full" @checked(old('mode') === 'full')>
                 <strong>Volledige synchronisatie</strong><br>
-                <small>Ontbrekende leerkrachten van de gekozen school worden gedeactiveerd en verborgen. Alleen voor een volledige DKO3-export.</small>
+                <small>Ontbrekende leerkrachten van de gekozen school worden gedeactiveerd en als DKO3-uitstroom gemarkeerd. Ze blijven zichtbaar in personeelsbeheer als inactief. Alleen voor een volledige DKO3-export.</small>
             </label>
         </div></div>
         <div class="di-warning"><strong>Geen automatische mails</strong><p>De import verstuurt geen wachtwoordinstellinks. Nieuwe gebruikers krijgen de schoolrol leerkracht. Bestaande schoolrollen blijven behouden.</p><strong>Belangrijk bij een volledige personeelsimport</strong><p>Alleen bij <strong>Volledige synchronisatie</strong> worden leerkrachten die ontbreken in de export gedeactiveerd. De veilige standaard <strong>Toevoegen en bijwerken</strong> laat bestaande personen ongemoeid. Andere scholen en bestaande wachtwoorden blijven onaangeroerd. Upload daarom uitsluitend een volledige export van alle huidige leerkrachten van die school.</p></div>
