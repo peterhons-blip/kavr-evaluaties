@@ -90,6 +90,13 @@ class Dko3TeacherImportTest extends TestCase
         $this->get(route('platform.users.index', ['school_id'=>$a->id, 'school_status'=>'active']))
             ->assertOk()->assertDontSee('gone@example.test');
 
+        $this->actingAs($admin)->withSession(['active_school_id' => $a->id])
+            ->get(route('school.members.index', ['status' => 'inactive']))
+            ->assertOk()->assertSee('gone@example.test')
+            ->assertSee('Niet meer in DKO3 (gearchiveerd)');
+        $this->get(route('school.members.index', ['status' => 'active']))
+            ->assertOk()->assertDontSee('gone@example.test');
+
         $this->actingAs($gone)->withSession(['active_school_id' => $a->id])
             ->get(route('dashboard'))->assertForbidden();
         $this->actingAs($admin);
