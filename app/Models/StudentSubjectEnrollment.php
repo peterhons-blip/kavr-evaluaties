@@ -11,4 +11,5 @@ class StudentSubjectEnrollment extends Model
     protected function casts(): array { return ['is_active' => 'boolean']; }
     public function schoolYear(): BelongsTo { return $this->belongsTo(StudentSchoolYear::class, 'student_school_year_id'); }
     public function subject(): BelongsTo { return $this->belongsTo(EducationSubject::class, 'education_subject_id'); }
+    public function assignments(): \Illuminate\Database\Eloquent\Relations\HasMany { return $this->hasMany(StudentSubjectAssignment::class,'student_subject_enrollment_id'); }
 }
