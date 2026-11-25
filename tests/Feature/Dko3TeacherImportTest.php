@@ -82,8 +82,17 @@ class Dko3TeacherImportTest extends TestCase
                 ->value('dko3_hidden_at')
         );
 
-        $this->get(route('platform.users.index', ['school_id'=>$a->id, 'status'=>'inactive']))
+        // Verdwenen uit DKO3 betekent schoolkoppeling inactief en historisch zichtbaar,
+        // niet verwijderen of verbergen uit de beheeradministratie.
+        $this->get(route('platform.users.index', ['school_id'=>$a->id, 'school_status'=>'inactive']))
+            ->assertOk()->assertSee('gone@example.test')
+            ->assertSee('Niet meer in DKO3 (gearchiveerd)');
+        $this->get(route('platform.users.index', ['school_id'=>$a->id, 'school_status'=>'active']))
             ->assertOk()->assertDontSee('gone@example.test');
+
+        $this->actingAs($gone)->withSession(['active_school_id' => $a->id])
+            ->get(route('dashboard'))->assertForbidden();
+        $this->actingAs($admin);
 
         $this->get(route('platform.users.index',['school_id'=>$b->id]))
             ->assertOk()->assertSee('gone@example.test');
