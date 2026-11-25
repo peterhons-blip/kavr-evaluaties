@@ -6,7 +6,7 @@
 </style></head><body><main class="card">
 <strong style="color:#168f90;font-size:21px;">Artelynx</strong>
 <h1>Wachtwoord instellen of herstellen</h1>
-<p>Vul je e-mailadres in. Als je een Artelynx-account hebt, ontvang je een beveiligde link waarmee je een wachtwoord kunt instellen.</p>
+<p>Vul je e-mailadres in. Als je een Artelynx-account hebt, ontvang je een beveiligde link waarmee je een wachtwoord kunt instellen. De link is 24 uur geldig en kan maar één keer worden gebruikt.</p>
 @if(session('status'))<div class="alert">{{ session('status') }}</div>@endif
 @if($errors->any())<div class="error">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif
 <form method="POST" action="{{ route('password.email') }}">@csrf
