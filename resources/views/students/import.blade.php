@@ -15,5 +15,10 @@
 <div class="si-actions"><a class="btn btn-secondary" href="{{ route($platform ? 'platform.students.index' : 'school.students.index', $platform ? ['school_id' => $school->id] : []) }}">Annuleren</a><button class="btn" type="submit">Bestand controleren →</button></div>
 </form>
 </div>
+<div class="card" style="max-width:860px;margin-top:18px">
+  <h2>Daarna: aparte inschrijvingsimports</h2>
+  <p>Deze leerlingenimport verwerkt alleen stamnummers en namen. Domeinen en vakken worden afzonderlijk per schooljaar gekoppeld; hier worden ze niet ingelezen.</p>
+  <a class="btn btn-secondary" href="{{ route($platform ? 'platform.education.imports' : 'school.education.imports', $platform ? ['school_id'=>$school->id] : []) }}">Domeinen en vakken apart importeren</a>
+</div>
 @endsection
 @push('styles')<style>.si-errors{padding:16px;background:#fff0f0;color:#9b3232;border-radius:10px;margin-bottom:15px}.card p{line-height:1.8;color:#718096;font-size:12px}.card input[type=file]{display:block;width:100%;border:1px solid #d4dfe8;border-radius:9px;padding:13px;margin:16px 0 22px}.si-year{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;margin-top:15px}.si-year input{max-width:260px;border:1px solid #d4dfe8;border-radius:9px;padding:11px}.si-year small{font-weight:400;color:#718096}.si-info{background:#edf8f7;border:1px solid #d5eae8;padding:17px;border-radius:10px;font-size:12px}.si-info p{margin:6px 0 0}.si-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:20px}</style>@endpush
