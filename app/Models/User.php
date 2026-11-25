@@ -91,7 +91,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function schools(): BelongsToMany
     {
         return $this->belongsToMany(School::class, 'school_user')
-            ->withPivot(['role', 'is_active', 'dko3_roles', 'dko3_active_assignments', 'dko3_subject_groups', 'dko3_locations', 'dko3_subjects'])
+            ->withPivot(['role', 'is_active', 'dko3_hidden_at', 'dko3_roles', 'dko3_active_assignments', 'dko3_subject_groups', 'dko3_locations', 'dko3_subjects'])
             ->withTimestamps();
     }
     
